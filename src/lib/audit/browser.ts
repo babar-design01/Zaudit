@@ -181,16 +181,44 @@ export type ModalProbe = {
 
 /* ============================================================ launching */
 
+const ARGS = [
+  '--no-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-gpu',
+  '--hide-scrollbars',
+  '--mute-audio',
+  '--disable-background-timer-throttling',
+  '--force-color-profile=srgb',
+];
+
+/** A serverless function, where the only browser is the one shipped in the bundle. */
+const serverless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAME;
+
+/**
+ * On Lambda there is no Chrome to find and no room for Playwright's own: the
+ * full download is larger than a function may be. `@sparticuz/chromium` is the
+ * same engine stripped for that limit, unpacked to /tmp on the first launch.
+ *
+ * It renders with fewer system fonts than a desktop, so a page falling back to
+ * a system font measures differently there. Web fonts download as usual, which
+ * is most pages — but it is a reason to prefer a container when the numbers
+ * have to match a designer's screen.
+ */
+async function serverlessLaunch(): Promise<LaunchOptions | null> {
+  try {
+    const mod = (await import('@sparticuz/chromium')).default;
+    return {
+      args: [...mod.args, ...ARGS],
+      executablePath: await mod.executablePath(),
+      headless: true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 function launchOptions(): LaunchOptions[] {
-  const args = [
-    '--no-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--hide-scrollbars',
-    '--mute-audio',
-    '--disable-background-timer-throttling',
-    '--force-color-profile=srgb',
-  ];
+  const args = ARGS;
   const explicit = process.env.PLAYWRIGHT_CHROMIUM_PATH || process.env.CHROME_PATH;
   return [
     ...(explicit ? [{ executablePath: explicit, args }] : []),
@@ -219,9 +247,15 @@ export async function browser(): Promise<Browser | null> {
     return shared;
   }
   shared = null;
-  for (const opts of launchOptions()) {
+  // On a serverless host the bundled build goes first; the desktop list stays
+  // behind it so a container that happens to set VERCEL still finds its Chrome.
+  const bundled = serverless ? await serverlessLaunch() : null;
+  const ways = bundled ? [bundled, ...launchOptions()] : launchOptions();
+  for (const opts of ways) {
     try {
-      shared = await chromium.launch({ ...opts, timeout: 20_000 });
+      // The bundled build unpacks itself to /tmp on the first launch of a cold
+      // function, which 20s does not always cover.
+      shared = await chromium.launch({ ...opts, timeout: opts === bundled ? 60_000 : 20_000 });
       keepWarm();
       return shared;
     } catch {

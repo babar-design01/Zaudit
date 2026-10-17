@@ -166,14 +166,35 @@ The audit completes without any of them. It just has less to say, and says so.
 ### Deploying it
 
 Every audit drives a real browser for 30–60 seconds and streams its progress, so
-this does not fit a free serverless tier — their function timeouts are shorter
-than a single run, and the browser does not fit in the bundle. It needs a
-container, or a machine that stays up.
+what the host has to allow is a long request and a process that can launch
+Chromium. A container is the straightforward way; Vercel works too, with the two
+accommodations below.
 
 ```bash
 docker build -t zaudit .
 docker run -p 3000:3000 -e ANTHROPIC_API_KEY=… zaudit
 ```
+
+**On Vercel.** Import the repo and it builds as-is. Two things are different
+there, both already wired up:
+
+- *The browser.* There is no Chrome to find on Lambda and no room for
+  Playwright's own download, so `browser.ts` launches
+  [`@sparticuz/chromium`](https://github.com/Sparticuz/chromium) instead when
+  `VERCEL` is set — the same engine stripped to fit, unpacked to `/tmp` on the
+  first launch of a cold function. It ships fewer system fonts than a desktop,
+  so a page that falls back to a system font measures slightly differently
+  there. `next.config.mjs` keeps its archives in the function bundle; tracing
+  would otherwise drop 60MB that nothing imports by name.
+- *Report links.* Each request may land on a fresh instance, so a report held
+  only in the process that produced it would 404 the moment a colleague opened
+  the link. Create a Blob store in the project (Storage → Blob) and
+  `BLOB_READ_WRITE_TOKEN` appears in the environment; `lib/report/store.ts` then
+  writes each finished report there as one private object. Without the token
+  nothing breaks — a link just only works while that instance is warm.
+
+`maxDuration` on the audit route is 300s, the ceiling on the free plan, and the
+first run after a deploy pays a few extra seconds to unpack the browser.
 
 The image is Debian slim plus Chromium (only Chromium: Firefox and WebKit would
 triple it for browsers nothing here uses). `render.yaml` is a blueprint for

@@ -1,11 +1,16 @@
 import { audit, AuditError } from '@/lib/audit/engine';
 import { assertPublicUrl } from '@/lib/audit/net';
 import { DEFAULT_GOAL, GOALS, type GoalId } from '@/lib/audit/framework';
+import { putReport } from '@/lib/report/store';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+// A cold serverless instance has to unpack a browser before it can load the
+// page, and a heavy site then takes a minute of probing and cropping on top.
+// 300s is the ceiling a function is allowed on Vercel's free plan; a
+// long-running server never reaches this at all.
+export const maxDuration = 300;
 
 /* ------------------------------------------------------------------ limits */
 
@@ -22,9 +27,6 @@ const CACHE_TTL_MS = 10 * 60_000;
 
 const hits = new Map<string, number[]>();
 const cache = new Map<string, { at: number; result: AuditResult }>();
-// Reports are read back by id from their own page, which is a different key
-// from the url+goal the audit is cached under.
-export const reports = new Map<string, { at: number; result: AuditResult }>();
 
 function rateLimited(ip: string): number | null {
   const now = Date.now();
@@ -51,13 +53,11 @@ function cached(key: string): AuditResult | null {
   return hit.result;
 }
 
-function remember(key: string, result: AuditResult): void {
+async function remember(key: string, result: AuditResult): Promise<void> {
   cache.set(key, { at: Date.now(), result });
-  reports.set(result.id, { at: Date.now(), result });
-  if (reports.size > 40) {
-    const oldest = [...reports.entries()].sort((a, b) => a[1].at - b[1].at)[0];
-    if (oldest) reports.delete(oldest[0]);
-  }
+  // The report page asks for this by id — from another instance, and possibly
+  // tomorrow — so it goes to the report store rather than only to this map.
+  await putReport(result);
   if (cache.size > 20) {
     const oldest = [...cache.entries()].sort((a, b) => a[1].at - b[1].at)[0];
     if (oldest) cache.delete(oldest[0]);
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
           onStage: (index) => send({ type: 'stage', index }),
           signal: request.signal,
         });
-        remember(key, result);
+        await remember(key, result);
         send({ type: 'result', result });
       } catch (err) {
         // The reader closed the dialog; there is nobody left to tell.
