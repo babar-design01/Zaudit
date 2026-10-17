@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.base.schema.json",
+  "name": "Zaudit",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+
+  // The audit opens a real browser, so the Codespace needs Chromium and its
+  // system libraries. The version is pinned to the playwright-core in
+  // package.json: a mismatch leaves playwright looking for a build that is not
+  // there. Only Chromium is installed — nothing here uses the other two.
+  "postCreateCommand": "npm ci && npx --yes playwright@1.62.1 install --with-deps chromium",
+
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Zaudit",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  }
+}
