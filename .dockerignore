@@ -1,0 +1,10 @@
+.git
+.next
+node_modules
+npm-debug.log*
+.env
+.env.local
+*.tsbuildinfo
+.claude
+public/_tpl
+scripts/_*

@@ -1,0 +1,291 @@
+/* Zaudit tokens — primary #146EF5, light + dark.
+   Transcribed from `Homepage Veltrex.dc.html`; these values are the design. */
+
+:root,
+[data-theme='light'] {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --popover: #ffffff;
+  --muted: #f3f3f3;
+  --fg: #16181d;
+  --muted-fg: #6b7280;
+  --border: #e7e8ea;
+  --input: #d9dbdf;
+  --primary: #146ef5;
+  --primary-fg: #ffffff;
+  --accent: #e8f0fe;
+  --accent-fg: #0f55c0;
+  --secondary: #f3f3f3;
+  --secondary-fg: #16181d;
+  --destructive: #e5484d;
+  --destructive-fg: #ffffff;
+  --ring: #146ef5;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+  --shadow-xs: 0 2px 10px rgba(20, 40, 90, 0.05);
+  --shadow-sm: 0 8px 24px rgba(20, 40, 90, 0.07);
+  --shadow-md: 0 10px 30px rgba(20, 40, 90, 0.1);
+  --shadow-lg: 0 18px 44px rgba(20, 40, 90, 0.14);
+  --font-sans: 'Figtree', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --font-serif: 'Instrument Serif', serif;
+  --grad: linear-gradient(100deg, #146ef5, #5c7cff 55%, #9e5cff);
+}
+
+[data-theme='dark'] {
+  --bg: #0c0e12;
+  --card: #14171d;
+  --popover: #14171d;
+  --muted: #1b1f27;
+  --fg: #f1f3f7;
+  --muted-fg: #99a1ae;
+  --border: #262b35;
+  --input: #323947;
+  --primary: #3b82f6;
+  --primary-fg: #ffffff;
+  --accent: #14233d;
+  --accent-fg: #7fb0ff;
+  --secondary: #1b1f27;
+  --secondary-fg: #f1f3f7;
+  --destructive: #f26669;
+  --destructive-fg: #16181d;
+  --ring: #3b82f6;
+  --shadow-xs: none;
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 500 14px/20px var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--muted-fg);
+}
+
+/* Hover treatments the prototype expressed as inline `style-hover` attributes. */
+.hp-navlink:hover {
+  color: var(--fg);
+  background: var(--accent);
+}
+
+.hp-menu-row:hover {
+  background: var(--accent);
+}
+
+.hp-link-primary:hover {
+  color: var(--primary);
+}
+
+.hp-link-fg:hover {
+  color: var(--fg);
+}
+
+.hp-link-muted:hover {
+  color: var(--muted-fg);
+}
+
+.hp-fade:hover {
+  opacity: 0.9;
+}
+
+.hp-social:hover {
+  border-color: var(--muted-fg);
+}
+
+.hp-cta-dark:hover {
+  background: #000000;
+}
+
+@keyframes hp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hp-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------------------------------------------------------- audit dialog */
+
+@keyframes hp-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hp-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The sweep that reads as "still thinking". A gradient wider than the text is
+   clipped to the glyphs and slid across, so the highlight travels the line. */
+@keyframes hp-shimmer {
+  from {
+    background-position: 200% 50%;
+  }
+  to {
+    background-position: -200% 50%;
+  }
+}
+
+/* Rotating status copy: each line rises in as the last one leaves. */
+@keyframes hp-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The indeterminate sliver that rides the progress track between stages. */
+@keyframes hp-track-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes hp-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* Anyone who has asked for less motion gets the states, not the movement. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------- print */
+
+/*
+ * Printing a report is how it becomes a PDF, so the page furniture goes and
+ * everything the reader collapsed opens. Cards are kept off page breaks, since
+ * a finding split across two sheets loses the evidence that explains it.
+ */
+@media print {
+  [data-print-hide],
+  nav[aria-label='Main'],
+  footer {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  details > summary {
+    display: none !important;
+  }
+
+  details > *:not(summary) {
+    display: revert !important;
+  }
+
+  details {
+    break-inside: avoid;
+  }
+
+  section > div,
+  article,
+  figure,
+  img {
+    break-inside: avoid;
+  }
+
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 10px;
+    word-break: break-all;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}
+
+/*
+ * The report's dark pages are for the screen. On paper they would drink a
+ * cartridge, so printing flips them: the structure and the rules stay, the ink
+ * does not.
+ */
+@media print {
+  [data-report-page='dark'] {
+    background: #fff !important;
+    color: #000 !important;
+    --report-fg: #000 !important;
+    --report-body: #333 !important;
+    --report-muted: #666 !important;
+    --report-rule: #d4d4d4 !important;
+  }
+
+  [data-report-page] {
+    padding: 18px 0 !important;
+    break-inside: avoid;
+  }
+
+  [data-report-page='dark'] h1,
+  [data-report-page='dark'] h2 {
+    color: #000 !important;
+  }
+}

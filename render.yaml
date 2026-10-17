@@ -1,0 +1,21 @@
+# Render blueprint: point Render at this repo and it reads this file.
+#
+# The free instance is 512MB of RAM and sleeps after 15 minutes idle. Chromium
+# and Next.js together will sit close to that ceiling, and a heavy page can push
+# past it — fine for a team trying it out, not for anything that must not fail.
+# `starter` is the first plan that stays awake and has room; change the line
+# below when the audits start getting killed.
+services:
+  - type: web
+    name: zaudit
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      # Set ANTHROPIC_API_KEY in the Render dashboard to turn on the model
+      # review. Without it the audit still runs; criteria that need a reading
+      # of the wording are reported as needing a reviewer.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
