@@ -1,4 +1,8 @@
+import { auth } from '@/auth';
 import { audit, AuditError } from '@/lib/audit/engine';
+import { OutOfCredits, attachRun, balance, refund, spend } from '@/lib/credits';
+import { accountsEnabled } from '@/lib/db';
+import { failRun, finishRun, newRunId, startRun } from '@/lib/runs';
 import { assertPublicUrl } from '@/lib/audit/net';
 import { DEFAULT_GOAL, GOALS, type GoalId } from '@/lib/audit/framework';
 import { putReport } from '@/lib/report/store';
@@ -114,6 +118,8 @@ export async function POST(request: Request) {
       // A stage can run for half a minute. Without a byte on the wire in that
       // time, an intermediary is entitled to assume the response has stalled.
       const heartbeat = setInterval(() => send({ type: 'ping' }), 10_000);
+      /** Named once the credit is spent, so a failure can give it back. */
+      let runId = '';
 
       try {
         if (!url.trim()) throw new AuditError('Enter a website address first.');
@@ -141,20 +147,61 @@ export async function POST(request: Request) {
           );
         }
 
+        // With no database there are no accounts and no credits, and the audit
+        // runs for whoever asks — the product as it was before either existed.
+        let userId: string | null = null;
+        let entryId = '';
+        if (accountsEnabled()) {
+          const session = await auth();
+          userId = session?.user?.id ?? null;
+          if (!userId) throw new AuditError('Sign in to run an audit. The first one is free.', false, 'signin');
+          const taken = await spend(userId).catch((err) => {
+            if (err instanceof OutOfCredits) throw new AuditError(err.message, false, 'buy');
+            throw err;
+          });
+          entryId = taken.entryId;
+          send({ type: 'credits', left: taken.left });
+        }
+
+        // The run is named here rather than inside the engine, because the
+        // credit was spent before the engine started and the two have to point
+        // at each other.
+        runId = newRunId(url, goal);
+        await startRun({ id: runId, userId, url, goal, charged: !!entryId });
+        if (entryId) await attachRun(entryId, runId);
+
         const result = await audit(url, {
           goal,
+          id: runId,
           onStage: (index) => send({ type: 'stage', index }),
           signal: request.signal,
         });
         await remember(key, result);
+        await finishRun(result);
+
+        // A run that could not be scored is a run the reader did not get: the
+        // site refused us, or too little could be measured to say anything.
+        // They keep the report and get the credit back.
+        if (result.overall == null && entryId) {
+          const given = await refund(runId, 'The audit could not be scored, so the credit was returned.');
+          if (given) send({ type: 'credits', left: await balance(userId!), refunded: true });
+        }
+
         send({ type: 'result', result });
       } catch (err) {
+        // A run that was paid for and then broke is on us, not the reader.
+        if (runId) {
+          await failRun(runId, err instanceof Error ? err.message : String(err)).catch(() => {});
+          const given = await refund(runId, 'The audit did not finish, so the credit was returned.').catch(() => false);
+          if (given) send({ type: 'credits', left: null, refunded: true });
+        }
         // The reader closed the dialog; there is nobody left to tell.
         if (request.signal.aborted) return;
         send({
           type: 'error',
           message: err instanceof Error ? err.message : String(err),
           quota: err instanceof AuditError ? err.quota : false,
+          ...(err instanceof AuditError && err.action ? { action: err.action } : {}),
         });
       } finally {
         clearInterval(heartbeat);

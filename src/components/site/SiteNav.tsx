@@ -41,7 +41,10 @@ export function AnnouncementBar() {
   );
 }
 
-export function SiteNav({ onRunAudit }: { onRunAudit: () => void }) {
+/** Who is signed in and what they have left, when accounts are switched on. */
+export type Account = { email: string | null; credits: number } | null;
+
+export function SiteNav({ onRunAudit, account, accounts = false }: { onRunAudit: () => void; account?: Account; accounts?: boolean }) {
   const [solutionsOpen, setSolutionsOpen] = useState(false);
 
   return (
@@ -145,13 +148,34 @@ export function SiteNav({ onRunAudit }: { onRunAudit: () => void }) {
         </Row>
 
         <Row gap={8}>
-          <a
-            className="hp-link-fg"
-            href="#"
-            style={{ font: text.label, color: color.mutedFg, whiteSpace: 'nowrap' }}
-          >
-            Log in
-          </a>
+          {accounts && account ? (
+            <a
+              className="hp-link-fg"
+              href="/account"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, font: text.label, color: color.mutedFg, whiteSpace: 'nowrap' }}
+            >
+              <span>Account</span>
+              <span
+                style={{
+                  font: t(500, 12, 16, 'mono'),
+                  color: account.credits > 0 ? color.accentFg : color.destructive,
+                  background: account.credits > 0 ? color.accent : mix(color.destructive, 10),
+                  padding: '3px 8px',
+                  borderRadius: radius.full,
+                }}
+              >
+                {account.credits} {account.credits === 1 ? 'credit' : 'credits'}
+              </span>
+            </a>
+          ) : (
+            <a
+              className="hp-link-fg"
+              href={accounts ? '/signin' : '#'}
+              style={{ font: text.label, color: color.mutedFg, whiteSpace: 'nowrap' }}
+            >
+              Log in
+            </a>
+          )}
           <Button variant="primary" size="sm" iconEnd="IconArrowUpRight" onClick={onRunAudit}>
             Run Free Audit
           </Button>

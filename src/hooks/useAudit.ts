@@ -29,6 +29,12 @@ export type AuditState = {
   result: AuditResult | null;
   error: string | null;
   quota: boolean;
+  /** What would fix the error, when something would. */
+  action?: 'signin' | 'buy';
+  /** Credits left after this run, when accounts are on. */
+  credits: number | null;
+  /** The run failed and the credit came back. */
+  refunded: boolean;
   /** The dialog is open from `start` until the reader dismisses it. */
   dialogOpen: boolean;
 };
@@ -45,6 +51,8 @@ export function useAudit() {
     result: null,
     error: null,
     quota: false,
+    credits: null,
+    refunded: false,
     dialogOpen: false,
   });
 
@@ -156,13 +164,16 @@ export function useAudit() {
             continue;
           } else if (event.type === 'stage') {
             setState((s) => ({ ...s, stageIndex: event.index, stageStartedAt: Date.now() }));
+          } else if (event.type === 'credits') {
+            // What the run cost, as it is taken, and again if it comes back.
+            setState((s) => ({ ...s, credits: event.left ?? s.credits, refunded: event.refunded || s.refunded }));
           } else if (event.type === 'result') {
             stopTick();
             rememberReport(event.result);
             setState((s) => ({ ...s, stage: 'done', result: event.result }));
-          } else {
+          } else if (event.type === 'error') {
             stopTick();
-            setState((s) => ({ ...s, stage: 'error', error: event.message, quota: event.quota }));
+            setState((s) => ({ ...s, stage: 'error', error: event.message, quota: event.quota, action: event.action }));
           }
         }
       }

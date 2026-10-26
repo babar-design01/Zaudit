@@ -13,7 +13,7 @@ import { Pricing } from '@/components/sections/Pricing';
 import { Problem } from '@/components/sections/Problem';
 import { ProductProof } from '@/components/sections/ProductProof';
 import { Testimonials } from '@/components/sections/Testimonials';
-import { AnnouncementBar, SiteNav } from '@/components/site/SiteNav';
+import { AnnouncementBar, SiteNav, type Account } from '@/components/site/SiteNav';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { focusHero, useAudit } from '@/hooks/useAudit';
 
@@ -24,13 +24,13 @@ import { focusHero, useAudit } from '@/hooks/useAudit';
  * results, once one has run) → how it works → what we analyze → who it's for →
  * testimonials → anatomy → pricing → FAQ → final CTA → footer.
  */
-export function Homepage() {
+export function Homepage({ account = null, accounts = false }: { account?: Account; accounts?: boolean } = {}) {
   const { state, setUrl, setGoal, openGoal, start, reset, closeDialog } = useAudit();
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
       <AnnouncementBar />
-      <SiteNav onRunAudit={focusHero} />
+      <SiteNav onRunAudit={focusHero} account={account} accounts={accounts} />
 
       {/* The run itself happens in a dialog over the page. */}
       <AuditDialog state={state} start={start} setGoal={setGoal} close={closeDialog} />

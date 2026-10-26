@@ -123,5 +123,8 @@ export type AuditResult = {
 export type AuditEvent =
   | { type: 'stage'; index: number }
   | { type: 'ping' }
+  /** What the run cost, and whether it was given back. Only when accounts are on. */
+  | { type: 'credits'; left: number | null; refunded?: boolean }
   | { type: 'result'; result: AuditResult }
-  | { type: 'error'; message: string; quota: boolean };
+  /** `action` is what would fix it: sign in, or top up. */
+  | { type: 'error'; message: string; quota: boolean; action?: 'signin' | 'buy' };

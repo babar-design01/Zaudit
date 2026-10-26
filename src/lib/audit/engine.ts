@@ -15,10 +15,13 @@ import type { AuditResult, Finding, ReviewerTask, WorkingItem } from './types';
 
 export class AuditError extends Error {
   quota: boolean;
-  constructor(message: string, quota = false) {
+  /** What would fix this, when something would: sign in, or buy credits. */
+  action?: 'signin' | 'buy';
+  constructor(message: string, quota = false, action?: 'signin' | 'buy') {
     super(message);
     this.name = 'AuditError';
     this.quota = quota;
+    this.action = action;
   }
 }
 
@@ -40,7 +43,7 @@ export class AuditError extends Error {
  */
 export async function audit(
   rawUrl: string,
-  { goal: goalId = DEFAULT_GOAL, onStage, signal }: { goal?: GoalId; onStage?: (index: number) => void; signal?: AbortSignal } = {},
+  { goal: goalId = DEFAULT_GOAL, onStage, signal, id: givenId }: { goal?: GoalId; onStage?: (index: number) => void; signal?: AbortSignal; /** The caller's own id for this run, when it has already named it. */ id?: string } = {},
 ): Promise<AuditResult> {
   const startedAt = Date.now();
   const goal = GOALS.find((g) => g.id === goalId) ?? GOALS.find((g) => g.id === DEFAULT_GOAL)!;
@@ -248,7 +251,7 @@ export async function audit(
     ? null
     : `The served HTML could not be fetched directly${!fetchedSettled.ok ? ` (${reason(fetchedSettled.error)})` : ''}; the browser copy was used.`;
 
-  const id = createHash('sha1').update(`${source.url}|${goal.id}|${startedAt}`).digest('hex').slice(0, 10);
+  const id = givenId ?? createHash('sha1').update(`${source.url}|${goal.id}|${startedAt}`).digest('hex').slice(0, 10);
 
   return {
     id,

@@ -51,7 +51,7 @@ export function AuditDialog({
   close: () => void;
 }) {
   const router = useRouter();
-  const { stage, url, goal, stageIndex, elapsed, stageStartedAt, result, error, quota, dialogOpen } =
+  const { stage, url, goal, stageIndex, elapsed, stageStartedAt, result, error, quota, action, credits, refunded, dialogOpen } =
     state;
 
   let host = '';
@@ -142,7 +142,7 @@ export function AuditDialog({
               </Button>
               <Spacer />
               <Text variant="fine" tone="muted">
-                {host}
+                {credits == null ? host : `${credits} credit${credits === 1 ? '' : 's'} left · ${host}`}
               </Text>
             </Row>
           </Stack>
@@ -264,15 +264,36 @@ export function AuditDialog({
                   borderRadius: radius.sm,
                 }}
               >
-                The PageSpeed Insights quota for this deployment’s key is exhausted. The audit can
-                still run from the live page read.
+                The model review is out of quota on this deployment’s key. Everything measured in the
+                browser still ran; the criteria that need a reading of the wording are held for a person.
+              </Text>
+            )}
+
+            {refunded && (
+              <Text
+                variant="fine"
+                tone="muted"
+                wrap="pretty"
+                style={{ padding: '12px 14px', background: color.muted, borderRadius: radius.sm }}
+              >
+                Your credit has been returned — a run that produces nothing is not one you paid for.
               </Text>
             )}
 
             <Row gap={8}>
-              <Button variant="primary" onClick={start}>
-                Try again
-              </Button>
+              {action === 'signin' ? (
+                <Button variant="primary" iconEnd="IconArrowUpRight" onClick={() => window.location.assign('/signin')}>
+                  Sign in
+                </Button>
+              ) : action === 'buy' ? (
+                <Button variant="primary" iconEnd="IconArrowUpRight" onClick={() => window.location.assign('/account')}>
+                  Top up
+                </Button>
+              ) : (
+                <Button variant="primary" onClick={start}>
+                  Try again
+                </Button>
+              )}
               <Button variant="ghost" onClick={close}>
                 Close
               </Button>
