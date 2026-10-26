@@ -20,8 +20,8 @@ import { color, radius as r, staticColor, text, tracking } from '@/design/tokens
 const SIZES = {
   /** The label the brand book calls `button`: 14px, padding 16 × 24. */
   default: { font: text.button, padding: '16px 24px' },
-  /** Nav and toolbars: `button-sm`, 12px, padding 11 × 20. */
-  sm: { font: text.buttonSm, padding: '11px 20px' },
+  /** Nav and toolbars: the design file draws them at 14px with padding 11 × 20. */
+  sm: { font: text.button, padding: '11px 20px' },
 } as const;
 
 type Tone = 'primary' | 'secondary';

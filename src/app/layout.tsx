@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './motion.css';
 
 const DESCRIPTION =
   'Paste a URL. Audix tests your site in a real browser and scores it against UX laws, design principles and accessibility rules, then tells you which element to fix first and why it matters.';

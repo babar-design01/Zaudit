@@ -113,6 +113,7 @@ export function AuditDialog({
         <button
           type="button"
           aria-label="Close"
+          data-dlg-x
           onClick={close}
           style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: radius.button, color: color.inkSecondary, background: 'transparent', border: 'none', cursor: 'pointer' }}
         >
@@ -170,7 +171,7 @@ export function AuditDialog({
                   );
                 })}
               </div>
-              <p key={goal} style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'baseline', font: t(400, 13, 20), color: color.inkSecondary }}>
+              <p key={goal} data-goal-note style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'baseline', font: t(400, 13, 20), color: color.inkSecondary }}>
                 <span style={{ fontWeight: 600, color: color.accentFg }}>Focus</span>
                 {FOCUS[goal]}
               </p>
@@ -211,7 +212,7 @@ export function AuditDialog({
                 <div style={{ width: `${Math.max(2, pct)}%`, height: '100%', borderRadius: radius.button, background: color.blue, transition: 'width .6s cubic-bezier(.2,.7,.2,1)' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <span key={stageIndex} aria-live="polite" style={{ font: t(400, 13, 20), color: color.inkSecondary }}>
+                <span key={stageIndex} data-status aria-live="polite" style={{ font: t(400, 13, 20), color: color.inkSecondary }}>
                   {stage === 'done' && result
                     ? `${result.findings.length} issue${result.findings.length === 1 ? '' : 's'} found, ranked by what to fix first`
                     : line}
@@ -229,13 +230,13 @@ export function AuditDialog({
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderBottom: i < STAGES.length - 1 ? '1px solid #F0F1F3' : 'none' }}>
                     <span style={{ display: 'inline-flex', width: 18, height: 18, alignItems: 'center', justifyContent: 'center', color: done ? color.blue : active ? color.ink : '#A1A6AE' }}>
                       {done ? (
-                        <span style={{ width: 18, height: 18, borderRadius: radius.sm, background: color.blue, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span data-tick style={{ width: 18, height: 18, borderRadius: radius.sm, background: color.blue, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="m5 13 4 4L19 7" />
                           </svg>
                         </span>
                       ) : active ? (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true" style={{ animation: 'ax-spin 0.9s linear infinite' }}>
+                        <svg data-spin width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
                           <path d="M12 3a9 9 0 1 0 9 9" />
                         </svg>
                       ) : (
@@ -259,7 +260,7 @@ export function AuditDialog({
             )}
 
             {stage === 'done' && result && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div data-done style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: color.bgSubtle, borderRadius: radius.sm, padding: '14px 16px' }}>
                   <span style={{ font: t(600, 14, 20), color: color.ink }}>Your score</span>
                   <span style={{ font: t(800, 24, 1), letterSpacing: tracking.tight, color: color.ink }}>

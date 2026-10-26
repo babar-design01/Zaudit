@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react';
 import { VIEWPORT } from '@/lib/audit/contract';
 import type { AuditResult, Finding } from '@/lib/audit/types';
 import { color, layout, radius, t, tracking } from '@/design/tokens';
+import { ReportDetails, ReportPriorities } from './ReportDetails';
 
 /**
  * The report, from `design/Report.dc.html`.
@@ -33,6 +34,8 @@ const SEV: Record<Sev, { name: string; when: string; swatch: string; tag: string
 const sevOf = (n: number): Sev => (n >= 4 ? 4 : n === 3 ? 3 : n === 2 ? 2 : 1);
 
 const pad = (n: number) => String(n).padStart(2, '0');
+
+const EFFORT: Record<string, string> = { trivial: 'Minutes', small: 'Under an hour', medium: 'A few hours', large: 'A day or more' };
 
 const frame: CSSProperties = { maxWidth: layout.frame, margin: '0 auto', padding: `72px ${layout.gutter}` };
 
@@ -172,7 +175,7 @@ function ScoreCard({ result, host }: { result: AuditResult; host: string }) {
       </div>
       <span style={{ position: 'relative', font: t(600, 12, 16), letterSpacing: tracking.button, textTransform: 'uppercase', color: color.ink }}>Your score</span>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ font: t(800, 'clamp(96px, 11vw, 160px)', 0.85), letterSpacing: '-0.06em', color: color.ink }}>{result.overall ?? '—'}</span>
+        <span data-score style={{ font: t(800, 'clamp(96px, 11vw, 160px)', 0.85), letterSpacing: '-0.06em', color: color.ink }}>{result.overall ?? '—'}</span>
         <span style={{ font: t(600, 28, 1), color: color.inkSecondary }}>/100</span>
       </div>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -236,7 +239,7 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
   const tone = SEV[sev].tag;
 
   return (
-    <section data-finding={index} style={{ background: index % 2 ? color.surface : '#F7F8FA', borderBottom: `1px solid ${color.border}` }}>
+    <section id={`issue-${index}`} data-finding={index} style={{ scrollMarginTop: 24,  background: index % 2 ? color.surface : '#F7F8FA', borderBottom: `1px solid ${color.border}` }}>
       <div style={{ ...frame, display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ maxWidth: 760, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -250,6 +253,14 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
           </div>
           <h2 style={{ margin: 0, font: t(800, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight, color: color.ink }}>{finding.checkName}</h2>
           <p style={{ margin: 0, font: t(400, 17, 28), color: color.inkSecondary }}>{plain(finding.rationale)}</p>
+          <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '6px 16px', font: t(400, 13, 20), color: color.inkMuted }}>
+            <span>{finding.criterionName}</span>
+            <span>{finding.standard}</span>
+            <span>
+              {finding.evidence.length} {finding.evidence.length === 1 ? 'place' : 'places'}
+            </span>
+            <span>{EFFORT[finding.effort] ?? finding.effort} to fix</span>
+          </p>
         </div>
 
         <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 28 }}>
@@ -297,7 +308,7 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
                     }}
                   />
                   <span
-                    data-reveal-pop
+                    data-mark
                     style={{
                       position: 'absolute',
                       left: `calc(${m.box!.left}% - 14px)`,
@@ -356,9 +367,11 @@ export function ReportDocument({ result }: { result: AuditResult }) {
   const host = hostOf(result.finalUrl);
   // Worst first, then by how many places it shows up.
   const findings = [...result.findings].sort((a, b) => b.nielsen - a.nielsen || b.evidence.length - a.evidence.length);
+  const order = new Map(findings.map((f, i) => [f.id, i + 1]));
   return (
     <article>
       <Cover result={result} />
+      <ReportPriorities result={result} order={order} />
       {findings.length === 0 ? (
         <section style={{ background: color.surface, borderBottom: `1px solid ${color.border}` }}>
           <div style={{ ...frame }}>
@@ -371,6 +384,7 @@ export function ReportDocument({ result }: { result: AuditResult }) {
       ) : (
         findings.map((f, i) => <IssueSlide key={f.id} finding={f} index={i + 1} total={findings.length} page={result.screenshot} host={host} />)
       )}
+      <ReportDetails result={result} />
     </article>
   );
 }

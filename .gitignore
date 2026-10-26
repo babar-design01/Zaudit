@@ -9,3 +9,6 @@ next-env.d.ts
 # scratch scripts and one-off captures
 scripts/_*
 public/_tpl
+
+# Reports kept on disk by a local server
+.data/

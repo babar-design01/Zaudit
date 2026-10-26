@@ -94,6 +94,7 @@ export function Modal({
 
   return (
     <div
+      data-scrim
       style={{
         position: 'fixed',
         inset: 0,
@@ -105,7 +106,6 @@ export function Modal({
         // The glow field, veiled at 28%: the backdrop every Audix dialog sits on.
         background: color.bgMist,
         overflow: 'hidden',
-        animation: 'ax-backdrop-in 180ms ease both',
       }}
       onMouseDown={(e) => {
         // Only a press that both starts and ends on the backdrop closes it, so a
@@ -137,7 +137,6 @@ export function Modal({
           position: 'relative',
           background: color.surface,
           boxShadow: 'var(--shadow-float)',
-          animation: 'ax-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
           outline: 'none',
         }}
       >

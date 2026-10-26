@@ -24,6 +24,43 @@ function blobEnabled(): boolean {
   return !!process.env.BLOB_READ_WRITE_TOKEN;
 }
 
+/**
+ * On a machine of its own — `npm run dev`, `npm start`, a container — reports
+ * are also written to disk, so a link survives the server restarting. Not on a
+ * serverless host: its disk is thrown away with the instance, which is what
+ * Blob is for.
+ */
+function diskEnabled(): boolean {
+  return !blobEnabled() && !process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME;
+}
+
+const DISK_DIR = '.data/reports';
+/** Ids are short hex or the word "sample"; anything else never reaches the disk. */
+const safeId = (id: string) => /^[a-z0-9-]{1,40}$/i.test(id);
+
+async function diskPut(result: AuditResult): Promise<void> {
+  if (!diskEnabled() || !safeId(result.id)) return;
+  try {
+    const { mkdir, writeFile } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    await mkdir(DISK_DIR, { recursive: true });
+    await writeFile(join(DISK_DIR, result.id + '.json'), JSON.stringify(result));
+  } catch (err) {
+    console.warn('report store: could not write to disk —', err instanceof Error ? err.message : err);
+  }
+}
+
+async function diskGet(id: string): Promise<AuditResult | null> {
+  if (!diskEnabled() || !safeId(id)) return null;
+  try {
+    const { readFile } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    return JSON.parse(await readFile(join(DISK_DIR, id + '.json'), 'utf8')) as AuditResult;
+  } catch {
+    return null;
+  }
+}
+
 function blobPath(id: string): string {
   return `reports/${id}.json`;
 }
@@ -45,6 +82,7 @@ function keepMemory(id: string, result: AuditResult): void {
  */
 export async function putReport(result: AuditResult): Promise<void> {
   keepMemory(result.id, result);
+  await diskPut(result);
   if (!blobEnabled()) return;
   try {
     const { put } = await import('@vercel/blob');
@@ -66,6 +104,11 @@ export async function putReport(result: AuditResult): Promise<void> {
 export async function getReport(id: string): Promise<AuditResult | null> {
   const hit = memory.get(id);
   if (hit) return hit.result;
+  const onDisk = await diskGet(id);
+  if (onDisk) {
+    keepMemory(id, onDisk);
+    return onDisk;
+  }
   if (!blobEnabled()) return null;
   try {
     const { get } = await import('@vercel/blob');
