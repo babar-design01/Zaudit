@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { VIEWPORT } from '@/lib/audit/contract';
 import type { AuditResult, Finding } from '@/lib/audit/types';
 import { color, layout, radius, t, tracking } from '@/design/tokens';
-import { ReportDetails, ReportPriorities } from './ReportDetails';
+import { ReportPriorities } from './ReportDetails';
 
 /**
  * The report, from `design/Report.dc.html`.
@@ -384,7 +384,6 @@ export function ReportDocument({ result }: { result: AuditResult }) {
       ) : (
         findings.map((f, i) => <IssueSlide key={f.id} finding={f} index={i + 1} total={findings.length} page={result.screenshot} host={host} />)
       )}
-      <ReportDetails result={result} />
     </article>
   );
 }
