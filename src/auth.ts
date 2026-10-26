@@ -17,7 +17,7 @@ import { accounts, db, sessions, users, verificationTokens } from '@/lib/db';
  * of the page offers an account.
  */
 
-const from = process.env.AUTH_EMAIL_FROM || 'Zaudit <hello@zaudit.com>';
+const from = process.env.AUTH_EMAIL_FROM || 'Audix <hello@audix.com>';
 
 const adapter = (() => {
   const on = db();

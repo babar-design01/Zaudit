@@ -1,181 +1,82 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { Container, Divider, Grid, IconBox, Row, Stack, Text } from '@/components/ui';
-import { color, hairline, t, text } from '@/design/tokens';
+import { layout, t } from '@/design/tokens';
+import { Logo } from './Logo';
 
-const FOOTER_LINK: CSSProperties = { font: t(400, 15, 22), color: color.fg };
-
-const SOCIAL: CSSProperties = {
-  width: 38,
-  height: 38,
-  borderRadius: 999,
-  border: hairline(),
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: color.fg,
-};
-
-const PAGES = [
-  { label: 'Product', href: '#product' },
-  { label: 'How It Works', href: '#how' },
-  { label: 'Solutions', href: '#solutions' },
-  { label: 'Pricing', href: '#plans' },
+/* TODO(design): every `#` here needs a real destination before launch. */
+const COLUMNS = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Features', href: '/#features' },
+      { label: 'How it works', href: '/#how' },
+      { label: 'Pricing', href: '/#plans' },
+      { label: 'Sample report', href: '/report/sample' },
+      { label: 'Changelog', href: '#' },
+    ],
+  },
+  {
+    heading: 'Resources',
+    links: [
+      { label: 'Blog', href: '#' },
+      { label: 'UX laws explained', href: '#' },
+      { label: 'Accessibility checklist', href: '#' },
+      { label: 'UX audit template', href: '#' },
+      { label: 'Help centre', href: '#' },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About', href: '#' },
+      { label: 'Contact', href: '/report/sample#contact' },
+      { label: 'Privacy policy', href: '#' },
+      { label: 'Terms of service', href: '#' },
+    ],
+  },
 ];
 
-const USEFUL = [
-  { label: 'Sample Audit', href: '#sample' },
-  { label: 'FAQ', href: '#faq' },
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Terms of Service', href: '#' },
-];
-
-const SOCIALS = [
-  { label: 'Website', icon: 'IconGlobe' },
-  { label: 'GitHub', icon: 'IconGithub' },
-  { label: 'Email', icon: 'IconMail' },
-] as const;
-
-const CONTACTS = [
-  { icon: 'IconMail', label: 'Email us', address: 'hello@zaudit.com' },
-  { icon: 'IconGlobe', label: 'Support', address: 'support@zaudit.com' },
-] as const;
-
-/** A footer column: a serif heading over a stack of links. */
-function Column({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <Stack gap={22}>
-      <Text font={t(400, 21, 26, 'serif')}>
-        {title}
-      </Text>
-      {children}
-    </Stack>
-  );
-}
+const MUTED = '#A1A6AE';
 
 /**
- * The footer redefines `--fg`, `--muted-fg` and `--border` on itself rather than
- * hard-coding dark values, so every token-driven component inside it inverts
- * without knowing it is on a dark field.
+ * The footer, identical on the homepage and the report: near-black ground, the
+ * logo in white with its brand line, three link columns, one line of small print.
  */
 export function SiteFooter() {
   return (
-    <footer
-      style={
-        {
-          background: '#0C0E12',
-          color: '#F1F3F7',
-          '--fg': '#F1F3F7',
-          '--muted-fg': '#99A1AE',
-          '--border': '#262B35',
-        } as CSSProperties
-      }
-    >
-      <Container style={{ padding: '72px 32px 0' }}>
-        <div
-          style={{
-            font: text.displayNumeral,
-            letterSpacing: '-0.02em',
-            color: '#F1F3F7',
-          }}
-        >
-          Zaudit
+    <footer className="ax-foot" style={{ background: '#0A0B0D', color: '#FFFFFF' }}>
+      <div
+        data-foot-grid
+        style={{
+          maxWidth: layout.frame,
+          margin: '0 auto',
+          padding: `72px ${layout.gutter} 48px`,
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.4fr) repeat(3, minmax(0, 1fr))',
+          gap: 40,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Logo height={22} fill="#FFFFFF" />
+          <p style={{ margin: 0, maxWidth: 320, font: t(400, 14, 22), color: MUTED }}>
+            Audix — automated UX audits for websites and web apps. Find what&apos;s hurting your user experience, fix
+            what matters first.
+          </p>
         </div>
 
-        <Divider style={{ marginTop: 56 }} />
+        {COLUMNS.map((c) => (
+          <div key={c.heading} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <span style={{ font: t(700, 16, 22), letterSpacing: '-0.015em', color: '#FFFFFF' }}>{c.heading}</span>
+            {c.links.map((l) => (
+              <a key={l.label} href={l.href} style={{ font: t(400, 14, 22), color: MUTED }}>
+                {l.label}
+              </a>
+            ))}
+          </div>
+        ))}
+      </div>
 
-        <Grid
-          columns="minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr) minmax(0, 1fr)"
-          gap={48}
-          style={{ padding: '72px 0' }}
-        >
-          <Stack gap={48} style={{ maxWidth: 400 }}>
-            <Text as="p" variant="body" tone="fg" wrap="pretty">
-              AI-powered UX auditing that finds what’s hurting your user experience and tells you
-              exactly how to fix it.
-            </Text>
-            <Row gap={20}>
-              <Text font={t(400, 21, 26, 'serif')}>Follow us</Text>
-              <Row gap={10}>
-                {SOCIALS.map((s) => (
-                  <a
-                    key={s.label}
-                    className="hp-social"
-                    href="#"
-                    aria-label={s.label}
-                    style={SOCIAL}
-                  >
-                    <IconBox name={s.icon} size="w-4" />
-                  </a>
-                ))}
-              </Row>
-            </Row>
-          </Stack>
-
-          <Column title="Pages">
-            <Stack as="nav" gap={14}>
-              {PAGES.map((l) => (
-                <a key={l.label} className="hp-link-muted" href={l.href} style={FOOTER_LINK}>
-                  {l.label}
-                </a>
-              ))}
-            </Stack>
-          </Column>
-
-          <Column title="Useful links">
-            <Stack as="nav" gap={14}>
-              {USEFUL.map((l) => (
-                <a key={l.label} className="hp-link-muted" href={l.href} style={FOOTER_LINK}>
-                  {l.label}
-                </a>
-              ))}
-            </Stack>
-          </Column>
-
-          <Column title="Contact us">
-            <Stack gap={20}>
-              {CONTACTS.map((c) => (
-                <Stack key={c.label} gap={6}>
-                  <Text
-                    font={t(400, 15, 22)}
-                    tone="fg"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
-                  >
-                    <IconBox name={c.icon} size="w-4" />
-                    {c.label}
-                  </Text>
-                  <a
-                    className="hp-link-fg"
-                    href={`mailto:${c.address}`}
-                    style={{ font: t(400, 15, 22), color: color.mutedFg }}
-                  >
-                    {c.address}
-                  </a>
-                </Stack>
-              ))}
-            </Stack>
-          </Column>
-        </Grid>
-
-        <Row
-          justify="between"
-          wrap
-          gap={24}
-          style={{ borderTop: hairline(), padding: '28px 0 32px' }}
-        >
-          <Text variant="caption" tone="muted">
-            © 2026 Zaudit. All rights reserved.
-          </Text>
-          <Row gap={12}>
-            <a className="hp-link-fg" href="#" style={{ font: text.caption, color: color.mutedFg }}>
-              Licenses
-            </a>
-            <span style={{ color: color.border }}>|</span>
-            <a className="hp-link-fg" href="#" style={{ font: text.caption, color: color.mutedFg }}>
-              Style guide
-            </a>
-          </Row>
-        </Row>
-      </Container>
+      <div style={{ maxWidth: layout.frame, margin: '0 auto', padding: `22px ${layout.gutter} 40px`, borderTop: '1px solid #23252B' }}>
+        <span style={{ font: t(400, 13, 18), color: MUTED }}>© 2026 Audix. All rights reserved.</span>
+      </div>
     </footer>
   );
 }

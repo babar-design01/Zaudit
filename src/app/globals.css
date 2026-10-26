@@ -1,61 +1,71 @@
-/* Zaudit tokens — primary #146EF5, light + dark.
-   Transcribed from `Homepage Veltrex.dc.html`; these values are the design. */
+/* Audix tokens — transcribed from design-system/tokens.json. These values are
+   the design: ink for action, blue for accent, 8px corners at most. */
 
 :root,
 [data-theme='light'] {
   --bg: #ffffff;
-  --card: #ffffff;
-  --popover: #ffffff;
-  --muted: #f3f3f3;
-  --fg: #16181d;
-  --muted-fg: #6b7280;
+  --bg-subtle: #f5f7fb;
+  --bg-mist: #dcebff;
+  --surface: #ffffff;
   --border: #e7e8ea;
-  --input: #d9dbdf;
-  --primary: #146ef5;
-  --primary-fg: #ffffff;
-  --accent: #e8f0fe;
+  --border-strong: #d9dbdf;
+  --ink: #0a0b0d;
+  --ink-secondary: #3a3d44;
+  --ink-muted: #6b7280;
+  --action: #0a0b0d;
+  --on-action: #ffffff;
+  --action-outline: rgba(20, 60, 140, 0.35);
+  --action-ghost: rgba(255, 255, 255, 0.18);
+  --blue: #146ef5;
+  --blue-tint: #edf4fe;
   --accent-fg: #0f55c0;
-  --secondary: #f3f3f3;
-  --secondary-fg: #16181d;
-  --destructive: #e5484d;
-  --destructive-fg: #ffffff;
-  --ring: #146ef5;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-full: 9999px;
-  --shadow-xs: 0 2px 10px rgba(20, 40, 90, 0.05);
-  --shadow-sm: 0 8px 24px rgba(20, 40, 90, 0.07);
-  --shadow-md: 0 10px 30px rgba(20, 40, 90, 0.1);
-  --shadow-lg: 0 18px 44px rgba(20, 40, 90, 0.14);
-  --font-sans: 'Figtree', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --font-serif: 'Instrument Serif', serif;
+  --focus: #146ef5;
+  --critical: #e5484d;
+  --major: #c2410c;
+  --on-critical: #ffffff;
+  --glow-cyan: #a8f3ff;
+  --glow-blue: #5e9bff;
+  --glow-periwinkle: #7fb2ff;
+  --glow-white: #ffffff;
+
+  --shadow-raise: 0 18px 40px rgba(20, 40, 90, 0.08);
+  --shadow-hover: 0 22px 44px rgba(21, 20, 25, 0.12);
+  --shadow-float: 0 30px 70px rgba(14, 40, 80, 0.25);
+
+  --font-sans: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* The hero's URL frame. The one gradient on the site. */
   --grad: linear-gradient(100deg, #146ef5, #5c7cff 55%, #9e5cff);
 }
 
 [data-theme='dark'] {
-  --bg: #0c0e12;
-  --card: #14171d;
-  --popover: #14171d;
-  --muted: #1b1f27;
-  --fg: #f1f3f7;
-  --muted-fg: #99a1ae;
-  --border: #262b35;
-  --input: #323947;
-  --primary: #3b82f6;
-  --primary-fg: #ffffff;
-  --accent: #14233d;
+  --bg: #0a0b0d;
+  --bg-subtle: #121419;
+  --bg-mist: #0e1b33;
+  --surface: #14161b;
+  --border: #23252b;
+  --border-strong: #33363e;
+  --ink: #f3f5f9;
+  --ink-secondary: #c9cdd4;
+  --ink-muted: #a1a6ae;
+  --action: #ffffff;
+  --on-action: #0a0b0d;
+  --action-outline: rgba(255, 255, 255, 0.45);
+  --action-ghost: rgba(255, 255, 255, 0.06);
+  --blue: #5e9bff;
+  --blue-tint: #12233f;
   --accent-fg: #7fb0ff;
-  --secondary: #1b1f27;
-  --secondary-fg: #f1f3f7;
-  --destructive: #f26669;
-  --destructive-fg: #16181d;
-  --ring: #3b82f6;
-  --shadow-xs: none;
-  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.45);
+  --focus: #5e9bff;
+  --critical: #ff6b6b;
+  --major: #f08a4b;
+  --on-critical: #0a0b0d;
+  --glow-cyan: #1b5c70;
+  --glow-blue: #2a5fc4;
+  --glow-periwinkle: #3b6fd1;
+  --glow-white: #0a0b0d;
+
+  --shadow-raise: none;
+  --shadow-hover: 0 22px 44px rgba(0, 0, 0, 0.45);
+  --shadow-float: 0 30px 70px rgba(0, 0, 0, 0.55);
 }
 
 *,
@@ -67,64 +77,132 @@
 body {
   margin: 0;
   background: var(--bg);
-  color: var(--fg);
-  font: 500 14px/20px var(--font-sans);
+  color: var(--ink);
+  font: 400 15px/24px var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--fg);
+  color: var(--ink);
   text-decoration: none;
 }
 
-a:hover {
-  color: var(--muted-fg);
+/* Headings balance, paragraphs read pretty — the brand book's rule. */
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
-/* Hover treatments the prototype expressed as inline `style-hover` attributes. */
-.hp-navlink:hover {
-  color: var(--fg);
-  background: var(--accent);
+p {
+  text-wrap: pretty;
 }
 
-.hp-menu-row:hover {
-  background: var(--accent);
+/* Every interactive element shows the same ring, 3px clear of itself. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
 }
 
-.hp-link-primary:hover {
-  color: var(--primary);
+/* --------------------------------------------------------- the two buttons */
+
+/*
+ * Hover, press and focus for both button styles, as `[data-cta]`. These are
+ * states an inline style cannot express, so they live here and every button
+ * carries the attribute.
+ */
+[data-cta] {
+  transition:
+    translate 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.25s ease;
 }
 
-.hp-link-fg:hover {
-  color: var(--fg);
+[data-cta='primary']:hover {
+  background-color: #2a2d35;
+  color: #ffffff;
+  translate: 0 -2px;
+  box-shadow: 0 10px 22px rgba(10, 11, 13, 0.22);
 }
 
-.hp-link-muted:hover {
-  color: var(--muted-fg);
+/* The primary inverts on a dark or colour band: white fill, ink text. */
+[data-cta='primary'][data-on='colour']:hover {
+  background-color: #eaf1ff;
+  color: #0a0b0d;
+  box-shadow: 0 10px 22px rgba(10, 11, 13, 0.25);
 }
 
-.hp-fade:hover {
+[data-cta='secondary']:hover {
+  background-color: #0a0b0d;
+  color: #ffffff;
+  translate: 0 -2px;
+  box-shadow:
+    inset 0 0 0 1px #0a0b0d,
+    0 10px 22px rgba(10, 11, 13, 0.16);
+}
+
+[data-cta='secondary'][data-on='colour']:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+  color: #0a0b0d;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+[data-cta]:active {
+  translate: 0 0;
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------ hover states */
+
+/* Nav links take ink on a quiet tint. */
+.ax-navlink:hover {
+  color: var(--ink);
+  background: #f3f5f8;
+}
+
+/* Cards lift 6px; the brand book's one card gesture. */
+.ax-card {
+  transition:
+    translate 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.35s ease;
+}
+
+.ax-card:hover {
+  translate: 0 -6px;
+  box-shadow: var(--shadow-hover);
+}
+
+.ax-link-ink:hover {
+  color: var(--ink);
+}
+
+.ax-link-blue:hover {
+  color: var(--blue);
+}
+
+.ax-fade:hover {
   opacity: 0.9;
 }
 
-.hp-social:hover {
-  border-color: var(--muted-fg);
+/* Footer links go white on hover, against the near-black ground. */
+.ax-foot a:hover {
+  color: #ffffff;
 }
 
-.hp-cta-dark:hover {
-  background: #000000;
-}
+/* ----------------------------------------------------------------- motion */
 
-@keyframes hp-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes hp-rise {
+@keyframes ax-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(36px);
   }
   to {
     opacity: 1;
@@ -132,15 +210,7 @@ a:hover {
   }
 }
 
-@keyframes hp-marquee {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-/* ---------------------------------------------------------- audit dialog */
-
-@keyframes hp-backdrop-in {
+@keyframes ax-in {
   from {
     opacity: 0;
   }
@@ -149,7 +219,170 @@ a:hover {
   }
 }
 
-@keyframes hp-dialog-in {
+@keyframes ax-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ax-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ax-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -8px;
+  }
+}
+
+@keyframes ax-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ax-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* The glow field: four blobs drifting on 12–19s loops. */
+@keyframes ax-blob-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18%, 12%) scale(1.15);
+  }
+}
+
+@keyframes ax-blob-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-20%, 18%) scale(0.9);
+  }
+}
+
+@keyframes ax-blob-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-25%, -15%) scale(1.1);
+  }
+}
+
+@keyframes ax-blob-d {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(15%, -25%);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-blob='a'] {
+    animation: ax-blob-a 14s ease-in-out infinite;
+  }
+  [data-blob='b'] {
+    animation: ax-blob-b 17s ease-in-out infinite;
+  }
+  [data-blob='c'] {
+    animation: ax-blob-c 19s ease-in-out infinite;
+  }
+  [data-blob='d'] {
+    animation: ax-blob-d 12s ease-in-out infinite;
+  }
+
+  /* Hero items fade up in sequence on load. */
+  [data-hero] > * {
+    animation: ax-up 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  [data-hero] > *:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  [data-hero] > *:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  [data-hero] > *:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  [data-hero] > *:nth-child(n + 5) {
+    animation-delay: 0.4s;
+  }
+
+  /* The feature panel's chips bob out of step with each other. */
+  [data-chip] {
+    animation: ax-bob 5s ease-in-out infinite;
+  }
+  [data-chip='1'] {
+    animation-delay: -1.2s;
+  }
+  [data-chip='2'] {
+    animation-delay: -2.5s;
+  }
+  [data-chip='3'] {
+    animation-delay: -3.7s;
+  }
+
+  /*
+   * Sections rise 36px and fade as they scroll in. Scroll-driven animation
+   * where the browser has it; everywhere else the content is simply visible,
+   * which is the point — nothing here is required to read the page.
+   */
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: ax-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    [data-reveal-grid] > * {
+      animation: ax-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+    [data-reveal-pop] {
+      animation: ax-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+
+/* ---------------------------------------------------------- audit dialog */
+
+@keyframes ax-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ax-dialog-in {
   from {
     opacity: 0;
     transform: translateY(12px) scale(0.97);
@@ -162,7 +395,7 @@ a:hover {
 
 /* The sweep that reads as "still thinking". A gradient wider than the text is
    clipped to the glyphs and slid across, so the highlight travels the line. */
-@keyframes hp-shimmer {
+@keyframes ax-shimmer {
   from {
     background-position: 200% 50%;
   }
@@ -172,7 +405,7 @@ a:hover {
 }
 
 /* Rotating status copy: each line rises in as the last one leaves. */
-@keyframes hp-line-in {
+@keyframes ax-line-in {
   from {
     opacity: 0;
     transform: translateY(6px);
@@ -184,7 +417,7 @@ a:hover {
 }
 
 /* The indeterminate sliver that rides the progress track between stages. */
-@keyframes hp-track-sweep {
+@keyframes ax-track-sweep {
   0% {
     transform: translateX(-100%);
   }
@@ -193,7 +426,7 @@ a:hover {
   }
 }
 
-@keyframes hp-pulse {
+@keyframes ax-pulse {
   0%,
   100% {
     opacity: 1;
@@ -287,5 +520,149 @@ a:hover {
   [data-report-page='dark'] h1,
   [data-report-page='dark'] h2 {
     color: #000 !important;
+  }
+}
+
+/* ------------------------------------------------------------ responsive */
+
+/*
+ * The design is drawn at 1440. Below it the side margin shrinks through the
+ * gutter clamp on its own; these rules do the rest: rows of cards wrap to one
+ * column, the pinned and stacking tracks unpin on a phone, the feature chips
+ * hide, and nothing may scroll sideways.
+ */
+
+/* Decorative overflow (glow blobs, orbs) is clipped without making a scroll
+   container, so the sticky tracks inside these sections keep working. */
+main section,
+#contact {
+  overflow-x: clip;
+}
+
+@media (max-width: 1100px) {
+  section [style*='repeat(4, minmax(0, 1fr))'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  /* The nav folds behind its Menu control. */
+  [data-nav-toggle] {
+    display: inline-flex !important;
+  }
+  [data-nav-links] {
+    display: none !important;
+  }
+  [data-nav-links][data-open] {
+    display: flex !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    margin: 0 !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 2px !important;
+    padding: 8px clamp(16px, 5.56vw, 80px) 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-raise);
+  }
+  [data-nav-links][data-open] a {
+    padding: 12px !important;
+  }
+
+  /* Every card row becomes one column. */
+  section [style*='grid-template-columns'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  footer [data-foot-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  footer [data-foot-grid] > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Pinned columns and tracks let go on a small screen. */
+  #faq [style*='position: sticky'] {
+    position: static !important;
+  }
+}
+
+@media (max-width: 720px) {
+  /* How it works: no 2100px scroll track on a phone; the steps still switch on tap. */
+  #how-track {
+    height: auto !important;
+  }
+  #how-track > div {
+    position: static !important;
+  }
+  /* Features stop stacking and their floating chips go. */
+  #features [data-fcard],
+  #features [style*='position: sticky'] {
+    position: static !important;
+  }
+  #features [data-chip] {
+    display: none !important;
+  }
+  /* Room for the hero field's button under the URL on a phone. */
+  #hero [data-urlframe] > div {
+    flex-wrap: wrap;
+    padding: 8px !important;
+  }
+  #hero [data-urlframe] input {
+    flex-basis: 100% !important;
+    padding: 6px 4px 6px 8px;
+  }
+  #hero [data-urlframe] [data-cta] {
+    flex: 1 1 100%;
+  }
+  #hero [data-urlframe] svg {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  /* The hero's own button is a thumb's reach away; the nav keeps logo and menu. */
+  [data-nav-cta] {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------- print */
+
+/* Save as PDF is the browser's print. The page furniture goes; each issue keeps
+   its screenshot and its list on one sheet. */
+@media print {
+  [data-print-hide],
+  header,
+  footer {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  [data-finding] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  [data-blob] {
+    display: none !important;
+  }
+  @page {
+    margin: 12mm;
+  }
+}
+
+/* The contact form: the dotted strips narrow and the panel padding drops to
+   the gutter on a phone, so the fields keep their width. */
+@media (max-width: 720px) {
+  [data-contact-form] {
+    padding: 48px 24px !important;
+  }
+  [data-contact-form] [data-dots] {
+    width: 12px !important;
   }
 }

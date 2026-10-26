@@ -1,94 +1,99 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from 'react';
-import { Icon, type IconName } from './Icon';
-import { color, motion, radius as r, shadow, staticColor, text } from '@/design/tokens';
+import type { IconName } from './Icon';
+import { color, radius as r, staticColor, text, tracking } from '@/design/tokens';
+
+/**
+ * The two button styles, and nothing else.
+ *
+ * The brand book allows a primary (ink fill, white label) and a secondary
+ * (ghost fill, 1px inset outline, ink label), each in a normal and a small
+ * size, each inverting on a dark or colour band. Labels are uppercase with
+ * 0.1em tracking, corners are 2px — square on purpose — and **no button
+ * carries an icon**.
+ *
+ * Hover, press and focus live in `globals.css` against `[data-cta]`, because an
+ * inline style cannot express a state.
+ */
 
 const SIZES = {
-  sm: { height: 32, padding: '8px 12px', gap: 8, font: 14, weight: 500, lh: '20px' },
-  default: { height: 36, padding: '8px 16px', gap: 8, font: 14, weight: 500, lh: '20px' },
-  lg: { height: 40, padding: '8px 24px', gap: 8, font: 14, weight: 500, lh: '20px' },
-  /** The action inside the FAQ's blue helper card. */
-  pill: { height: 44, padding: '12px 20px', gap: 8, font: 14, weight: 500, lh: '20px' },
-  /** The full-width action at the foot of a pricing card. */
-  cta: { height: 52, padding: 0, gap: 10, font: 15, weight: 500, lh: '22px' },
-  /** The closing CTA. Taller, and the one button the design does not set as a pill. */
-  xl: { height: 54, padding: '16px 28px', gap: 10, font: 15, weight: 600, lh: '22px' },
+  /** The label the brand book calls `button`: 14px, padding 16 × 24. */
+  default: { font: text.button, padding: '16px 24px' },
+  /** Nav and toolbars: `button-sm`, 12px, padding 11 × 20. */
+  sm: { font: text.buttonSm, padding: '11px 20px' },
 } as const;
 
-const VARIANTS = {
-  primary: {
-    background: color.primary,
-    color: color.primaryFg,
-    boxShadow: shadow.xs,
-  },
-  secondary: {
-    background: color.secondary,
-    color: color.secondaryFg,
-    boxShadow: shadow.xs,
-  },
-  outline: {
-    background: color.bg,
-    color: color.fg,
-    boxShadow: shadow.hairlineRaised,
-  },
-  ghost: { background: 'transparent', color: color.fg },
-  destructive: {
-    background: color.destructive,
-    color: staticColor.white,
-    boxShadow: shadow.xs,
-  },
-  /** Near-black on the blue CTA band, where a primary button would disappear. */
-  ink: { background: staticColor.ink, color: staticColor.white },
-  /** The inverse of `primary`, for use on a blue field: white plate, blue label. */
-  onPrimary: { background: color.primaryFg, color: color.primary },
-} as const;
+type Tone = 'primary' | 'secondary';
 
 export type ButtonProps = {
-  variant?: keyof typeof VARIANTS;
-  size?: keyof typeof SIZES;
+  variant?: Tone | LegacyVariant;
+  size?: keyof typeof SIZES | LegacySize;
   disabled?: boolean;
-  iconStart?: IconName;
-  iconEnd?: IconName;
   children?: ReactNode;
   style?: CSSProperties;
   onClick?: () => void;
   type?: 'button' | 'submit';
-  /** Carries the hover rules from `globals.css`, which inline styles cannot express. */
   className?: string;
-  /** The design pins buttons to pills; the `xl` CTA is the exception, at 12px. */
-  radius?: number | string;
   fullWidth?: boolean;
-  /** Overrides the variant's shadow. The pricing CTA carries none. */
-  elevation?: keyof typeof shadow;
   /** Set when the label alone does not say what the button does. */
   ariaLabel?: string;
+  /** On a dark or colour band the primary inverts to a white fill. */
+  onColour?: boolean;
+  /** @deprecated The brand book puts no icons in buttons. Ignored. */
+  iconStart?: IconName;
+  /** @deprecated The brand book puts no icons in buttons. Ignored. */
+  iconEnd?: IconName;
+  /** @deprecated Corners are fixed at 2px. Ignored. */
+  radius?: number | string;
+  /** @deprecated Elevation comes from the variant. Ignored. */
+  elevation?: string;
 };
 
-/**
- * Ports the design system's `Button`. The prototype pinned every button to a pill
- * with a global `button { border-radius: 999px !important }`, so that radius is
- * the default here rather than being imposed on every button in the app — and
- * `radius` opens it back up for the one button the design shapes differently.
- */
+/* The old API had six variants and six sizes. They map onto the two that
+   remain, so a section that has not been ported yet still renders a button
+   the brand book would recognise. */
+type LegacyVariant = 'outline' | 'ghost' | 'destructive' | 'ink' | 'onPrimary';
+type LegacySize = 'lg' | 'pill' | 'cta' | 'xl';
+
+const toneOf = (v: Tone | LegacyVariant): Tone =>
+  v === 'secondary' || v === 'outline' || v === 'ghost' ? 'secondary' : 'primary';
+
+const sizeOf = (s: keyof typeof SIZES | LegacySize): keyof typeof SIZES => (s === 'sm' ? 'sm' : 'default');
+
 export function Button({
   variant = 'primary',
   size = 'default',
   disabled,
-  iconStart,
-  iconEnd,
   children,
   style,
   onClick,
   type = 'button',
   className,
-  radius = 999,
   fullWidth,
-  elevation,
   ariaLabel,
+  onColour,
 }: ButtonProps) {
-  const s = SIZES[size];
-  const v = VARIANTS[variant];
+  const tone = toneOf(variant);
+  const s = SIZES[sizeOf(size)];
+
+  const skin: CSSProperties =
+    tone === 'primary'
+      ? onColour
+        ? { background: staticColor.white, color: staticColor.ink }
+        : { background: color.action, color: color.onAction }
+      : onColour
+        ? {
+            background: 'rgba(255, 255, 255, 0.18)',
+            color: staticColor.ink,
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.55)',
+          }
+        : {
+            background: color.actionGhost,
+            color: color.ink,
+            boxShadow: `inset 0 0 0 1px ${color.actionOutline}`,
+          };
+
   return (
     <button
       type={type}
@@ -96,34 +101,85 @@ export function Button({
       onClick={onClick}
       className={className}
       aria-label={ariaLabel}
+      data-cta={tone}
+      data-on={onColour ? 'colour' : undefined}
       style={{
         display: fullWidth ? 'flex' : 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        flexDirection: 'row',
-        gap: s.gap,
         boxSizing: 'border-box',
-        height: s.height,
         padding: s.padding,
-        borderRadius: radius,
+        borderRadius: r.button,
         border: 'none',
-        fontFamily: 'var(--font-sans)',
-        fontWeight: s.weight,
-        fontSize: s.font,
-        lineHeight: s.lh,
+        font: s.font,
+        letterSpacing: tracking.button,
+        textTransform: 'uppercase',
         whiteSpace: 'nowrap',
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.5 : 1,
         ...(fullWidth ? { width: '100%' } : null),
-        transition: `background-color ${motion.fast}, box-shadow ${motion.fast}, opacity ${motion.fast}`,
-        ...v,
-        ...(elevation ? { boxShadow: shadow[elevation] } : null),
+        ...skin,
         ...style,
       }}
     >
-      {iconStart && <Icon name={iconStart} size={16} />}
       {children}
-      {iconEnd && <Icon name={iconEnd} size={16} />}
     </button>
+  );
+}
+
+/** The same two styles as a link, for actions that navigate. */
+export function ButtonLink({
+  href,
+  variant = 'primary',
+  size = 'default',
+  children,
+  style,
+  fullWidth,
+  onColour,
+  ariaLabel,
+}: Omit<ButtonProps, 'onClick' | 'type' | 'disabled'> & { href: string }) {
+  const tone = toneOf(variant);
+  const s = SIZES[sizeOf(size)];
+
+  const skin: CSSProperties =
+    tone === 'primary'
+      ? onColour
+        ? { background: staticColor.white, color: staticColor.ink }
+        : { background: color.action, color: color.onAction }
+      : onColour
+        ? {
+            background: 'rgba(255, 255, 255, 0.18)',
+            color: staticColor.ink,
+            boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.55)',
+          }
+        : {
+            background: color.actionGhost,
+            color: color.ink,
+            boxShadow: `inset 0 0 0 1px ${color.actionOutline}`,
+          };
+
+  return (
+    <a
+      href={href}
+      aria-label={ariaLabel}
+      data-cta={tone}
+      data-on={onColour ? 'colour' : undefined}
+      style={{
+        display: fullWidth ? 'flex' : 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: s.padding,
+        borderRadius: r.button,
+        font: s.font,
+        letterSpacing: tracking.button,
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+        ...(fullWidth ? { width: '100%' } : null),
+        ...skin,
+        ...style,
+      }}
+    >
+      {children}
+    </a>
   );
 }

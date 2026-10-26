@@ -1,10 +1,20 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+const DESCRIPTION =
+  'Paste a URL. Audix tests your site in a real browser and scores it against UX laws, design principles and accessibility rules, then tells you which element to fix first and why it matters.';
+
 export const metadata: Metadata = {
-  title: 'Zaudit — Find what’s hurting your user experience.',
-  description:
-    'Analyze your website for usability, UI, accessibility, and conversion issues. Get evidence-backed findings that show what’s wrong, why it matters, and what to improve next.',
+  title: 'Audix – Free Website UX Audit Tool',
+  description: DESCRIPTION,
+  openGraph: {
+    title: 'Audix – Free Website UX Audit Tool',
+    description: DESCRIPTION,
+    siteName: 'Audix',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image', title: 'Audix – Free Website UX Audit Tool', description: DESCRIPTION },
+  icons: { icon: '/audix-logo.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,14 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-        />
+        {/* One family. The brand book allows no second typeface. */}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@300..900&display=swap" />
       </head>
       <body>{children}</body>
     </html>

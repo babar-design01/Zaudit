@@ -24,7 +24,7 @@ export type { TextTone, MeasureName } from './typography';
 export { ArrowLink, IconTile, Dot, CountPill, Meter, MetaRow, FieldLabel } from './elements';
 
 /* Controls */
-export { Button } from './Button';
+export { Button, ButtonLink } from './Button';
 export type { ButtonProps } from './Button';
 export { Badge } from './Badge';
 export { Input } from './Input';

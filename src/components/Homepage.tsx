@@ -1,54 +1,62 @@
 'use client';
 
-import { Anatomy } from '@/components/sections/Anatomy';
+import { useEffect } from 'react';
+import { ClosingCta } from '@/components/home/ClosingCta';
+import { Covered } from '@/components/home/Covered';
+import { Faq } from '@/components/home/Faq';
+import { Features } from '@/components/home/Features';
+import { Hero } from '@/components/home/Hero';
+import { HowItWorks } from '@/components/home/HowItWorks';
+import { Pricing } from '@/components/home/Pricing';
+import { Problem } from '@/components/home/Problem';
+import { Proof } from '@/components/home/Proof';
+import { Solutions } from '@/components/home/Solutions';
+import { Stories } from '@/components/home/Stories';
 import { AuditDialog } from '@/components/sections/AuditDialog';
-import { Audiences } from '@/components/sections/Audiences';
-import { AuditSummary } from '@/components/sections/AuditSummary';
-import { Dimensions } from '@/components/sections/Dimensions';
-import { Faq } from '@/components/sections/Faq';
-import { FinalCta } from '@/components/sections/FinalCta';
-import { Hero } from '@/components/sections/Hero';
-import { HowItWorks } from '@/components/sections/HowItWorks';
-import { Pricing } from '@/components/sections/Pricing';
-import { Problem } from '@/components/sections/Problem';
-import { ProductProof } from '@/components/sections/ProductProof';
-import { Testimonials } from '@/components/sections/Testimonials';
-import { AnnouncementBar, SiteNav, type Account } from '@/components/site/SiteNav';
 import { SiteFooter } from '@/components/site/SiteFooter';
-import { focusHero, useAudit } from '@/hooks/useAudit';
+import { SiteNav, type Account } from '@/components/site/SiteNav';
+import { useAudit } from '@/hooks/useAudit';
 
 /**
- * The Zaudit homepage, built from `Homepage Veltrex.dc.html`.
+ * The Audix homepage, built from `design/Main.dc.html` in the handoff.
  *
- * Section order is the design's: hero → product proof → the problem → (live audit
- * results, once one has run) → how it works → what we analyze → who it's for →
- * testimonials → anatomy → pricing → FAQ → final CTA → footer.
+ * Section order is the design's: nav → hero → what you get → the problem → how
+ * it works → features → what's covered → who it's for → customer stories →
+ * pricing → FAQ → closing statement → footer. Every "Run free audit" opens the
+ * same dialog: goal, then the run, then the report.
  */
 export function Homepage({ account = null, accounts = false }: { account?: Account; accounts?: boolean } = {}) {
-  const { state, setUrl, setGoal, openGoal, start, reset, closeDialog } = useAudit();
+  const { state, setUrl, setGoal, openGoal, start, closeDialog } = useAudit();
+
+  // The report's nav sends people here with ?audit=1 to start one.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('audit') === '1') {
+      window.history.replaceState(null, '', window.location.pathname);
+      openGoal();
+    }
+  }, [openGoal]);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)' }}>
-      <AnnouncementBar />
-      <SiteNav onRunAudit={focusHero} account={account} accounts={accounts} />
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
+      <SiteNav onRunAudit={openGoal} account={account} accounts={accounts} />
 
-      {/* The run itself happens in a dialog over the page. */}
       <AuditDialog state={state} start={start} setGoal={setGoal} close={closeDialog} />
 
-      <Hero state={state} setUrl={setUrl} start={openGoal} reset={reset} />
-      <ProductProof />
-      <Problem />
+      <main id="main">
+        <Hero onRunAudit={openGoal} url={state.url} setUrl={setUrl} />
+        <Proof onRunAudit={openGoal} />
+        <Problem onRunAudit={openGoal} />
+        <HowItWorks />
+        <Features onRunAudit={openGoal} />
+        <Covered onRunAudit={openGoal} />
+        <Solutions onRunAudit={openGoal} />
+        <Stories />
+        <Pricing onRunAudit={openGoal} />
+        <Faq onRunAudit={openGoal} />
+        <ClosingCta onRunAudit={openGoal} />
+      </main>
 
-      {state.stage === 'done' && state.result && <AuditSummary result={state.result} />}
-
-      <HowItWorks />
-      <Dimensions />
-      <Audiences onRunAudit={focusHero} />
-      <Testimonials />
-      <Anatomy onRunAudit={focusHero} />
-      <Pricing onRunAudit={focusHero} />
-      <Faq onRunAudit={focusHero} />
-      <FinalCta onRunAudit={focusHero} />
       <SiteFooter />
     </div>
   );

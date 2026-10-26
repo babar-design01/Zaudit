@@ -43,7 +43,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <Stack gap={28}>
           <Row gap={12} align="center">
             <Link href="/" style={{ font: t(500, 13, 20), color: color.mutedFg }}>
-              ← Zaudit
+              ← Audix
             </Link>
             <Spacer />
             <Text variant="bodyXs" tone="muted">
@@ -124,7 +124,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
             ) : (
               <Card radius={radius.md} pad={20}>
                 <Text variant="bodySm" tone="muted" wrap="pretty">
-                  Buying credits is not switched on in this deployment yet. Email hello@zaudit.com and we will add
+                  Buying credits is not switched on in this deployment yet. Email hello@audix.com and we will add
                   them to your account by hand.
                 </Text>
               </Card>

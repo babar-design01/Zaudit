@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Card } from './layout';
-import { color, mix, radius } from '@/design/tokens';
+import { color, radius } from '@/design/tokens';
 
 /**
  * A centred dialog over a blurred backdrop.
@@ -18,7 +18,7 @@ export function Modal({
   title,
   /** Set false while work is in flight that a stray click should not cancel. */
   dismissOnBackdrop = true,
-  width = 560,
+  width = 540,
   children,
 }: {
   open: boolean;
@@ -102,9 +102,10 @@ export function Modal({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
-        background: mix('#0C0E12', 55),
-        backdropFilter: 'blur(6px)',
-        animation: 'hp-backdrop-in 180ms ease both',
+        // The glow field, veiled at 28%: the backdrop every Audix dialog sits on.
+        background: color.bgMist,
+        overflow: 'hidden',
+        animation: 'ax-backdrop-in 180ms ease both',
       }}
       onMouseDown={(e) => {
         // Only a press that both starts and ends on the backdrop closes it, so a
@@ -112,9 +113,15 @@ export function Modal({
         if (dismissOnBackdrop && e.target === e.currentTarget) onClose();
       }}
     >
+      <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <span data-blob="a" style={{ position: 'absolute', left: '-20%', top: '-30%', width: '70%', height: '90%', borderRadius: '50%', background: color.glowCyan, filter: 'blur(80px)', opacity: 0.9 }} />
+        <span data-blob="b" style={{ position: 'absolute', right: '-20%', top: '10%', width: '60%', height: '90%', borderRadius: '50%', background: color.glowBlue, filter: 'blur(90px)', opacity: 0.8 }} />
+        <span data-blob="c" style={{ position: 'absolute', left: '20%', bottom: '-40%', width: '70%', height: '70%', borderRadius: '50%', background: color.glowWhite, filter: 'blur(80px)', opacity: 0.95 }} />
+        <span style={{ position: 'absolute', inset: 0, background: 'rgba(10, 11, 13, 0.28)' }} />
+      </div>
       <Card
         as="div"
-        elevation="lg"
+        elevation="float"
         radius={radius.lg}
         role="dialog"
         aria-modal="true"
@@ -127,8 +134,10 @@ export function Modal({
           maxWidth: width,
           maxHeight: 'calc(100vh - 48px)',
           overflowY: 'auto',
-          background: color.card,
-          animation: 'hp-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
+          position: 'relative',
+          background: color.surface,
+          boxShadow: 'var(--shadow-float)',
+          animation: 'ax-dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both',
           outline: 'none',
         }}
       >

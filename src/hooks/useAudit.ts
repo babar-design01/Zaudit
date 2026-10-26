@@ -89,8 +89,11 @@ export function useAudit() {
    */
   const openGoal = useCallback(() => {
     if (latest.current.stage === 'running') return;
+    // Every "Run free audit" on the page opens the dialog, but the dialog needs
+    // an address. Without one, the reader is taken to the field that asks for
+    // it rather than shown an error for a question they were never asked.
     if (!latest.current.url.trim()) {
-      setState((s) => ({ ...s, stage: 'error', error: 'Enter a website address first.', quota: false, dialogOpen: true }));
+      focusHero();
       return;
     }
     setState((s) => ({ ...s, stage: 'goal', error: null, result: null, dialogOpen: true }));

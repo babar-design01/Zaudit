@@ -1,14 +1,14 @@
 /**
- * Zaudit design tokens.
+ * Audix design tokens.
  *
- * The single typed source of truth for the values the homepage is built from.
- * Every number and string here already existed in `globals.css` or in a section's
- * inline styles — nothing is rounded, merged or "cleaned up". The design file is
- * still the authority; this module only gives those values names and types so
- * they stop being retyped by hand in twelve places.
+ * The typed source of truth for the values the site is built from, transcribed
+ * from `design-system/tokens.json` in the approved handoff. Colour, radius and
+ * shadow resolve through CSS custom properties so both themes keep working;
+ * spacing and type are literals, because the design pins them.
  *
- * Colour, radius and shadow resolve through CSS custom properties so both themes
- * keep working. Spacing and type are literals, because the design pins them.
+ * Two rules from the brand book are encoded here rather than left to memory:
+ * **nothing is rounder than 8px** (buttons are 2px, square on purpose), and
+ * **blue is never a button fill** — the primary action is ink.
  */
 
 /* ------------------------------------------------------------------ colour */
@@ -16,41 +16,90 @@
 /** Themable colour roles. Values are `var(--…)` so `[data-theme]` still swaps them. */
 export const color = {
   bg: 'var(--bg)',
-  card: 'var(--card)',
-  popover: 'var(--popover)',
-  muted: 'var(--muted)',
-  fg: 'var(--fg)',
-  mutedFg: 'var(--muted-fg)',
+  /** Quiet band behind grouped content. */
+  bgSubtle: 'var(--bg-subtle)',
+  /** Ground of the glow field. Never under body text without the glows above it. */
+  bgMist: 'var(--bg-mist)',
+  surface: 'var(--surface)',
   border: 'var(--border)',
-  input: 'var(--input)',
-  primary: 'var(--primary)',
-  primaryFg: 'var(--primary-fg)',
-  accent: 'var(--accent)',
+  /** Control outlines: inputs and toggles at rest. */
+  borderStrong: 'var(--border-strong)',
+  ink: 'var(--ink)',
+  inkSecondary: 'var(--ink-secondary)',
+  inkMuted: 'var(--ink-muted)',
+  /** Primary button fill. One per view region. */
+  action: 'var(--action)',
+  onAction: 'var(--on-action)',
+  actionOutline: 'var(--action-outline)',
+  actionGhost: 'var(--action-ghost)',
+  /** The single accent: eyebrows, figures, links, focus. Never a button fill. */
+  blue: 'var(--blue)',
+  blueTint: 'var(--blue-tint)',
+  focus: 'var(--focus)',
+  critical: 'var(--critical)',
+  major: 'var(--major)',
+  onCritical: 'var(--on-critical)',
+
+  /* The glow field's four blobs. Decorative only. */
+  glowCyan: 'var(--glow-cyan)',
+  glowBlue: 'var(--glow-blue)',
+  glowPeriwinkle: 'var(--glow-periwinkle)',
+  glowWhite: 'var(--glow-white)',
+
+  /* ---- legacy names, kept while the sections are ported one at a time ---- */
+  /** @deprecated use `surface` */
+  card: 'var(--surface)',
+  /** @deprecated use `surface` */
+  popover: 'var(--surface)',
+  /** @deprecated use `bgSubtle` */
+  muted: 'var(--bg-subtle)',
+  /** @deprecated use `ink` */
+  fg: 'var(--ink)',
+  /** @deprecated use `inkMuted` */
+  mutedFg: 'var(--ink-muted)',
+  /** @deprecated use `borderStrong` */
+  input: 'var(--border-strong)',
+  /** @deprecated `blue` is the accent; `action` is the button fill */
+  primary: 'var(--blue)',
+  /** @deprecated use `onAction` */
+  primaryFg: 'var(--on-action)',
+  /** @deprecated use `blueTint` */
+  accent: 'var(--blue-tint)',
   accentFg: 'var(--accent-fg)',
-  secondary: 'var(--secondary)',
-  secondaryFg: 'var(--secondary-fg)',
-  destructive: 'var(--destructive)',
-  destructiveFg: 'var(--destructive-fg)',
-  ring: 'var(--ring)',
-  /** The 100deg blue -> violet gradient. Used as a fill, a 2px frame and clipped text. */
+  /** @deprecated use `bgSubtle` */
+  secondary: 'var(--bg-subtle)',
+  /** @deprecated use `ink` */
+  secondaryFg: 'var(--ink)',
+  /** @deprecated use `critical` */
+  destructive: 'var(--critical)',
+  /** @deprecated use `onCritical` */
+  destructiveFg: 'var(--on-critical)',
+  ring: 'var(--focus)',
+  /** The 100deg blue → violet gradient. The hero's URL frame, and nothing else. */
   gradient: 'var(--grad)',
 } as const;
 
 /**
- * Colours the design states as literals rather than theme roles: the ink used on
- * the primary-blue CTA band, and the white it sits against. These do not flip
- * with the theme in the design, so they are not theme roles here either.
+ * Colours the design states as literals rather than theme roles: the ink the
+ * logo is drawn in, the white it inverts to on dark, and the copy that sits on
+ * a colour band.
  */
 export const staticColor = {
   white: '#FFFFFF',
-  ink: '#16181D',
-  /** Copy and rules over a primary-blue field. */
+  ink: '#0A0B0D',
+  /** Copy and rules over a colour or ink field. */
+  onInk: 'rgba(255, 255, 255, 0.82)',
+  onInkDim: 'rgba(255, 255, 255, 0.72)',
+  onInkLine: 'rgba(255, 255, 255, 0.18)',
+  /** @deprecated use `onInk` */
   onPrimary: 'rgba(255, 255, 255, 0.82)',
-  onPrimaryDim: 'rgba(255, 255, 255, 0.75)',
-  onPrimaryLine: 'rgba(255, 255, 255, 0.24)',
+  /** @deprecated use `onInkDim` */
+  onPrimaryDim: 'rgba(255, 255, 255, 0.72)',
+  /** @deprecated use `onInkLine` */
+  onPrimaryLine: 'rgba(255, 255, 255, 0.18)',
 } as const;
 
-/** Blend a theme colour toward another. Wraps the `color-mix` the sections already use. */
+/** Blend a theme colour toward another. Wraps the `color-mix` the sections use. */
 export function mix(from: string, percent: number, into: string = 'transparent'): string {
   return `color-mix(in oklab, ${from} ${percent}%, ${into})`;
 }
@@ -58,17 +107,12 @@ export function mix(from: string, percent: number, into: string = 'transparent')
 /* ----------------------------------------------------------------- spacing */
 
 /**
- * The spacing steps the design actually uses — in pixels, not step indices.
- * Mostly a 2px grid that thins out as it grows; the values from 24 up are the
- * section rhythm.
- *
- * These are the literal pixel values so that `gap={20}` means twenty pixels and
- * nothing has to be decoded. `Space` gives autocomplete over the scale while
- * still admitting an off-scale number, because the design has a few.
+ * The spacing scale, in pixels. `space-1` through `space-40` from the handoff,
+ * with the in-between values the layouts actually use kept alongside them.
  */
 export const SPACE = [
   0, 1, 2, 3, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 28, 32, 40, 44, 48, 56, 64, 80, 88, 96, 104,
-  128,
+  128, 160,
 ] as const;
 
 export type SpaceValue = (typeof SPACE)[number];
@@ -78,32 +122,55 @@ export type Space = SpaceValue | (number & {});
 
 /* ------------------------------------------------------- radius and shadow */
 
+/**
+ * Corners are 8px at most. The one exception is a status dot, which may be
+ * round because it carries no content.
+ */
 export const radius = {
-  sm: 'var(--radius-sm)', // 12
-  md: 'var(--radius-md)', // 16
-  lg: 'var(--radius-lg)', // 24
-  full: 'var(--radius-full)', // 9999
-  /** 10px — the testimonial portrait plate. The one radius outside the scale. */
-  plate: 10,
+  /** Buttons, tabs, severity tags. Square on purpose. */
+  button: 2,
+  /** Badges, chips, small tags. */
+  sm: 4,
+  /** Inputs, toggles, small controls, inner tiles. */
+  md: 6,
+  /** The maximum: cards, panels, dialogs, accordion items, icon wells. */
+  lg: 8,
+  /** A 6px status dot, and decorative blobs. Nothing with content. */
+  full: 9999,
+  /** @deprecated use `lg` — kept while sections are ported */
+  plate: 8,
 } as const;
 
 export const shadow = {
   none: 'none',
-  xs: 'var(--shadow-xs)',
-  sm: 'var(--shadow-sm)',
-  md: 'var(--shadow-md)',
-  lg: 'var(--shadow-lg)',
-  /** A 1px inset rule that takes no part in layout, as the outline Button/Badge use. */
+  /** Raised panels: the paid plans, the active step card. */
+  raise: 'var(--shadow-raise)',
+  /** Cards on hover, with a 6px lift. */
+  hover: 'var(--shadow-hover)',
+  /** Product mocks floating over a colour panel. */
+  float: 'var(--shadow-float)',
+  /** @deprecated use `raise` */
+  xs: 'var(--shadow-raise)',
+  /** @deprecated use `raise` */
+  sm: 'var(--shadow-raise)',
+  /** @deprecated use `hover` */
+  md: 'var(--shadow-hover)',
+  /** @deprecated use `float` */
+  lg: 'var(--shadow-float)',
+  /** A 1px inset rule that takes no part in layout. */
   hairline: 'inset 0 0 0 1px var(--border)',
-  hairlineRaised: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
+  hairlineRaised: 'inset 0 0 0 1px var(--border), var(--shadow-raise)',
 } as const;
 
 /* -------------------------------------------------------------- typography */
 
+/** One family. The brand book allows no second typeface. */
 export const font = {
   sans: 'var(--font-sans)',
-  mono: 'var(--font-mono)',
-  serif: 'var(--font-serif)',
+  /** @deprecated Audix is one typeface; kept so unported files still compile. */
+  mono: 'var(--font-sans)',
+  /** @deprecated Audix is one typeface; kept so unported files still compile. */
+  serif: 'var(--font-sans)',
 } as const;
 
 export type FontFamily = keyof typeof font;
@@ -111,15 +178,10 @@ export type FontFamily = keyof typeof font;
 /**
  * Compose a `font` shorthand from parts.
  *
- * The design carries near-duplicate steps — 13/18, 13/19, 13/20 and 13/21 all
- * appear. Those are transcribed as they are rather than snapped to a scale, so
- * `t()` exists to express one without inventing a ramp entry for it:
+ *   t(400, 15, 24)      -> '400 15px/24px var(--font-sans)'
+ *   t(800, 70, 1.04)    -> '800 70px/1.04 var(--font-sans)'
  *
- *   t(400, 13, 19)           -> '400 13px/19px var(--font-sans)'
- *   t(400, 26, 34, 'serif')  -> '400 26px/34px var(--font-serif)'
- *
- * A unitless line-height at or below 3 is passed through as a ratio, which is how
- * the clamped serif headings express theirs.
+ * A unitless line-height at or below 3 is passed through as a ratio.
  */
 export function t(
   weight: number,
@@ -133,122 +195,168 @@ export function t(
 }
 
 /**
- * The type ramp, named by the job each step does on the page. Every value is one
- * already in use; the count in a comment is how many places used it before the
- * ramp existed, which is why those are the named steps and one-offs go through `t()`.
+ * The type ramp from `tokens.json`, named by the job each step does. Headings
+ * are 800 with tight tracking; body is 400; labels are 600 uppercase with
+ * tracking, which `tracking` below supplies.
  */
 export const text = {
-  /* Serif — headlines. */
-  /** Hero h1. */
-  display: t(400, 'clamp(48px, 5vw, 74px)', 1.02, 'serif'),
-  /** The closing CTA band. */
-  displayCta: t(400, 'clamp(44px, 4.6vw, 64px)', 1.05, 'serif'),
-  /** The oversized numeral in the proof section. */
-  displayNumeral: t(400, 'clamp(84px, 12vw, 170px)', 1, 'serif'),
-  /** The standard section h2. x6 */
-  sectionTitle: t(400, 'clamp(34px, 3.4vw, 46px)', 1.05, 'serif'),
-  /** Section h2 with room for two lines. */
-  sectionTitleLoose: t(400, 'clamp(34px, 3.4vw, 46px)', 1.15, 'serif'),
-  /** The FAQ heading, a half-step tighter. */
-  sectionTitleFaq: t(400, 'clamp(34px, 3.2vw, 44px)', 1.12, 'serif'),
-  /** The audited URL over the results. */
-  resultTitle: t(400, 'clamp(30px, 3vw, 38px)', 1.08, 'serif'),
-  /** The anatomy card's headline. */
-  cardTitleLg: t(400, 'clamp(28px, 2.6vw, 36px)', 1.1, 'serif'),
-  /** Each How-It-Works panel headline. */
-  cardTitle: t(400, 'clamp(26px, 2.4vw, 34px)', 1.1, 'serif'),
-  /** Pricing figure. */
-  price: t(400, 54, 1, 'serif'),
-  /** Pull quote / closing line. */
-  quote: t(400, 26, 34, 'serif'),
-  /** The brand line above a quote. */
-  quoteBrand: t(400, 24, 30, 'serif'),
-  /** Attribution name. */
-  quoteName: t(400, 22, 28, 'serif'),
-  /** Audience card title. */
-  audienceTitle: t(400, 26, 1.15, 'serif'),
+  /* Display — closing statements and headlines. */
+  /** Closing statements on the glow field. Two lines at most. */
+  display: t(500, 'clamp(40px, 5vw, 72px)', 1.1),
+  /** Hero headline, once per page. */
+  h1: t(800, 'clamp(40px, 4.8vw, 70px)', 1.04),
+  /** Section headline. */
+  h2: t(800, 'clamp(30px, 3.1vw, 44px)', 1.08),
+  /** Figures in story cards and reports, in blue. */
+  stat: t(600, 'clamp(32px, 2.9vw, 42px)', 1),
 
-  /* Sans — body copy. */
-  /** Hero subhead. */
-  leadHero: t(400, 17, 29),
-  /** CTA-band subhead. */
-  leadCta: t(400, 17, 28),
-  /** The standard section lead paragraph. x8 */
-  lead: t(400, 16, 28),
-  /** Long-form body. x5 */
-  body: t(400, 15, 26),
-  /** Compact body. x5 */
-  bodySm: t(400, 14, 22),
-  /** Tightest body. x5 */
-  bodyXs: t(400, 13, 20),
-  /** Supporting caption. x4 */
-  caption: t(400, 13, 18),
-  /** Fine print under a control. */
-  fine: t(400, 12, 18),
-  /** Smallest supporting line. */
-  micro: t(400, 11, 16),
+  /* Text. */
+  /** Card and step titles. */
+  h3: t(700, 20, 28),
+  /** Customer quotes. */
+  quote: t(500, 'clamp(19px, 1.7vw, 24px)', 1.45),
+  /** Lead paragraphs under display and h1. */
+  bodyLg: t(400, 18, 30),
+  /** Card descriptions, answers. */
+  body: t(400, 15, 24),
+  /** Plan descriptions, list items, footer links. */
+  small: t(400, 14, 22),
 
-  /* Sans — labels and controls. */
-  /** Control and list labels. x10 */
-  label: t(500, 14, 20),
-  /** Emphasised label / inline link. x6 */
-  labelStrong: t(600, 14, 20),
-  /** Dimension card title. */
-  labelXl: t(600, 19, 24),
-  /** Card subheading. */
-  labelLg: t(600, 16, 22),
-  /** Card subheading, serif-adjacent size. */
-  labelMd: t(600, 15, 22),
-  /** Small strong label. */
-  labelSm: t(600, 13, 20),
-  /** Metadata chip. x5 */
-  chip: t(500, 12, 16),
-  /** The uppercase eyebrow pill. x3 */
+  /* Labels — uppercase, with tracking. */
+  /** Section eyebrow above h2. */
   eyebrow: t(600, 11, 16),
-  /** The uppercase eyebrow set in primary rather than in a pill. */
-  eyebrowPlain: t(600, 13, 18),
+  /** Every button label. */
+  button: t(600, 14, 20),
+  /** Nav and toolbar buttons. */
+  buttonSm: t(600, 12, 16),
+  /** Badges and severity tags. */
+  badge: t(700, 10, 14),
 
-  /* Mono — measurements and provenance. */
-  /** Evidence, timestamps, counts. x12 */
-  mono: t(400, 12, 16, 'mono'),
-  /** Provenance footers. x4 */
-  monoXs: t(400, 11, 16, 'mono'),
-  /** Step labels. */
-  monoLabel: t(500, 13, 18, 'mono'),
-  /** The 100-point score. */
-  metricLg: t(500, 40, 1, 'mono'),
-  /** A category score. */
-  metric: t(500, 28, 1, 'mono'),
+  /* ---- legacy names, kept while the sections are ported ---- */
+  /** @deprecated use `display` */
+  displayCta: t(500, 'clamp(36px, 4.4vw, 64px)', 1.1),
+  /** @deprecated use `stat` */
+  displayNumeral: t(600, 'clamp(56px, 8vw, 110px)', 1),
+  /** @deprecated use `h2` */
+  sectionTitle: t(800, 'clamp(30px, 3.1vw, 44px)', 1.08),
+  /** @deprecated use `h2` */
+  sectionTitleLoose: t(800, 'clamp(30px, 3.1vw, 44px)', 1.14),
+  /** @deprecated use `h2` */
+  sectionTitleFaq: t(800, 'clamp(28px, 2.9vw, 40px)', 1.1),
+  /** @deprecated use `h2` */
+  resultTitle: t(800, 'clamp(26px, 2.4vw, 34px)', 1.1),
+  /** @deprecated use `h3` */
+  cardTitleLg: t(700, 'clamp(22px, 2vw, 28px)', 1.2),
+  /** @deprecated use `h3` */
+  cardTitle: t(700, 'clamp(20px, 1.8vw, 24px)', 1.25),
+  /** @deprecated use `stat` */
+  price: t(800, 42, 1),
+  /** @deprecated use `quote` */
+  quoteBrand: t(700, 18, 26),
+  /** @deprecated use `h3` */
+  quoteName: t(700, 16, 22),
+  /** @deprecated use `h3` */
+  audienceTitle: t(700, 20, 28),
+  /** @deprecated use `bodyLg` */
+  leadHero: t(400, 17, 29),
+  /** @deprecated use `bodyLg` */
+  leadCta: t(400, 17, 28),
+  /** @deprecated use `bodyLg` */
+  lead: t(400, 16, 28),
+  /** @deprecated use `small` */
+  bodySm: t(400, 14, 22),
+  /** @deprecated use `small` */
+  bodyXs: t(400, 13, 20),
+  /** @deprecated use `small` */
+  caption: t(400, 13, 18),
+  /** @deprecated use `small` */
+  fine: t(400, 12, 18),
+  /** @deprecated use `badge` */
+  micro: t(400, 11, 16),
+  /** @deprecated use `small` */
+  label: t(500, 14, 20),
+  /** @deprecated use `h3` */
+  labelStrong: t(600, 14, 20),
+  /** @deprecated use `h3` */
+  labelXl: t(700, 19, 26),
+  /** @deprecated use `h3` */
+  labelLg: t(700, 16, 22),
+  /** @deprecated use `h3` */
+  labelMd: t(600, 15, 22),
+  /** @deprecated use `h3` */
+  labelSm: t(600, 13, 20),
+  /** @deprecated use `badge` */
+  chip: t(600, 12, 16),
+  /** @deprecated use `eyebrow` */
+  eyebrowPlain: t(600, 13, 18),
+  /** @deprecated Audix has no mono face */
+  mono: t(500, 12, 16),
+  /** @deprecated Audix has no mono face */
+  monoXs: t(500, 11, 16),
+  /** @deprecated Audix has no mono face */
+  monoLabel: t(600, 13, 18),
+  /** @deprecated use `stat` */
+  metricLg: t(600, 40, 1),
+  /** @deprecated use `stat` */
+  metric: t(600, 28, 1),
 } as const;
 
 export type TextStyle = keyof typeof text;
 
 /** Letter-spacing steps the design pairs with the ramp. */
 export const tracking = {
-  display: '-0.01em',
-  tight: '-0.2px',
-  snug: '-0.1px',
+  /** Display and h1. */
+  display: '-0.035em',
+  /** h2 and stat. */
+  tight: '-0.03em',
+  /** h3 and quote. */
+  snug: '-0.02em',
   none: '0',
-  wide: '0.015em',
+  /** Eyebrows. */
   eyebrow: '0.06em',
-  eyebrowWide: '0.08em',
+  /** Badges and severity tags. */
+  badge: '0.08em',
+  /** Every button label. */
+  button: '0.1em',
+  /** @deprecated use `button` */
+  wide: '0.1em',
+  /** @deprecated use `button` */
+  eyebrowWide: '0.1em',
 } as const;
 
 /* ------------------------------------------------------------------ layout */
 
 export const layout = {
-  /** Every section shares this measure. */
-  container: 1152,
-  /** Left and right gutter inside the container. */
-  gutter: 32,
+  /** Section container max width. */
+  frame: 1440,
+  /** Content width inside the frame, at 1440 with 80px margins. */
+  content: 1280,
+  /** The side margin, which shrinks to 16px on a phone. */
+  gutter: 'clamp(16px, 5.56vw, 80px)',
   /** Sticky header height, which in-page anchors have to clear. */
-  navHeight: 56,
+  navHeight: 72,
+  /** @deprecated use `frame` with `gutter` */
+  container: 1440,
+} as const;
+
+/** Section vertical rhythm. */
+export const band = {
+  /** Every ordinary section. */
+  section: 80,
+  /** Hero and story band. */
+  tall: 96,
+  /** The glow field. */
+  glow: 160,
 } as const;
 
 /** The reading measures the design caps text at. */
 export const measure = {
   hero: 820,
   heroLead: 560,
+  /** The section intro's heading column. */
+  heading: 680,
+  /** The section intro's description column. */
+  description: 440,
   section: 720,
   sectionNarrow: 620,
   card: 400,
@@ -258,11 +366,13 @@ export const measure = {
 /* ------------------------------------------------------------------ motion */
 
 export const motion = {
-  fast: '.15s ease',
-  rise: 'hp-rise 200ms ease both',
-  riseSlow: 'hp-rise 240ms ease both',
-  spin: 'hp-spin 700ms linear infinite',
-  marquee: 'hp-marquee 55s linear infinite',
+  fast: '.2s ease',
+  /** The house curve: everything that moves uses it. */
+  ease: 'cubic-bezier(.2,.7,.2,1)',
+  rise: 'ax-up .9s cubic-bezier(.2,.7,.2,1) both',
+  riseSlow: 'ax-up 1.1s cubic-bezier(.2,.7,.2,1) both',
+  spin: 'ax-spin 700ms linear infinite',
+  marquee: 'ax-marquee 55s linear infinite',
 } as const;
 
 /** A 1px border in a themed colour — the most repeated declaration on the page. */

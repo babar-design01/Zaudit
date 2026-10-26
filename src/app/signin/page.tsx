@@ -32,7 +32,7 @@ export default async function SignInPage({
       <Container style={{ padding: '96px 32px', maxWidth: 520 }}>
         <Stack gap={24}>
           <Link href="/" style={{ font: t(500, 13, 20), color: color.mutedFg }}>
-            ← Back to Zaudit
+            ← Back to Audix
           </Link>
 
           <Card radius={radius.lg} pad={28} gap={18}>
@@ -57,7 +57,7 @@ export default async function SignInPage({
               <Stack gap={18}>
                 <Stack gap={8}>
                   <Heading level={1} variant="cardTitle">
-                    Sign in to Zaudit
+                    Sign in to Audix
                   </Heading>
                   <Text variant="bodySm" tone="muted" wrap="pretty">
                     No password. We email you a link, you click it, you are in. New accounts start with one free

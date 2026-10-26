@@ -53,7 +53,7 @@ export async function POST(request: Request) {
           currency: pack.currency,
           unit_amount: pack.amount,
           product_data: {
-            name: `Zaudit — ${pack.credits} audit credits`,
+            name: `Audix — ${pack.credits} audit credits`,
             description: pack.summary,
           },
         },

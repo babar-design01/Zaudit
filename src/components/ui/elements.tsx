@@ -13,7 +13,7 @@ import { color, hairline, radius, shadow, staticColor, t, text, tracking } from 
  * times across the page, sometimes as an `<a>` to an anchor and sometimes as a
  * `<button>` that scrolls to the hero, so it takes either.
  *
- * The hover colour comes from the `hp-link-primary` rule in `globals.css`,
+ * The hover colour comes from the `ax-link-primary` rule in `globals.css`,
  * because inline styles cannot express `:hover`.
  */
 export function ArrowLink({
@@ -24,7 +24,7 @@ export function ArrowLink({
   tone = 'fg',
   underline = false,
   iconSize,
-  className = 'hp-link-primary',
+  className = 'ax-link-primary',
   style,
 }: {
   children: ReactNode;
@@ -286,7 +286,7 @@ export function Meter({
             width: '25%',
             background: fill,
             borderRadius: 999,
-            animation: 'hp-track-sweep 1.5s ease-in-out infinite',
+            animation: 'ax-track-sweep 1.5s ease-in-out infinite',
           }}
         />
       ) : (

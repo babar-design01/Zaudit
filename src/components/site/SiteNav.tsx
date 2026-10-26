@@ -1,186 +1,166 @@
 'use client';
 
-import { useState } from 'react';
-import type { CSSProperties } from 'react';
-import { Button, Card, IconBox, Row, Text } from '@/components/ui';
-import { color, hairline, layout, mix, radius, t, text } from '@/design/tokens';
-import { SOLUTIONS } from '@/content/homepage';
-
-const NAV_LINK: CSSProperties = {
-  font: text.label,
-  color: color.mutedFg,
-  padding: '6px 10px',
-  borderRadius: radius.sm,
-  whiteSpace: 'nowrap',
-  flexShrink: 0,
-};
-
-const LINKS = [
-  { label: 'Product', href: '#product' },
-  { label: 'How It Works', href: '#how' },
-];
-
-const LINKS_AFTER = [
-  { label: 'Sample Audit', href: '#sample' },
-  { label: 'Pricing', href: '#plans' },
-];
-
-export function AnnouncementBar() {
-  return (
-    <div
-      style={{
-        background: color.primary,
-        color: '#fff',
-        textAlign: 'center',
-        padding: '7px 16px',
-        font: t(600, 12, 16),
-      }}
-    >
-      No credit card required · Get your first findings before signup
-    </div>
-  );
-}
+import { useEffect, useState } from 'react';
+import { Button, ButtonLink } from '@/components/ui';
+import { color, hairline, layout, radius, t } from '@/design/tokens';
+import { Logo } from './Logo';
 
 /** Who is signed in and what they have left, when accounts are switched on. */
 export type Account = { email: string | null; credits: number } | null;
 
-export function SiteNav({ onRunAudit, account, accounts = false }: { onRunAudit: () => void; account?: Account; accounts?: boolean }) {
-  const [solutionsOpen, setSolutionsOpen] = useState(false);
+const LINKS = [
+  { label: 'Features', href: '/#features' },
+  { label: 'How it works', href: '/#how' },
+  { label: 'Pricing', href: '/#plans' },
+  { label: 'Sample report', href: '/report/sample', id: 'sample' },
+  // TODO(design): Blog has no destination yet.
+  { label: 'Blog', href: '#' },
+] as const;
+
+/**
+ * The nav, identical on the homepage and the report.
+ *
+ * 72px, white, a bottom hairline. Logo left; the links sit right, beside the
+ * one small primary action. On the report "Sample report" is the current page.
+ */
+export function SiteNav({
+  onRunAudit,
+  account,
+  accounts = false,
+  current,
+}: {
+  /** Opens the audit dialog. Without it the button links home to start one. */
+  onRunAudit?: () => void;
+  account?: Account;
+  accounts?: boolean;
+  /** Which link is the page the reader is on. */
+  current?: 'sample';
+}) {
+  // TODO(design): the handoff draws the nav at 1440 only. Below 900px the
+  // links fold behind a square Menu control — a desktop nav left at phone
+  // width is the very fault this product's own mobile check reports.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
 
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 20,
-        background: mix(color.bg, 88),
-        backdropFilter: 'blur(10px)',
-        borderBottom: hairline(),
-      }}
-    >
-      <Row
-        gap={24}
+    <header style={{ position: 'relative', background: color.surface, borderBottom: hairline() }}>
+      <div
         style={{
-          maxWidth: layout.container,
+          maxWidth: layout.frame,
           margin: '0 auto',
-          padding: `0 ${layout.gutter}px`,
-          height: layout.navHeight,
+          padding: `0 ${layout.gutter}`,
+          minHeight: layout.navHeight,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 24,
         }}
       >
-        <a href="#" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- fixed-height wordmark, no layout shift to optimize */}
-          <img src="/zaudit-logo.png" alt="Zaudit" style={{ height: 22, width: 'auto', display: 'block' }} />
+        <a href="/" aria-label="Audix home" style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <Logo height={20} />
         </a>
 
-        <Row as="nav" gap={2} justify="center" style={{ flex: 1, minWidth: 0 }}>
-          {LINKS.map((l) => (
-            <a key={l.label} className="hp-navlink" href={l.href} style={NAV_LINK}>
-              {l.label}
-            </a>
-          ))}
-
-          {/* Solutions opens on hover; the 6px padding above the panel keeps the
-              pointer inside the hover region as it travels down to the menu. */}
-          <div
-            style={{ position: 'relative', flexShrink: 0 }}
-            onMouseEnter={() => setSolutionsOpen(true)}
-            onMouseLeave={() => setSolutionsOpen(false)}
-          >
-            <a
-              href="#solutions"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-                font: text.label,
-                color: solutionsOpen ? color.fg : color.mutedFg,
-                padding: '6px 10px',
-                borderRadius: radius.sm,
-                background: solutionsOpen ? color.accent : 'transparent',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Solutions
-              <IconBox name="IconChevronDown" size="w-3" />
-            </a>
-
-            {solutionsOpen && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, paddingTop: 6, width: 244 }}>
-                <Card
-                  tone="bare"
-                  radius={radius.md}
-                  elevation="md"
-                  pad={4}
-                  gap={2}
-                  style={{ background: color.popover }}
-                >
-                  {SOLUTIONS.map((s) => (
-                    <a
-                      key={s.label}
-                      className="hp-menu-row"
-                      href="#solutions"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1,
-                        padding: '8px 10px',
-                        borderRadius: radius.sm,
-                      }}
-                    >
-                      <Text variant="label" tone="fg">
-                        {s.label}
-                      </Text>
-                      <Text font={t(400, 12, 16)} tone="muted">
-                        {s.desc}
-                      </Text>
-                    </a>
-                  ))}
-                </Card>
-              </div>
+        <button
+          type="button"
+          data-nav-toggle
+          aria-expanded={open}
+          aria-controls="site-nav-links"
+          onClick={() => setOpen((o) => !o)}
+          style={{
+            marginLeft: 'auto',
+            display: 'none',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 44,
+            height: 44,
+            border: 'none',
+            borderRadius: radius.button,
+            boxShadow: `inset 0 0 0 1px ${color.border}`,
+            background: color.surface,
+            color: color.ink,
+            cursor: 'pointer',
+          }}
+        >
+          <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)' }}>Menu</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            {open ? (
+              <>
+                <path d="M6 6l12 12" />
+                <path d="M18 6 6 18" />
+              </>
+            ) : (
+              <>
+                <path d="M4 7h16" />
+                <path d="M4 12h16" />
+                <path d="M4 17h16" />
+              </>
             )}
-          </div>
+          </svg>
+        </button>
 
-          {LINKS_AFTER.map((l) => (
-            <a key={l.label} className="hp-navlink" href={l.href} style={NAV_LINK}>
-              {l.label}
-            </a>
-          ))}
-        </Row>
-
-        <Row gap={8}>
-          {accounts && account ? (
-            <a
-              className="hp-link-fg"
-              href="/account"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, font: text.label, color: color.mutedFg, whiteSpace: 'nowrap' }}
-            >
-              <span>Account</span>
-              <span
+        <nav
+          id="site-nav-links"
+          aria-label="Main"
+          data-nav-links
+          data-open={open ? '' : undefined}
+          onClick={() => setOpen(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto', marginRight: 16 }}
+        >
+          {LINKS.map((l) => {
+            const here = 'id' in l && l.id === current;
+            return (
+              <a
+                key={l.label}
+                href={l.href}
+                className="ax-navlink"
+                aria-current={here ? 'page' : undefined}
                 style={{
-                  font: t(500, 12, 16, 'mono'),
-                  color: account.credits > 0 ? color.accentFg : color.destructive,
-                  background: account.credits > 0 ? color.accent : mix(color.destructive, 10),
-                  padding: '3px 8px',
-                  borderRadius: radius.full,
+                  font: t(500, 14, 20),
+                  color: here ? color.ink : color.inkMuted,
+                  padding: '7px 12px',
+                  borderRadius: radius.lg,
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {account.credits} {account.credits === 1 ? 'credit' : 'credits'}
-              </span>
-            </a>
-          ) : (
+                {l.label}
+              </a>
+            );
+          })}
+
+          {/* TODO(design): accounts are not in the handoff. Shown only when the
+              deployment has them switched on, in the nav's own link style. */}
+          {accounts && (
             <a
-              className="hp-link-fg"
-              href={accounts ? '/signin' : '#'}
-              style={{ font: text.label, color: color.mutedFg, whiteSpace: 'nowrap' }}
+              href={account ? '/account' : '/signin'}
+              className="ax-navlink"
+              style={{ font: t(500, 14, 20), color: color.inkMuted, padding: '7px 12px', borderRadius: radius.lg, whiteSpace: 'nowrap' }}
             >
-              Log in
+              {account ? `${account.credits} ${account.credits === 1 ? 'credit' : 'credits'}` : 'Log in'}
             </a>
           )}
-          <Button variant="primary" size="sm" iconEnd="IconArrowUpRight" onClick={onRunAudit}>
-            Run Free Audit
-          </Button>
-        </Row>
-      </Row>
+        </nav>
+
+        <span data-nav-cta style={{ display: 'inline-flex' }}>
+          {onRunAudit ? (
+            <Button size="sm" onClick={onRunAudit}>
+              Run free audit
+            </Button>
+          ) : (
+            <ButtonLink size="sm" href="/?audit=1">
+              Run free audit
+            </ButtonLink>
+          )}
+        </span>
+      </div>
     </header>
   );
+}
+
+/** @deprecated The handoff has no announcement bar. Kept so old imports compile. */
+export function AnnouncementBar() {
+  return null;
 }

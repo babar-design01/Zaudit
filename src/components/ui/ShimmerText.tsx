@@ -29,7 +29,7 @@ export function ShimmerText({
         WebkitBackgroundClip: 'text',
         backgroundClip: 'text',
         color: 'transparent',
-        animation: 'hp-shimmer 2.4s linear infinite',
+        animation: 'ax-shimmer 2.4s linear infinite',
         ...style,
       }}
     >
@@ -83,7 +83,7 @@ export function RotatingLines({
       }}
     >
       {/* keyed so React remounts the span and the entry animation runs again */}
-      <span key={`${resetKey}-${i}`} style={{ display: 'inline-block', animation: 'hp-line-in 320ms ease both' }}>
+      <span key={`${resetKey}-${i}`} style={{ display: 'inline-block', animation: 'ax-line-in 320ms ease both' }}>
         {line}
       </span>
     </span>
