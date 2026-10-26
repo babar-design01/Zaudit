@@ -109,19 +109,20 @@ fix to print. A criterion names the checks that decide it; a check can serve mor
 than one criterion. Nothing in the report says `ACC-012` — it says `AC-11`, WCAG
 2.2 AA 2.5.8, measured 20×22px, required 24×24px.
 
-**Eight pillars, plus two toggles.** Usability & task flow (Nielsen, ISO
+**Eight design pillars, plus three toggles.** Usability & task flow (Nielsen, ISO
 9241-11), Information architecture & navigation, Visual hierarchy & layout
 (Gestalt), Consistency & design system, System states & feedback, Accessibility
-(WCAG 2.2 AA), Content & microcopy, Performance & technical quality (Core Web
-Vitals). Trust & privacy and Conversion are switches, off unless the goal turns
-them on.
+(WCAG 2.2 AA), Content & microcopy, Perceived performance & responsiveness (Core
+Web Vitals). Technical quality & findability, Trust & privacy and Conversion are
+switches, off unless the goal turns them on — the default audit is a design
+audit, and says nothing about meta descriptions or TLS.
 
 **The goal is declared before the audit starts**, because it sets the weights —
 never the criteria. Six presets ship; a heavier pillar counts double.
 
 | stage | what happens | where |
 | --- | --- | --- |
-| 0 · measure | The page opens in real Chromium at 1440×900 and is measured: screenshot, geometry and computed styles, axe-core, a real Tab walk that diffs pixels to see focus, flash detection, a reduced-motion re-read, Core Web Vitals from the browser's own observers, a sample of its links followed, and a second render at 320px | `browser.ts`, `probe*.ts` |
+| 0 · measure | The page opens in real Chromium at 1440×900 and is measured: screenshot, geometry and computed styles, axe-core, a real Tab walk that diffs pixels to see focus, flash detection, a reduced-motion re-read, Core Web Vitals from the browser's own observers, a sample of its links followed, a second render at 320px, and a second visit at 390×844 with touch on | `browser.ts`, `probe*.ts` |
 | 1 · classify | Page type and platforms are decided **before any criterion is judged**. The model decides when a key is set, measured signals otherwise | `classify.ts`, `review.ts` |
 | 2 · evaluate | Every check runs, then rolls up: a criterion is `pass`, `partial`, `fail`, `not applicable` or `not assessed` | `evaluate.ts`, `rules/*.ts` |
 | 3 · review | The model may flag false positives, lower confidence, move severity by one step and rewrite the prose. It cannot add a finding. Criteria marked `assisted` are only confirmed by this review | `review.ts` |
@@ -137,7 +138,7 @@ never the criteria. Six presets ship; a heavier pillar counts double.
 - **One root cause, one finding.** Instances are clustered by root cause. Where two checks describe the same defect on one element, only the more severe survives.
 - **Criteria judged by reading need the model.** Error copy, button verbs, which fields a task needs, which element dominates a region: the candidate and its evidence are found in code, but without a completed model review the criterion reports `not assessed` and the finding is held for a person.
 - **Nothing is submitted, pressed or purchased.** The probes type into fields and blur them, ask forms to validate themselves (`reportValidity`, which sends nothing), press Escape, click a modal's backdrop, hover with the real pointer and read the pressed state by forcing `:active` through the DevTools protocol. They never submit a form, press a destructive control, or advance a flow. Criteria that would need that are reviewer tasks.
-- **Probes put the page back.** The dark theme is switched on and off, text is stress-tested at 2× and 0.3× its length and restored, and the window returns to 1440×900 after the 320px pass.
+- **Probes put the page back.** The dark theme is switched on and off, text is stress-tested at 2× and 0.3× its length and restored, and the window returns to 1440×900 after the 320px pass. The phone visit is a separate context, so nothing it measures was typed into or tabbed through first.
 - **Discipline, not taste.** The design-system criteria never judge whether a design is attractive. They build the first screen's token inventory and hold the page to its own type scale or spacing unit when 70% of uses sit on one. Vendor widgets, ads, iframes, SVG internals and anything marked `data-audit-ignore` are left out.
 - **A refused visit is not audited.** If the site answers 401, 403, 429 or 503, which is usually bot protection, the audit stops with that message rather than scoring the block page.
 - **The model is checked, not trusted.** Its edits are refused if they raise confidence, move severity more than one step, use a banned phrase or heuristic jargon, state a number the evidence doesn't contain, or give a fix that doesn't name the element and the exact change. A false positive it flags goes to review; it is not deleted.

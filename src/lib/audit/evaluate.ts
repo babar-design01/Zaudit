@@ -14,6 +14,7 @@ import {
 } from './contract';
 import type { CriterionDef, Platform, Severity, Verdict } from './framework';
 import { ACC_EVALUATORS, type RuleContext } from './rules/acc';
+import { MOBILE_EVALUATORS } from './rules/mobile';
 import { TECH_EVALUATORS } from './rules/tech';
 import { UI_EVALUATORS } from './rules/ui';
 import { UX_EVALUATORS } from './rules/ux';
@@ -36,6 +37,7 @@ const EVALUATORS: Record<string, (ctx: RuleContext) => RuleOutcome> = {
   ...UX_EVALUATORS,
   ...UI_EVALUATORS,
   ...TECH_EVALUATORS,
+  ...MOBILE_EVALUATORS,
 };
 
 export const SCREENSHOT_REF = 'viewport@1440x900';

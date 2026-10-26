@@ -66,7 +66,7 @@ export const SEVERITY_MEANING: Record<Severity, string> = {
 
 /* ----------------------------------------------------------------- pillars */
 
-export type PillarId = 'usability' | 'ia' | 'hierarchy' | 'consistency' | 'states' | 'accessibility' | 'content' | 'performance' | 'trust' | 'conversion';
+export type PillarId = 'usability' | 'ia' | 'hierarchy' | 'consistency' | 'states' | 'accessibility' | 'content' | 'performance' | 'technical' | 'trust' | 'conversion';
 
 export type PillarDef = {
   id: PillarId;
@@ -149,14 +149,14 @@ export const GOALS: GoalDef[] = [
   {
     id: 'prelaunch',
     name: 'Pre-launch QA',
-    blurb: 'Weighted towards states, consistency, accessibility and performance, with trust and privacy switched on.',
+    blurb: 'Weighted towards states, consistency, accessibility and performance, with trust and technical quality switched on.',
     heavier: ['states', 'consistency', 'accessibility', 'performance'],
-    toggles: ['trust'],
+    toggles: ['trust', 'technical'],
   },
   {
     id: 'health',
     name: 'General health check',
-    blurb: 'Equal weight on all eight pillars. The default when no particular goal has been set.',
+    blurb: 'Equal weight on the eight design pillars. The default when no particular goal has been set.',
     heavier: [],
     toggles: [],
   },

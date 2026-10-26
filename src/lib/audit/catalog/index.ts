@@ -1,6 +1,7 @@
 import type { RuleDef } from '../contract';
 import type { CriterionDef, PillarDef } from '../framework';
 import { ACCESSIBILITY } from './acc';
+import { MOBILE_CHECKS } from './mobile';
 import { CRITERIA, PILLARS } from './pillars';
 import { TECH_CHECKS } from './tech';
 import { UI_QUALITY } from './ui';
@@ -19,7 +20,7 @@ import { USABILITY } from './ux';
 
 export { CRITERIA, PILLARS };
 
-export const CHECKS: RuleDef[] = [...ACCESSIBILITY.rules, ...USABILITY.rules, ...UI_QUALITY.rules, ...TECH_CHECKS];
+export const CHECKS: RuleDef[] = [...ACCESSIBILITY.rules, ...USABILITY.rules, ...UI_QUALITY.rules, ...TECH_CHECKS, ...MOBILE_CHECKS];
 
 const checksById = new Map<string, RuleDef>(CHECKS.map((c) => [c.id, c]));
 const criteriaById = new Map<string, CriterionDef>(CRITERIA.map((c) => [c.id, c]));

@@ -59,9 +59,19 @@ export const PILLARS: PillarDef[] = [
   },
   {
     id: 'performance',
-    name: 'Performance & technical quality',
-    question: 'Does it load quickly, hold still, and work at every width?',
-    standards: ['Core Web Vitals', 'Lighthouse'],
+    name: 'Perceived performance & responsiveness',
+    question: 'Does the first screen arrive quickly, hold still, and answer a press?',
+    standards: ['Core Web Vitals', 'Nielsen heuristic 1: visibility of system status'],
+  },
+  {
+    // Served securely, findable, no dead links: real faults, but a technical
+    // audit rather than a design one. Off unless a goal asks for it, so the
+    // default report is about the experience and nothing else.
+    id: 'technical',
+    name: 'Technical quality & findability',
+    question: 'Is the page served, linked and described properly?',
+    standards: ['Lighthouse', 'Search and social metadata practice'],
+    optional: true,
   },
   {
     id: 'trust',
@@ -220,6 +230,18 @@ export const CRITERIA: CriterionDef[] = [
     why: 'People build a model of how the product works. Breaking it makes them relearn the same task in each new place.',
     reviewerTask: 'Pick one task that appears on several screens and record how each screen implements it.',
   },
+  {
+    id: 'US-12',
+    pillar: 'usability',
+    name: 'Focusing a field does not move the page',
+    passCondition: 'Text fields are at least 16px on a phone, so focusing one does not zoom the viewport.',
+    standard: 'Apple HIG; iOS Safari focus-zoom behaviour',
+    appliesTo: WEB,
+    method: 'auto',
+    severityBase: 1,
+    checks: ['MOB-005'],
+    why: 'iOS zooms into any field under 16px and does not zoom back out, so the form jumps and the rest of the page is left off-screen mid-task.',
+  },
 
   /* ------------------------------- 2. Information architecture & navigation */
   {
@@ -319,6 +341,18 @@ export const CRITERIA: CriterionDef[] = [
     checks: ['UX-016'],
     why: 'Every extra step loses people. Depth is the cheapest conversion problem to find and the most expensive to ignore.',
     reviewerTask: 'Count the clicks from the entry page to the product’s main task, by the shortest route a new visitor would find.',
+  },
+  {
+    id: 'IA-09',
+    pillar: 'ia',
+    name: 'Navigation collapses on a phone',
+    passCondition: 'At phone width the primary navigation either fits the screen or collapses behind a labelled menu control.',
+    standard: 'Apple HIG and Material navigation patterns; responsive practice',
+    appliesTo: WEB,
+    method: 'auto',
+    severityBase: 3,
+    checks: ['MOB-003'],
+    why: 'Navigation is how people recover when they are lost. A desktop nav left at phone width either spills off the screen or squeezes its labels past reading.',
   },
 
   /* ----------------------------------------- 3. Visual hierarchy & layout */
@@ -834,7 +868,7 @@ export const CRITERIA: CriterionDef[] = [
     appliesTo: ALL,
     method: 'auto',
     severityBase: 2,
-    checks: ['ACC-012'],
+    checks: ['ACC-012', 'MOB-001'],
     why: 'Small targets cause mis-taps, and mis-taps on a destructive or commercial control cost money.',
   },
   {
@@ -1086,7 +1120,7 @@ export const CRITERIA: CriterionDef[] = [
   },
   {
     id: 'PF-04',
-    pillar: 'performance',
+    pillar: 'technical',
     name: 'The server answers quickly',
     passCondition: 'Time to first byte stays at or below 800ms.',
     standard: 'Core Web Vitals supporting metric: TTFB',
@@ -1110,7 +1144,7 @@ export const CRITERIA: CriterionDef[] = [
   },
   {
     id: 'PF-06',
-    pillar: 'performance',
+    pillar: 'technical',
     name: 'Links go somewhere',
     passCondition: 'Links on the page resolve rather than returning an error.',
     standard: 'Technical quality practice',
@@ -1122,7 +1156,7 @@ export const CRITERIA: CriterionDef[] = [
   },
   {
     id: 'PF-07',
-    pillar: 'performance',
+    pillar: 'technical',
     name: 'Served securely',
     passCondition: 'The page is served over HTTPS and loads no insecure sub-resources.',
     standard: 'Technical quality practice',
@@ -1134,7 +1168,7 @@ export const CRITERIA: CriterionDef[] = [
   },
   {
     id: 'PF-08',
-    pillar: 'performance',
+    pillar: 'technical',
     name: 'The page describes itself to search and social',
     passCondition: 'Title, meta description and canonical URL are present and sensible.',
     standard: 'SEO basics',
@@ -1145,16 +1179,40 @@ export const CRITERIA: CriterionDef[] = [
     why: 'Without them the page is listed by whatever text a search engine picks, and shared as a bare link.',
   },
   {
-    id: 'PF-09',
-    pillar: 'performance',
-    name: 'The layout holds down to 320px',
-    passCondition: 'At 320px wide, nothing overflows horizontally and no content is cut off.',
+    id: 'VH-13',
+    pillar: 'hierarchy',
+    name: 'The layout holds at phone widths',
+    passCondition: 'On a phone, and again at 320px, nothing overflows horizontally and no content is cut off.',
     standard: 'Responsive practice; WCAG 2.2 AA 1.4.10 reflow',
     appliesTo: WEB,
     method: 'auto',
     severityBase: 3,
-    checks: ['PERF-008'],
+    checks: ['PERF-008', 'MOB-007'],
     why: 'A page that scrolls sideways on a phone is unusable for the majority of traffic on most sites.',
+  },
+  {
+    id: 'VH-14',
+    pillar: 'hierarchy',
+    name: 'Pinned bars leave room for the content',
+    passCondition: 'Fixed and sticky furniture covers no more than 30% of a phone screen.',
+    standard: 'Mobile layout practice; Apple HIG and Material app-bar guidance',
+    appliesTo: WEB,
+    method: 'auto',
+    severityBase: 2,
+    checks: ['MOB-004'],
+    why: 'A header, a consent bar and a promotion bar can between them leave half a phone screen for the thing the person came to read.',
+  },
+  {
+    id: 'VH-15',
+    pillar: 'hierarchy',
+    name: 'Text stays legible on a phone',
+    passCondition: 'Runs of body copy are at least 14px on a phone, with 16px the working default.',
+    standard: 'Typographic practice; Apple HIG and Material type scales',
+    appliesTo: WEB,
+    method: 'auto',
+    severityBase: 2,
+    checks: ['MOB-006'],
+    why: 'Phone reading happens at arm’s length and in motion; copy that is comfortable on a desk is a squint on a train.',
   },
 
   /* --------------------------------- Optional: trust, security & privacy */

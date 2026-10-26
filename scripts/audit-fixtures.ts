@@ -203,6 +203,43 @@ const UI_BAD = (png: string) => `<!doctype html><html lang="en"><head><title>Too
   <div class="panel">Account panel</div>
 </div></body></html>`;
 
+/**
+ * A page that works on a desk and falls apart in a hand: a desktop nav with no
+ * menu control, three bars pinned over the content, 13px copy, a 13px field
+ * that makes iOS zoom, an icon row under the target floor, and a table that
+ * pushes the page sideways.
+ */
+const MOBILE_BAD = `<!doctype html><html lang="en"><head><title>Dashboard | Acme</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin: 0; font-family: Arial, sans-serif; color: #1a1a1a; background: #fff; font-size: 13px; }
+  .bar { position: fixed; left: 0; right: 0; background: #eef2ff; }
+  .bar.top { top: 0; height: 120px; }
+  .bar.promo { top: 120px; height: 90px; background: #fff3cd; }
+  .bar.bottom { bottom: 0; height: 110px; background: #e8f0fe; }
+  nav { display: flex; gap: 24px; white-space: nowrap; padding: 8px 12px; }
+  nav a { display: inline-block; padding: 14px 10px; min-height: 44px; box-sizing: border-box; color: #1a1a1a; }
+  main { padding: 220px 12px 130px; }
+  p { font-size: 13px; line-height: 1.5; }
+  input { font-size: 13px; padding: 12px; min-height: 44px; box-sizing: border-box; }
+  .icons a { display: inline-block; width: 18px; height: 18px; background: #1a4fd6; margin-right: 2px; }
+  table { width: 900px; border-collapse: collapse; }
+  td { padding: 8px; border: 1px solid #ddd; }
+</style></head>
+<body>
+  <div class="bar top"><nav aria-label="Main"><a href="/overview">Overview</a><a href="/reports">Reports</a><a href="/billing">Billing</a><a href="/team">Team</a><a href="/settings">Settings</a><a href="/help">Help</a><a href="/account">Account</a></nav></div>
+  <div class="bar promo">Save 20% on annual plans this week only</div>
+  <main id="main">
+    <h1>Your dashboard</h1>
+    <p>This paragraph is set at thirteen pixels, which reads well enough on a desk and poorly in a hand on a moving train, especially at this length.</p>
+    <label for="q">Search reports</label>
+    <input id="q" type="search" placeholder="Search reports">
+    <p class="icons"><a href="/share" aria-label="Share"></a><a href="/print" aria-label="Print"></a><a href="/export" aria-label="Export"></a></p>
+    <table><tr><td>January</td><td>February</td><td>March</td><td>April</td><td>May</td><td>June</td></tr></table>
+  </main>
+  <div class="bar bottom">Chat with us — we reply in minutes</div>
+</body></html>`;
+
 /** The same kinds of content, built from one set of tokens. */
 const UI_GOOD = `<!doctype html><html lang="en"><head><title>Plans | Acme</title><style>
   :root { --bg: #ffffff; --fg: #1a1a1a; --muted: #555555; --primary: #1a4fd6; --surface: #f4f4f6; }
@@ -463,6 +500,25 @@ async function main() {
   console.log('\nUI: preflight and colour maths');
   check('ΔE between #1A1A1A and #1C1C1C is under 3', deltaE([26, 26, 26], [28, 28, 28]) < 3, deltaE([26, 26, 26], [28, 28, 28]).toFixed(2));
   check('ΔE between black and white is about 100', Math.abs(deltaE([0, 0, 0], [255, 255, 255]) - 100) < 1, deltaE([0, 0, 0], [255, 255, 255]).toFixed(1));
+
+  console.log('\nMOBILE: a page that works on a desk and not in a hand');
+  const mob = await run('MOBILE_BAD', MOBILE_BAD, { type: 'dashboard', url: 'https://fixture.test/dashboard' });
+  check('the phone visit ran', mob.m.mobile.ok, mob.m.mobile.ok ? `${mob.m.mobile.value.viewport.width}×${mob.m.mobile.value.viewport.height}` : mob.m.mobile.error);
+  check('the phone visit is a second context, not the desktop page resized', mob.m.mobile.ok && mob.m.mobile.value.facts.viewport.width === 390);
+  for (const id of ['MOB-001', 'MOB-003', 'MOB-004', 'MOB-005', 'MOB-006', 'MOB-007']) expect(mob.ev, id, 'fail');
+  const navFinding = firing(mob.ev.findings, 'MOB-003')[0];
+  check('MOB-003 says how many links it counted', typeof navFinding?.evidence[0].fields.visible_links === 'number', String(navFinding?.evidence[0].fields.visible_links));
+  check('a mobile finding carries the phone capture', typeof navFinding?.evidence[0].fields.mobile_capture === 'string' && String(navFinding.evidence[0].fields.mobile_capture).startsWith('data:image/'));
+  check('mobile findings are document-level, not boxed on the desktop shot', mob.ev.findings.filter((f) => f.ruleId.startsWith('MOB')).every((f) => f.evidence.every((e) => e.documentLevel)));
+  const barShare = firing(mob.ev.findings, 'MOB-004')[0]?.evidence[0].fields.covered_share;
+  check('MOB-004 reports the share of the screen covered', typeof barShare === 'string' && /%$/.test(String(barShare)), String(barShare));
+
+  console.log('\nMOBILE: the good page holds up in a hand');
+  for (const id of ['MOB-001', 'MOB-004', 'MOB-005', 'MOB-006', 'MOB-007']) {
+    const o = status(good.ev, id);
+    check(`GOOD: ${id} does not fail`, o.status !== 'fail', says(o));
+  }
+  check('GOOD: a nav of five links with no menu control still passes', status(good.ev, 'MOB-003').status === 'pass', says(status(good.ev, 'MOB-003')));
 
   console.log('\nUX: pages that do it right');
   for (const o of good.ev.checks) if (o.status === 'fail' && o.id.startsWith('UX')) check(`GOOD: ${o.id} does not fail`, false, says(o));

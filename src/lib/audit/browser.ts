@@ -14,6 +14,7 @@ import {
   type FocusStop,
   type PageFacts,
 } from './probe';
+import { collectMobileFacts, type MobileFacts } from './probe-mobile';
 import {
   TOAST_WATCH,
   collectUxFacts,
@@ -143,6 +144,8 @@ export type Measured = {
   links: StepResult<LinkCheck[]>;
   /** What the layout does at 320px. */
   reflow: StepResult<ReflowProbe>;
+  /** The page as a phone gets it: a second visit at 390×844, touch and all. */
+  mobile: StepResult<MobileProbe>;
 };
 
 export type FieldReaction = {
@@ -962,6 +965,77 @@ async function checkLinks(page: Page, links: TechFacts['links']): Promise<LinkCh
   return out;
 }
 
+/* ---------------------------------------------------------- mobile */
+
+/** iPhone-class logical size: the width most of the web's phone traffic arrives at. */
+export const PHONE = { width: 390, height: 844 } as const;
+
+export type MobileProbe = {
+  viewport: { width: number; height: number };
+  facts: MobileFacts;
+  overflow: Overflow;
+  /** The first screen as a phone draws it, for the report's exhibits. */
+  capture: string | null;
+};
+
+/**
+ * The page as a phone gets it: a second visit, not a narrower window.
+ *
+ * The context is touch-capable and mobile, so `pointer: coarse`, `hover: none`
+ * and `(max-width)` queries all resolve the way they do on a real device, and a
+ * site that serves a different navigation to phones serves it here too. Chromium
+ * is what we drive, so the user agent says Chrome on Android rather than
+ * borrowing Safari's — the audit does not lie about what asked for the page.
+ */
+async function probeMobile(b: Browser, load: (page: Page) => Promise<number | null>, signal?: AbortSignal): Promise<MobileProbe> {
+  const context = await b.newContext({
+    viewport: { width: PHONE.width, height: PHONE.height },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    userAgent:
+      'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) ' +
+      'Chrome/131.0.0.0 Mobile Safari/537.36 Zaudit/1.0 (+https://zaudit.com/bot)',
+    locale: 'en-US',
+  });
+
+  try {
+    const page = await context.newPage();
+    page.setDefaultTimeout(30_000);
+    await page.addInitScript({ content: 'window.__name = (f) => f;' });
+    await load(page);
+    await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => {});
+    await page.waitForTimeout(400);
+    if (signal?.aborted) throw new Error('cancelled');
+
+    // Same roll-through as the desktop visit, so lazy content is present and
+    // the measurement is of the page as it settles, not as it starts.
+    await page.evaluate(async () => {
+      const step = window.innerHeight * 2;
+      for (let y = 0; y < document.body.scrollHeight && y < 9_000; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 70));
+      }
+      window.scrollTo(0, 0);
+    });
+    await page.waitForTimeout(300);
+
+    await page.evaluate('globalThis.__name = globalThis.__name || ((f) => f)');
+    await page.evaluate(installHelpers, { vw: PHONE.width, vh: PHONE.height });
+    const facts = await page.evaluate(collectMobileFacts);
+    const overflow = await page.evaluate(scanOverflow);
+
+    const shot = await page.screenshot({ type: 'png', animations: 'allow', caret: 'initial' });
+    const capture = `data:image/webp;base64,${(
+      await sharp(shot).resize({ width: PHONE.width, withoutEnlargement: true }).webp({ quality: 74 }).toBuffer()
+    ).toString('base64')}`;
+
+    return { viewport: { ...PHONE }, facts, overflow, capture };
+  } finally {
+    await context.close().catch(() => {});
+  }
+}
+
 /* ---------------------------------------------------------- reflow */
 
 export type ReflowProbe = { width: number; overflow: Overflow; capture: string | null };
@@ -1097,6 +1171,9 @@ export async function measurePage(
     const stress = uiv ? await step(() => probeStress(page, uiv)) : noUi;
     // Last, because it changes the window: everything above measured 1440×900.
     const reflow = await step(() => probeReflow(page));
+    // A phone is a second visit, in its own context: this page has been typed
+    // into, tabbed through and resized, and none of that belongs in it.
+    const mobile = await step(() => probeMobile(b, load, signal));
 
     return {
       finalUrl: page.url(),
@@ -1121,6 +1198,7 @@ export async function measurePage(
       tech,
       links,
       reflow,
+      mobile,
     };
   } finally {
     await context.close().catch(() => {});
