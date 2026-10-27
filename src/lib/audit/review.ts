@@ -28,7 +28,7 @@ import type { Evaluation } from './evaluate';
  * away in favour of the catalog's own text.
  */
 
-const MODEL = 'claude-opus-5';
+export const MODEL = 'claude-opus-5';
 
 export class ModelSkipped extends Error {}
 
@@ -46,9 +46,9 @@ function anthropic(): Anthropic {
  * One structured call. The schema constrains the reply, and server-side
  * fallbacks re-run a declined request on another model rather than failing it.
  */
-async function ask<T>(
+export async function ask<T>(
   system: string,
-  user: string,
+  user: string | Anthropic.Beta.Messages.BetaContentBlockParam[],
   schema: Record<string, unknown>,
   effort: 'low' | 'medium' | 'high',
   maxTokens: number,

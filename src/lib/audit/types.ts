@@ -39,7 +39,30 @@ export type Annotation = {
 
 export type Finding = ContractFinding & {
   annotations: Annotation[];
+  /**
+   * Where it came from. Measured findings are the engine's checks; expert
+   * findings are the model reading the page the way an auditor does — always
+   * pinned to elements on the page, and never part of the score.
+   */
+  source?: 'measured' | 'expert';
+  /** An expert finding in the auditor's own shape. */
+  expert?: ExpertNote;
 };
+
+/** How an auditor writes a finding: what is wrong, what it costs, what to do. */
+export type ExpertNote = {
+  issue: string;
+  impact: string;
+  solution: string;
+  bucket: ExpertBucket;
+  device: 'desktop' | 'mobile';
+  area: string;
+};
+
+export type ExpertBucket = 'fix' | 'improve' | 'idea';
+
+/** The four-way read an audit opens with. */
+export type Takeaways = { good: string[]; improve: string[]; fix: string[]; ideas: string[] };
 
 /** What a reviewer has to do by hand, because one page load cannot settle it. */
 export type ReviewerTask = {
@@ -79,6 +102,11 @@ export type AuditResult = {
   band: Band | null;
   /** One paragraph stating what the score is a score of. */
   scoreBasis: string;
+
+  /** What this page is for, in a sentence — every finding is judged against it. */
+  pageGoal: string | null;
+  /** The auditor's read of the page, when the model ran. */
+  expert: { ran: boolean; error: string | null; summary: string | null; takeaways: Takeaways | null };
 
   pillars: PillarScore[];
   /** The five fixes worth doing first, ranked by severity × frequency × goal weight. */

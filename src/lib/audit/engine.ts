@@ -10,6 +10,7 @@ import { FetchError, fetchPage, type PageFetch } from './fetch';
 import { DEFAULT_GOAL, GOALS, weightsFor, type GoalId, type Platform, type Severity, type Verdict } from './framework';
 import { UnsafeUrlError, assertPublicUrl } from './net';
 import { classifyWithModel, describeModelError, modelAvailable, reviewFindings } from './review';
+import { expertReview } from './expert';
 import { score } from './score';
 import type { AuditResult, Finding, ReviewerTask, WorkingItem } from './types';
 
@@ -161,6 +162,17 @@ export async function audit(
   evaluation = holdAssisted(evaluation, model.reviewed);
   cancelled();
 
+  // The auditor's read. Outside the score by design: the score stays a measure
+  // of what was measured, and the expert findings are shown beside it, labelled.
+  cancelled();
+  const expert = await expertReview({
+    measured,
+    url: source.url,
+    pageType,
+    goal: { name: goal.name, blurb: goal.blurb },
+    findings: evaluation.findings.filter((f) => f.status === 'confirmed').map((f) => ({ ...f, annotations: [] })),
+  });
+
   /* 4 — score --------------------------------------------------------- */
   stage(4);
   const scored = score(evaluation.criteria, evaluation.findings, goal);
@@ -219,6 +231,7 @@ export async function audit(
       text: p.note,
     }));
 
+
   /**
    * A pass rate over a handful of criteria is not a score of the page — it is a
    * score of whatever happened to be measurable. Below a quarter of the criteria
@@ -243,6 +256,7 @@ export async function audit(
     measured?.axe.ok ? `axe-core ${axeVersion()}` : null,
     `page type: ${pageType.type} (${pageType.source === 'llm' ? 'model' : pageType.source === 'signals' ? 'page signals' : 'undetermined'})`,
     model.reviewed ? 'reviewed by the model' : model.available ? 'model review failed' : 'no model review',
+    expert.ran ? `expert review: ${expert.findings.length} finding${expert.findings.length === 1 ? '' : 's'}` : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -265,9 +279,11 @@ export async function audit(
     overall: thin ? null : scored.overall,
     band: thin ? null : scored.band,
     scoreBasis,
+    pageGoal: expert.pageGoal,
+    expert: { ran: expert.ran, error: expert.error, summary: expert.summary, takeaways: expert.takeaways },
     pillars: scored.pillars,
     priorities: scored.priorities,
-    findings: annotated.filter((f) => f.status === 'confirmed'),
+    findings: [...annotated.filter((f) => f.status === 'confirmed').map((f) => ({ ...f, source: 'measured' as const })), ...expert.findings],
     review: annotated.filter((f) => f.status === 'needs_human_review'),
     counts,
     criteria: evaluation.criteria,

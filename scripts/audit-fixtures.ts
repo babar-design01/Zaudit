@@ -17,6 +17,8 @@ import { evaluate, holdAssisted, type Evaluation } from '../src/lib/audit/evalua
 import { GOALS, type GoalId } from '../src/lib/audit/framework';
 import { applyReview, fixProblem, proseProblem, type ReviewReply } from '../src/lib/audit/review';
 import { score } from '../src/lib/audit/score';
+import { acceptExpertReply, type ExpertReply } from '../src/lib/audit/expert';
+import type { Anchor } from '../src/lib/audit/probe-anchors';
 
 const img = (w: number, h: number, fill = '#8aa') =>
   `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="${fill}"/></svg>`)}`;
@@ -593,6 +595,60 @@ async function main() {
     bad.ev.findings,
   ).findings.find((x) => x.id === f.id)!;
   check('a false positive moves to review, not deleted', fp.status === 'needs_human_review', fp.reviewReason ?? '');
+
+  console.log('\nEXPERT: the auditor pass may create findings, but only anchored ones');
+  const anchor = (id: string, kind: Anchor['kind'], text: string, selector: string, y = 100): Anchor => ({ id, kind, text, selector, box: { x: 40, y, w: 200, h: 48 } });
+  const anchors = new Map<string, Anchor>(
+    [
+      anchor('d1', 'cta', 'Try it out', 'main > a:nth-of-type(1)'),
+      anchor('d2', 'cta', 'Join waitlist', 'main > a:nth-of-type(2)'),
+      anchor('d3', 'heading', 'Plan & book your entire event', 'h1'),
+      anchor('d4', 'pinned', 'We use cookies', '#cookie'),
+      anchor('m1', 'cta', 'Join waitlist', 'main > a:nth-of-type(2)', 600),
+      anchor('m2', 'section', 'Who we are', 'section:nth-of-type(2)', 900),
+    ].map((a) => [a.id, a]),
+  );
+  const base = { area: 'Calls to action', device: 'desktop' as const, confidence: 0.85 };
+  const sound = {
+    ...base,
+    title: 'Conflicting CTAs & unclear primary action',
+    bucket: 'fix' as const,
+    issue: '“Try it out” and “Join waitlist” sit side by side at the same size and weight.',
+    impact: 'Visitors hesitate between two paths and more of them choose neither.',
+    solution: 'Make “Join waitlist” the single filled button; turn “Try it out” into a text link and add “No credit card · 30s” under it.',
+    element_ids: ['d1', 'd2'],
+  };
+  const ex: ExpertReply = {
+    page_goal: 'Get event planners to join the waitlist.',
+    summary: 'The hero splits attention and the cookie banner competes with it.',
+    takeaways: { good: ['Clear headline'], improve: ['Card hierarchy'], fix: ['Two equal CTAs', 'Consider optimizing everything'], ideas: ['a', 'b', 'c', 'd', 'e'] },
+    findings: [
+      sound,
+      { ...base, title: 'Phantom element', bucket: 'fix', issue: 'Something is wrong.', impact: 'It hurts.', solution: 'Change the thing with exact copy.', element_ids: ['d999'] },
+      { ...base, title: 'Vague advice', bucket: 'improve', issue: 'The hero is busy.', impact: 'Visitors are distracted.', solution: 'Consider optimizing the hero.', element_ids: ['d3'] },
+      { ...base, title: 'Low confidence hunch', bucket: 'idea', issue: 'Maybe the banner is wrong.', impact: 'Possibly bounce.', solution: 'Move the banner to the bottom with a neutral style.', element_ids: ['d4'], confidence: 0.3 },
+      { ...base, title: 'Hero headline too small on phone', bucket: 'improve', device: 'desktop', issue: 'The waitlist button is pushed below the first phone screen.', impact: 'Mobile visitors scroll before they can act.', solution: 'Make the hero 80vh on phones and keep “Join waitlist” above the fold.', element_ids: ['m1', 'm2', 'd3'] },
+    ],
+  };
+  const measuredSame = [{ checkName: 'Unclear primary action', evidence: [{ selector: 'main > a:nth-of-type(2)' }] }] as unknown as Parameters<typeof acceptExpertReply>[2];
+  const out = acceptExpertReply(ex, anchors, []);
+  check('a finding citing real elements is kept', out.accepted.some((a) => a.title === sound.title && a.anchors.length === 2));
+  check('a finding citing nothing on the page is dropped', !out.accepted.some((a) => a.title === 'Phantom element') && out.rejected.some((r) => /cites nothing/.test(r)));
+  check('vague advice is dropped', !out.accepted.some((a) => a.title === 'Vague advice'));
+  check('a low-confidence finding is dropped', !out.accepted.some((a) => a.title === 'Low confidence hunch'));
+  const phone = out.accepted.find((a) => a.title.startsWith('Hero headline'));
+  check('a finding mostly on the phone is filed under mobile', phone?.note.device === 'mobile' && phone.anchors.every((a) => a.id.startsWith('m')), phone?.note.device);
+  check('a fix leads the list', out.accepted[0]?.note.bucket === 'fix');
+  check('takeaways drop vague lines and cap at four', !out.takeaways.fix.some((x) => /optimizing/i.test(x)) && out.takeaways.ideas.length === 4);
+  check('the page goal is kept', out.pageGoal === 'Get event planners to join the waitlist.');
+  const dup = acceptExpertReply({ ...ex, findings: [{ ...sound, title: 'Unclear primary action between two buttons' }] }, anchors, measuredSame);
+  check('a measured finding about the same element and topic wins', dup.accepted.length === 0 && dup.rejected.some((r) => /already reported/.test(r)));
+  const many = acceptExpertReply(
+    { ...ex, findings: Array.from({ length: 14 }, (_, i) => ({ ...sound, title: `Finding ${i + 1}` })) },
+    anchors,
+    [],
+  );
+  check('no more than ten expert findings', many.accepted.length === 10, String(many.accepted.length));
 
   console.log(`\n${failures ? `${failures} check(s) failed` : 'all checks passed'}\n`);
   process.exit(failures ? 1 : 0);

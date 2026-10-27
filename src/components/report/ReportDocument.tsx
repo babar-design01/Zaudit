@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { VIEWPORT } from '@/lib/audit/contract';
 import type { AuditResult, Finding } from '@/lib/audit/types';
 import { color, layout, radius, t, tracking } from '@/design/tokens';
-import { ReportPriorities } from './ReportDetails';
+import { ReportPriorities, ReportTakeaways } from './ReportDetails';
 
 /**
  * The report, from `design/Report.dc.html`.
@@ -37,6 +37,57 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 const EFFORT: Record<string, string> = { trivial: 'Minutes', small: 'Under an hour', medium: 'A few hours', large: 'A day or more' };
 
+/**
+ * Criteria a visitor never sees: the outline in the markup, landmarks, the
+ * language attribute, the title tag, the server, metadata. Real faults, but an
+ * auditor would not open with them, so they sort below anything of the same
+ * severity a visitor would notice.
+ */
+const BACKSTAGE = new Set(['IA-05', 'IA-06', 'AC-06', 'AC-13', 'AC-14', 'CS-09', 'PF-04', 'PF-07', 'PF-08']);
+const backstage = (f: Finding) => BACKSTAGE.has(f.criterionId) || f.pillar === 'technical';
+
+/**
+ * The order the slides run in: what a visitor runs into first, worst first,
+ * ideas last. An auditor's fix sits just above a measured issue of the same
+ * severity; ties go to the engine's own fix order, which weighs the goal.
+ */
+function displayOrder(r: AuditResult): Finding[] {
+  const ranked = new Map((r.priorities ?? []).map((p, i) => [p.findingId, i]));
+  const rank = (f: Finding) =>
+    f.expert?.bucket === 'idea' ? -9 :f.nielsen + (f.expert?.bucket === 'fix' ? 0.25 : 0) - (backstage(f) ? 1.5 : 0);
+  const tie = (f: Finding) => ranked.get(f.id) ?? 99;
+  return byRule(r.findings).sort((a, b) => rank(b) - rank(a) || tie(a) - tie(b) || b.evidence.length - a.evidence.length);
+}
+
+/**
+ * One slide per rule. The engine keeps a root cause per component so each is
+ * deducted once, but a reader should meet "targets are too small" once, with
+ * every place it happens.
+ */
+function byRule(findings: Finding[]): Finding[] {
+  const out: Finding[] = [];
+  const first = new Map<string, Finding>();
+  for (const f of findings) {
+    const held = f.source === 'expert' ? undefined : first.get(f.ruleId);
+    if (!held) {
+      const copy = { ...f, evidence: [...f.evidence] };
+      if (f.source !== 'expert') first.set(f.ruleId, copy);
+      out.push(copy);
+      continue;
+    }
+    held.evidence.push(...f.evidence);
+    if (f.nielsen > held.nielsen) held.nielsen = f.nielsen;
+  }
+  return out;
+}
+
+/** An idea is not a fault, so it does not wear a severity. */
+function tagOf(f: Finding): { name: string; tone: string } {
+  if (f.expert?.bucket === 'idea') return { name: 'Idea', tone: 'var(--ink-muted)' };
+  const s = SEV[sevOf(f.nielsen)];
+  return { name: s.name, tone: s.tag };
+}
+
 const frame: CSSProperties = { maxWidth: layout.frame, margin: '0 auto', padding: `72px ${layout.gutter}` };
 
 /**
@@ -53,12 +104,22 @@ const plain = (s: string) =>
     .replace(/^./, (c) => c.toUpperCase())
     .replace(/([^.!?])$/, '$1.');
 
+/**
+ * One place, in a sentence. Some measurements are only a number — "68×33px" —
+ * which says nothing until it stands next to what was expected.
+ */
+function said(e: Finding['evidence'][number]): string {
+  if (e.observed.length >= 28 || !e.expected) return plain(e.observed);
+  const expected = e.expected.replace(/^>=\s*/, 'at least ').replace(/^<=\s*/, 'at most ');
+  return plain(`${e.observed}, against ${expected}`);
+}
+
 /* --------------------------------------------------------------- cover */
 
-function summarySentence(r: AuditResult): string {
-  const found = r.findings.length;
+function summarySentence(r: AuditResult, findings: Finding[]): string {
+  const found = findings.length;
   const checked = r.coverage.assessed;
-  const critical = r.counts[4] ?? 0;
+  const critical = findings.filter((f) => sevOf(f.nielsen) === 4).length;
   const lead =
     r.overall == null
       ? 'We could not measure enough of this page to score it.'
@@ -69,16 +130,18 @@ function summarySentence(r: AuditResult): string {
           : r.overall >= 50
             ? 'Your page works, but some things get in the way.'
             : 'Several things on this page get in visitors’ way.';
-  const tail = found === 0 ? 'and found nothing to fix.' : `and found ${found} to fix.`;
+  const read = r.expert?.ran ? ', read the page the way an auditor would,' : '';
+  const tail = found === 0 ? `${read} and found nothing to fix.` : `${read} and found ${found} to change.`;
   const crit = found === 0 ? '' : critical === 0 ? ' None of them is critical.' : ` ${critical === 1 ? 'One is' : `${critical} are`} critical.`;
-  return `${lead} We checked ${checked} things ${tail}${crit}`;
+  return `${lead} We checked ${checked} things${tail}${crit}`;
 }
 
-function Cover({ result }: { result: AuditResult }) {
+function Cover({ result, findings }: { result: AuditResult; findings: Finding[] }) {
   const host = hostOf(result.finalUrl);
   const date = new Date(result.fetchedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const counts = ([4, 3, 2, 1] as Sev[]).map((s) => ({ s, n: result.counts[s] ?? 0 }));
-  const issues = result.findings.length;
+  const counts = ([4, 3, 2, 1] as Sev[]).map((s) => ({ s, n: findings.filter((f) => sevOf(f.nielsen) === s).length }));
+  const issues = findings.length;
+  const expert = findings.filter((f) => f.source === 'expert').length;
   const passed = result.coverage.verdicts.pass ?? 0;
   const owed = result.reviewerTasks.length;
 
@@ -92,13 +155,19 @@ function Cover({ result }: { result: AuditResult }) {
                 UX audit report · {host} · {date}
               </span>
               <h1 style={{ margin: 0, font: t(800, 'clamp(52px, 6vw, 88px)', 1.0), letterSpacing: '-0.04em', color: color.ink }}>Experience audit</h1>
-              <p style={{ margin: 0, maxWidth: 520, font: t(400, 18, 30), color: color.inkSecondary }}>{summarySentence(result)}</p>
+              <p style={{ margin: 0, maxWidth: 520, font: t(400, 18, 30), color: color.inkSecondary }}>{summarySentence(result, findings)}</p>
+              {result.pageGoal && (
+                <p style={{ margin: '8px 0 0', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, borderLeft: `3px solid ${color.blue}` }}>
+                  <span style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: color.inkMuted }}>What this page is for</span>
+                  <span style={{ font: t(600, 18, 28), color: color.ink }}>{result.pageGoal}</span>
+                </p>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
                 <Figure n={result.coverage.assessed} label="Things checked" sub={owed ? `${owed} more need a person to look at them` : 'Nothing left for a person to check'} />
-                <Figure n={issues} label={issues === 1 ? 'Issue found' : 'Issues found'} sub={`${passed} check${passed === 1 ? '' : 's'} passed`} />
+                <Figure n={issues} label={issues === 1 ? 'Issue found' : 'Issues found'} sub={expert ? `${issues - expert} measured · ${expert} from the expert review` : `${passed} check${passed === 1 ? '' : 's'} passed`} />
               </div>
 
               {issues > 0 && (
@@ -127,6 +196,11 @@ function Cover({ result }: { result: AuditResult }) {
                   </div>
                 ))}
               </div>
+              {expert > 0 && (
+                <p style={{ margin: 0, font: t(400, 13, 20), color: color.inkMuted }}>
+                  The score covers the {result.coverage.assessed} measured checks. Expert-review findings are an auditor’s judgement on top of them and do not change it.
+                </p>
+              )}
             </div>
           </div>
 
@@ -203,7 +277,7 @@ function marksOf(f: Finding): Mark[] {
     const whole = e.documentLevel || (w >= VIEWPORT.width * 0.95 && h >= VIEWPORT.height * 0.95);
     return {
       n: i + 1,
-      text: plain(e.observed),
+      text: said(e),
       box: whole
         ? null
         : {
@@ -221,22 +295,86 @@ function captureOf(f: Finding): { src: string; label: string } | null {
   for (const e of f.evidence) {
     for (const [k, v] of Object.entries(e.fields)) {
       if (typeof v === 'string' && v.startsWith('data:image/')) {
-        return { src: v, label: k === 'mobile_capture' ? 'The page on a phone, 390 × 844' : k.replace(/_/g, ' ').replace(/ (capture|screenshot)$/, '') };
+        const label =
+          k === 'mobile_capture' || (k === 'expert_capture' && f.expert?.device === 'mobile')
+            ? 'The page on a phone, 390 × 844'
+            : k === 'expert_capture'
+              ? 'The page on desktop'
+              : k.replace(/_/g, ' ').replace(/ (capture|screenshot)$/, '');
+        return { src: v, label };
       }
     }
   }
   return null;
 }
 
+type Story = { issue: string; impact: string; solution: string };
+
+/**
+ * Every finding told the way the team writes one: what is wrong, what it costs
+ * the business, what to do. An expert finding is written that way already; a
+ * measured one is put together from its evidence, rationale and fix.
+ */
+function storyOf(f: Finding): Story {
+  if (f.expert) return { issue: f.expert.issue, impact: f.expert.impact, solution: f.expert.solution };
+  const more = f.evidence.length - 1;
+  const first = f.evidence[0] ? said(f.evidence[0]) : plain(f.checkName);
+  return {
+    issue: more > 0 ? `${first} The same in ${more} more ${more === 1 ? 'place' : 'places'}.` : first,
+    impact: plain(f.rationale),
+    solution: plain(f.fix.split('\n')[0]),
+  };
+}
+
+function StoryBlock({ story }: { story: Story }) {
+  const parts: [string, string][] = [
+    ['Issue', story.issue],
+    ['Impact', story.impact],
+    ['Solution', story.solution],
+  ];
+  return (
+    <dl style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+      {parts.map(([k, v], i) => {
+        const fix = i === 2;
+        return (
+          <div
+            key={k}
+            style={{
+              flex: '1 1 280px',
+              minWidth: 0,
+              padding: 20,
+              borderRadius: radius.lg,
+              background: fix ? color.blueTint : color.surface,
+              boxShadow: fix ? 'none' : `inset 0 0 0 1px ${color.border}`,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <dt style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: fix ? color.accentFg : color.inkMuted }}>{k}</dt>
+            <dd style={{ margin: 0, font: t(400, 16, 26), color: color.ink }}>{v}</dd>
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
+
 function IssueSlide({ finding, index, total, page, host }: { finding: Finding; index: number; total: number; page: AuditResult['screenshot']; host: string }) {
-  const sev = sevOf(finding.nielsen);
+  const tag = tagOf(finding);
+  const expert = finding.expert;
   const marks = marksOf(finding);
   const boxed = marks.filter((m) => m.box);
   const capture = captureOf(finding);
   // A probe's own capture wins when the issue is about a state the first
   // screen does not show — the phone view, the dark theme, the stretched text.
   const showCapture = !!capture && boxed.length === 0;
-  const tone = SEV[sev].tag;
+  const tone = tag.tone;
+  // One place is said in full by the issue; a list would only repeat it.
+  const listed = marks.length > 1 || !!expert;
+  const meta = expert
+    ? ['Expert review', expert.area, expert.device === 'mobile' ? 'On a phone' : 'On desktop', `${Math.round(finding.confidence * 100)}% sure`]
+    : ['Measured', finding.criterionName, finding.standard, `${finding.evidence.length} ${finding.evidence.length === 1 ? 'place' : 'places'}`, `${EFFORT[finding.effort] ?? finding.effort} to fix`];
 
   return (
     <section id={`issue-${index}`} data-finding={index} style={{ scrollMarginTop: 24,  background: index % 2 ? color.surface : '#F7F8FA', borderBottom: `1px solid ${color.border}` }}>
@@ -245,29 +383,29 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ font: t(800, 20, 1), letterSpacing: tracking.snug, color: color.ink }}>{pad(index)}</span>
             <span style={{ background: tone, color: '#FFFFFF', font: t(700, 11, 16), letterSpacing: tracking.badge, textTransform: 'uppercase', padding: '4px 8px', borderRadius: radius.button }}>
-              {SEV[sev].name}
+              {tag.name}
             </span>
             <span style={{ font: t(500, 13, 18), color: color.inkMuted }}>
               Issue {index} of {total}
             </span>
           </div>
           <h2 style={{ margin: 0, font: t(800, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight, color: color.ink }}>{finding.checkName}</h2>
-          <p style={{ margin: 0, font: t(400, 17, 28), color: color.inkSecondary }}>{plain(finding.rationale)}</p>
           <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '6px 16px', font: t(400, 13, 20), color: color.inkMuted }}>
-            <span>{finding.criterionName}</span>
-            <span>{finding.standard}</span>
-            <span>
-              {finding.evidence.length} {finding.evidence.length === 1 ? 'place' : 'places'}
-            </span>
-            <span>{EFFORT[finding.effort] ?? finding.effort} to fix</span>
+            {meta.map((m, i) => (
+              <span key={m} style={i === 0 ? { fontWeight: 600, color: expert ? color.accentFg : color.inkSecondary } : undefined}>
+                {m}
+              </span>
+            ))}
           </p>
         </div>
+
+        <StoryBlock story={storyOf(finding)} />
 
         <figure style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: 28 }}>
           {showCapture ? (
             <div style={{ display: 'flex', justifyContent: 'center', background: '#EEF1F6', border: `1px solid ${color.border}`, borderRadius: radius.lg, padding: 24 }}>
               {/* eslint-disable-next-line @next/next/no-img-element -- a capture taken mid-audit */}
-              <img src={capture.src} alt={`${capture.label}, where this issue appears`} style={{ display: 'block', maxWidth: '100%', maxHeight: 620, height: 'auto', borderRadius: radius.md, boxShadow: 'var(--shadow-raise)' }} />
+              <img src={capture.src} alt={`${capture.label}, with ${marks.length} numbered mark${marks.length === 1 ? '' : 's'} where this issue appears`} style={{ display: 'block', maxWidth: '100%', maxHeight: 620, height: 'auto', borderRadius: radius.md, boxShadow: 'var(--shadow-raise)' }} />
             </div>
           ) : (
             <div
@@ -330,23 +468,18 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
             </div>
           )}
 
+          {listed && (
           <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: '20px 40px' }}>
             {marks.map((m) => (
               <li key={m.n} style={{ flex: '1 1 360px', minWidth: 0, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <span style={{ width: 28, height: 28, flexShrink: 0, borderRadius: radius.md, background: m.box || !showCapture ? tone : color.inkMuted, color: '#FFFFFF', font: t(700, 13, 28), textAlign: 'center' }}>
+                <span style={{ width: 28, height: 28, flexShrink: 0, borderRadius: radius.md, background: m.box || !showCapture || expert ? tone : color.inkMuted, color: '#FFFFFF', font: t(700, 13, 28), textAlign: 'center' }}>
                   {m.n}
                 </span>
                 <span style={{ font: t(400, 16, 26), color: color.inkSecondary }}>{m.text}</span>
               </li>
             ))}
           </ol>
-
-          {/* TODO(design): the fix is not on the design's slide. It is the
-              product's core promise, so it is kept, set as one quiet line. */}
-          <p style={{ margin: 0, padding: '16px 20px', background: color.blueTint, borderRadius: radius.lg, font: t(400, 15, 24), color: color.ink }}>
-            <span style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: color.accentFg, marginRight: 10 }}>What to change</span>
-            {plain(finding.fix.split('\n')[0])}
-          </p>
+          )}
         </figure>
       </div>
     </section>
@@ -365,13 +498,12 @@ const hostOf = (url: string) => {
 
 export function ReportDocument({ result }: { result: AuditResult }) {
   const host = hostOf(result.finalUrl);
-  // Worst first, then by how many places it shows up.
-  const findings = [...result.findings].sort((a, b) => b.nielsen - a.nielsen || b.evidence.length - a.evidence.length);
-  const order = new Map(findings.map((f, i) => [f.id, i + 1]));
+  const findings = displayOrder(result);
   return (
     <article>
-      <Cover result={result} />
-      <ReportPriorities result={result} order={order} />
+      <Cover result={result} findings={findings} />
+      <ReportTakeaways result={result} />
+      <ReportPriorities result={result} findings={findings} />
       {findings.length === 0 ? (
         <section style={{ background: color.surface, borderBottom: `1px solid ${color.border}` }}>
           <div style={{ ...frame }}>

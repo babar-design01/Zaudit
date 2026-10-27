@@ -14,6 +14,7 @@ import {
   type FocusStop,
   type PageFacts,
 } from './probe';
+import { collectAnchors, type Anchor } from './probe-anchors';
 import { collectMobileFacts, type MobileFacts } from './probe-mobile';
 import {
   TOAST_WATCH,
@@ -146,6 +147,8 @@ export type Measured = {
   reflow: StepResult<ReflowProbe>;
   /** The page as a phone gets it: a second visit at 390×844, touch and all. */
   mobile: StepResult<MobileProbe>;
+  /** The whole page, top to bottom, and the elements on it an auditor can point at. */
+  page: StepResult<FullPage>;
 };
 
 export type FieldReaction = {
@@ -970,12 +973,42 @@ async function checkLinks(page: Page, links: TechFacts['links']): Promise<LinkCh
 /** iPhone-class logical size: the width most of the web's phone traffic arrives at. */
 export const PHONE = { width: 390, height: 844 } as const;
 
+/** A capture of the whole page, capped, with the elements drawn on it. */
+export type FullPage = {
+  jpeg: Buffer;
+  width: number;
+  height: number;
+  anchors: Anchor[];
+};
+
+/** Long pages are capped: past this, a reviewer is skimming, and so is the model. */
+const FULL_PAGE_MAX = 7200;
+/** Two phone screens: the first impression and what is just below it. */
+const PHONE_FULL_MAX = 1688;
+
+/**
+ * The whole page as one tall capture, and the elements on it by id. Taken at
+ * the top of the page after the measurements have put it back where it was.
+ */
+async function captureFullPage(page: Page, width: number, maxHeight: number, prefix: string): Promise<FullPage> {
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(200);
+  const total = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight ?? 0));
+  const height = Math.min(total, maxHeight);
+  const png = await page.screenshot({ type: 'png', fullPage: true, clip: { x: 0, y: 0, width, height }, animations: 'disabled', caret: 'initial' });
+  const jpeg = await sharp(png).jpeg({ quality: 72 }).toBuffer();
+  const anchors = await page.evaluate(collectAnchors, { prefix, max: 180, maxY: height });
+  return { jpeg, width, height, anchors };
+}
+
 export type MobileProbe = {
   viewport: { width: number; height: number };
   facts: MobileFacts;
   overflow: Overflow;
   /** The first screen as a phone draws it, for the report's exhibits. */
   capture: string | null;
+  /** The first two phone screens, for the expert review. */
+  full: FullPage | null;
 };
 
 /**
@@ -1023,6 +1056,7 @@ async function probeMobile(b: Browser, load: (page: Page) => Promise<number | nu
     await page.evaluate('globalThis.__name = globalThis.__name || ((f) => f)');
     await page.evaluate(installHelpers, { vw: PHONE.width, vh: PHONE.height });
     const facts = await page.evaluate(collectMobileFacts);
+    const full = await captureFullPage(page, PHONE.width, PHONE_FULL_MAX, 'm').catch(() => null);
     const overflow = await page.evaluate(scanOverflow);
 
     const shot = await page.screenshot({ type: 'png', animations: 'allow', caret: 'initial' });
@@ -1030,7 +1064,7 @@ async function probeMobile(b: Browser, load: (page: Page) => Promise<number | nu
       await sharp(shot).resize({ width: PHONE.width, withoutEnlargement: true }).webp({ quality: 74 }).toBuffer()
     ).toString('base64')}`;
 
-    return { viewport: { ...PHONE }, facts, overflow, capture };
+    return { viewport: { ...PHONE }, facts, overflow, capture, full };
   } finally {
     await context.close().catch(() => {});
   }
@@ -1170,6 +1204,7 @@ export async function measurePage(
     const dark = uiv ? await step(() => probeDark(page, uiv)) : noUi;
     const stress = uiv ? await step(() => probeStress(page, uiv)) : noUi;
     // Last, because it changes the window: everything above measured 1440×900.
+    const full = await step(() => captureFullPage(page, VIEWPORT.width, FULL_PAGE_MAX, 'd'));
     const reflow = await step(() => probeReflow(page));
     // A phone is a second visit, in its own context: this page has been typed
     // into, tabbed through and resized, and none of that belongs in it.
@@ -1199,6 +1234,7 @@ export async function measurePage(
       links,
       reflow,
       mobile,
+      page: full,
     };
   } finally {
     await context.close().catch(() => {});

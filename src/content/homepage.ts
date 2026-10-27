@@ -367,6 +367,7 @@ export const AUDIT_STAGE_LINES: string[][] = [
   [
     'Grouping findings by root cause',
     'Moving uncertain findings to review',
+    'Reading the page the way an auditor would',
     'Checking every sentence against the evidence',
   ],
   [
