@@ -15,7 +15,6 @@ export const metadata: Metadata = {
     type: 'website',
   },
   twitter: { card: 'summary_large_image', title: 'Audix – Free Website UX Audit Tool', description: DESCRIPTION },
-  icons: { icon: '/audix-logo.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
