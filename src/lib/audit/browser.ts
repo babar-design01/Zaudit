@@ -213,8 +213,11 @@ const serverless = !!process.env.VERCEL || !!process.env.AWS_LAMBDA_FUNCTION_NAM
 async function serverlessLaunch(): Promise<LaunchOptions | null> {
   try {
     const mod = (await import('@sparticuz/chromium')).default;
+    // Its defaults run everything in one process, where a renderer that runs
+    // out of memory on a long full-page capture takes the whole browser with
+    // it. A Vercel function can start child processes, so keep them apart.
     return {
-      args: [...mod.args, ...ARGS],
+      args: [...mod.args.filter((a) => a !== '--single-process'), ...ARGS],
       executablePath: await mod.executablePath(),
       headless: true,
     };
