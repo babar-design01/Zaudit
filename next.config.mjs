@@ -7,9 +7,10 @@ const nextConfig = {
 
   // The browser is 60MB of brotli archives that nothing imports by name, so
   // tracing leaves them out and the function has no Chromium to launch. Only
-  // the audit route needs them.
+  // the audit route needs them. playwright-core is the same story on a smaller
+  // scale: it reads its own browsers.json at runtime, which tracing misses.
   outputFileTracingIncludes: {
-    '/api/audit': ['./node_modules/@sparticuz/chromium/bin/**'],
+    '/api/audit': ['./node_modules/@sparticuz/chromium/bin/**', './node_modules/playwright-core/**'],
   },
 };
 
