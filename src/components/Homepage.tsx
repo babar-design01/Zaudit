@@ -12,6 +12,7 @@ import { Problem } from '@/components/home/Problem';
 import { Proof } from '@/components/home/Proof';
 import { Solutions } from '@/components/home/Solutions';
 // import { Stories } from '@/components/home/Stories';
+import { Contact } from '@/components/report/Contact';
 import { AuditDialog } from '@/components/sections/AuditDialog';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav, type Account } from '@/components/site/SiteNav';
@@ -55,6 +56,7 @@ export function Homepage({ account = null, accounts = false }: { account?: Accou
         {/* <Stories /> */}
         <Pricing onRunAudit={openGoal} />
         <Faq onRunAudit={openGoal} />
+        <Contact />
         <ClosingCta onRunAudit={openGoal} />
       </main>
 

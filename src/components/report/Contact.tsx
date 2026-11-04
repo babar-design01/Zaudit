@@ -4,6 +4,10 @@
 
 import { useState, type FormEvent } from 'react';
 import type { AuditResult } from '@/lib/audit/types';
+import { TURNSTILE_SITE_KEY, Turnstile } from './Turnstile';
+
+/** Where a message goes when the server has no way to send mail. */
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@audix.com';
 
 /**
  * "Talk to our team about these fixes": copy and the trust-badge strip on a
@@ -13,19 +17,32 @@ import type { AuditResult } from '@/lib/audit/types';
  * has a mail key. Without one it answers 503 and the browser opens the
  * reader's own mail app with the same message, so the form never dead-ends.
  *
+ * The same form closes the homepage, where there is no report to talk about and
+ * the copy and the message say so.
+ *
  * TODO(design): confirm the trust badges are Audix's own, or label them.
  */
-export function Contact({ result }: { result: AuditResult }) {
+export function Contact({ result }: { result?: AuditResult }) {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
+  const [captchaRound, setCaptchaRound] = useState(0);
 
   const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     if (!form.reportValidity()) return;
+    if (TURNSTILE_SITE_KEY && !captcha) {
+      setProblem('Please complete the check above the button first.');
+      return;
+    }
     const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
-    const payload = { ...data, reportId: result.id, reportUrl: window.location.href, host: hostOf(result.finalUrl), score: result.overall, findings: result.findings.length };
+    const about = result ? { reportId: result.id, reportUrl: window.location.href, host: hostOf(result.finalUrl), score: result.overall, findings: result.findings.length } : {};
+    const payload = { ...data, ...about, captcha };
     setBusy(true);
+    setProblem(null);
     try {
       const res = await fetch('/api/contact', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       if (res.ok) {
@@ -39,7 +56,10 @@ export function Contact({ result }: { result: AuditResult }) {
         return;
       }
       const err = (await res.json().catch(() => ({}))) as { error?: string };
-      setSent(err.error ?? 'That did not send. Try again, or email hello@audix.com.');
+      setProblem(err.error ?? `That did not send. Try again, or email ${CONTACT_EMAIL}.`);
+      // A token works once, so another try needs a new one.
+      setCaptcha(null);
+      setCaptchaRound((n) => n + 1);
     } catch {
       window.location.href = mailtoFor(payload);
     } finally {
@@ -56,18 +76,18 @@ export function Contact({ result }: { result: AuditResult }) {
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch" }}>
           <div style={{ flex: "1 1 520px", minWidth: "0", background: "var(--bg-subtle)", padding: "96px clamp(16px, 5.56vw, 80px)", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "56px" }}>
             <div style={{ maxWidth: "560px", display: "flex", flexDirection: "column", gap: "24px" }}>
-              <h2 style={{ margin: "0", font: "600 clamp(40px, 4vw, 60px)/1.08 var(--font-sans)", letterSpacing: "-0.035em", background: "linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textWrap: "balance" }}>Talk to our team about these fixes</h2>
-              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>Send us this report and we'll come back with what each fix takes, in hours, not a proposal.</p>
-              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>Prefer to fix it yourself? Every issue above shows exactly what to change.</p>
+              <h2 style={{ margin: "0", font: "600 clamp(40px, 4vw, 60px)/1.08 var(--font-sans)", letterSpacing: "-0.035em", background: "linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textWrap: "balance" }}>{result ? 'Talk to our team about these fixes' : 'Contact us'}</h2>
+              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>{result ? "Send us this report and we'll come back with what each fix takes, in hours, not a proposal." : 'Questions about an audit, a plan, or getting the fixes done? Send us a message.'}</p>
+              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>{result ? 'Prefer to fix it yourself? Every issue above shows exactly what to change.' : 'A person will reply within a working day.'}</p>
             </div>
-            <div style={{ paddingTop: "28px", borderTop: "1px solid #E3E7EF" }}>
+            {result && <div style={{ paddingTop: "28px", borderTop: "1px solid #E3E7EF" }}>
               <img src="/trust-badges.png" alt="ISO 9001:2015 certified, Clutch top IT services company, GoodFirms, 2025 winner for custom software development" style={{ display: "block", width: "100%", maxWidth: "440px", height: "auto", opacity: "0.85" }} />
-            </div>
+            </div>}
           </div>
           <div data-contact-form style={{ flex: "1 1 560px", minWidth: "0", position: "relative", padding: "72px 96px", display: "flex", justifyContent: "center" }}>
             <div aria-hidden="true" data-dots="" style={{ position: "absolute", top: "0", bottom: "0", left: "0", width: "72px", backgroundImage: "radial-gradient(circle, rgba(10, 11, 13, 0.0) 0, rgba(10, 11, 13, 0) 100%), radial-gradient(circle, #5E9BFF 1.2px, transparent 1.6px), linear-gradient(180deg, rgba(168, 243, 255, 0) 0%, rgba(168, 243, 255, 0.55) 25%, rgba(94, 155, 255, 0.45) 55%, rgba(127, 178, 255, 0.35) 80%, rgba(127, 178, 255, 0) 100%)", backgroundSize: "auto, 9px 9px, auto", WebkitMaskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)", maskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)" }}></div>
             <div aria-hidden="true" data-dots="" style={{ position: "absolute", top: "0", bottom: "0", right: "0", width: "72px", backgroundImage: "radial-gradient(circle, rgba(10, 11, 13, 0.0) 0, rgba(10, 11, 13, 0) 100%), radial-gradient(circle, #5E9BFF 1.2px, transparent 1.6px), linear-gradient(180deg, rgba(168, 243, 255, 0) 0%, rgba(168, 243, 255, 0.55) 25%, rgba(94, 155, 255, 0.45) 55%, rgba(127, 178, 255, 0.35) 80%, rgba(127, 178, 255, 0) 100%)", backgroundSize: "auto, 9px 9px, auto", WebkitMaskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)", maskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)" }}></div>
-            <form aria-label="Ask us to fix these findings" onSubmit={submit} noValidate={false} style={{ position: "relative", width: "100%", maxWidth: "520px", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "24px 16px" }}>
+            <form aria-label={result ? 'Ask us to fix these findings' : 'Contact us'} onSubmit={submit} noValidate={false} style={{ position: "relative", width: "100%", maxWidth: "520px", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "24px 16px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                 <label htmlFor="c-first" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>First name<span style={{ color: "var(--critical)" }}>*</span></label>
                 <input id="c-first" name="firstName" type="text" autoComplete="given-name" required placeholder="For example, Jerry" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
@@ -92,6 +112,18 @@ export function Contact({ result }: { result: AuditResult }) {
                 <label htmlFor="c-message" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Message<span style={{ color: "var(--critical)" }}>*</span></label>
                 <textarea id="c-message" name="message" rows={4} required placeholder="Tell us about your project, goals, timeline, or requirements" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none", resize: "vertical" }}></textarea>
               </div>
+              {!sent && TURNSTILE_SITE_KEY && (
+                <Turnstile
+                  resetKey={captchaRound}
+                  onToken={(token) => {
+                    setCaptcha(token);
+                    if (token) setProblem(null);
+                  }}
+                  onFail={() => setCaptchaFailed(true)}
+                />
+              )}
+              {!sent && captchaFailed && !captcha && <p role="alert" style={{ gridColumn: "1 / -1", margin: 0, font: "400 14px/20px var(--font-sans)", color: "var(--critical)" }}>The check could not load. Refresh the page, or email {CONTACT_EMAIL}.</p>}
+              {!sent && problem && <p role="alert" style={{ gridColumn: "1 / -1", margin: 0, font: "400 14px/20px var(--font-sans)", color: "var(--critical)" }}>{problem}</p>}
               {sent ? (<p role="status" style={{ gridColumn: "1 / -1", margin: 0, padding: "14px 16px", background: "var(--blue-tint)", borderRadius: "8px", font: "500 15px/22px var(--font-sans)", color: "var(--ink)" }}>{sent}</p>) : (<button type="submit" disabled={busy} data-cta="primary" style={{ gridColumn: "1 / -1", marginTop: "8px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)", color: "#FFFFFF", border: "none", cursor: "pointer", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "18px 24px", borderRadius: "2px" }}>{busy ? "Sending…" : "Submit inquiry"}</button>)}
             </form>
           </div>
@@ -111,7 +143,7 @@ const hostOf = (url: string) => {
 
 /** The same message, addressed to the team, for when there is no mail backend. */
 function mailtoFor(p: Record<string, unknown>): string {
-  const subject = `UX audit fixes — ${p.host}`;
+  const subject = p.host ? `UX audit fixes — ${p.host}` : `Audix enquiry — ${p.firstName ?? ''} ${p.lastName ?? ''}`;
   const body = [
     `Name: ${p.firstName ?? ''} ${p.lastName ?? ''}`,
     `Email: ${p.email ?? ''}`,
@@ -120,7 +152,7 @@ function mailtoFor(p: Record<string, unknown>): string {
     '',
     String(p.message ?? ''),
     '',
-    `Report: ${p.reportUrl} (score ${p.score ?? 'n/a'}, ${p.findings} issues)`,
+    p.reportUrl ? `Report: ${p.reportUrl} (score ${p.score ?? 'n/a'}, ${p.findings} issues)` : '',
   ].join('\n');
-  return `mailto:hello@audix.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

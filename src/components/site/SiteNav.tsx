@@ -14,6 +14,7 @@ const LINKS = [
   { label: 'Pricing', href: '/#plans' },
   // TODO(design): Blog has no destination yet.
   { label: 'Blog', href: '#' },
+  { label: 'Contact', href: '/#contact' },
 ] as const;
 
 /**
@@ -149,7 +150,7 @@ export function SiteNav({
               className="ax-navlink"
               style={{ font: t(500, 14, 20), color: color.inkMuted, padding: '7px 12px', borderRadius: radius.lg, whiteSpace: 'nowrap' }}
             >
-              {account ? `${account.credits} ${account.credits === 1 ? 'credit' : 'credits'}` : 'Log in'}
+              {account ? `${account.credits} ${account.credits === 1 ? 'audit' : 'audits'} left` : 'Log in'}
             </a>
           )}
         </nav>

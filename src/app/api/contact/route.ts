@@ -1,10 +1,11 @@
 import { Resend } from 'resend';
+import { verifyCaptcha } from '@/lib/captcha';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
- * POST /api/contact — the report's "Submit inquiry".
+ * POST /api/contact — "Submit inquiry", from the homepage and from a report.
  *
  * Emails the team when the deployment has a mail key and somewhere to send it
  * (`CONTACT_RESEND_KEY` or `AUTH_RESEND_KEY`, and `CONTACT_TO`). Without them it
@@ -29,15 +30,20 @@ const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/[
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 export async function POST(request: Request) {
+  const ip = (request.headers.get('x-forwarded-for') ?? '').split(',')[0] || 'local';
+  if (limited(ip)) return Response.json({ error: 'That is a lot of messages. Try again in a few minutes.' }, { status: 429 });
+
+  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+  // Before anything else is looked at, so a robot learns nothing from the answers.
+  if (!(await verifyCaptcha(body.captcha, ip))) {
+    return Response.json({ error: 'The check did not pass. Please try it again.' }, { status: 400 });
+  }
+
   const key = process.env.CONTACT_RESEND_KEY || process.env.AUTH_RESEND_KEY;
   const to = process.env.CONTACT_TO;
   const from = process.env.CONTACT_FROM || process.env.AUTH_EMAIL_FROM || 'Audix <hello@audix.com>';
   if (!key || !to) return Response.json({ error: 'Mail is not set up on this deployment.' }, { status: 503 });
 
-  const ip = (request.headers.get('x-forwarded-for') ?? '').split(',')[0] || 'local';
-  if (limited(ip)) return Response.json({ error: 'That is a lot of messages. Try again in a few minutes.' }, { status: 429 });
-
-  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const firstName = clean(body.firstName, MAX.name);
   const lastName = clean(body.lastName, MAX.name);
   const email = clean(body.email, MAX.email);
@@ -59,10 +65,15 @@ export async function POST(request: Request) {
     ['Email', email],
     ...(phone ? ([['Phone', `${phoneCode} ${phone}`]] as [string, string][]) : []),
     ...(country ? ([['Country', country]] as [string, string][]) : []),
-    ['Site', host],
-    ['Score', score == null ? 'not scored' : `${score}/100`],
-    ['Issues', findings == null ? '—' : String(findings)],
-    ['Report', reportUrl],
+    // Only a message sent from a report has any of this to say.
+    ...(reportUrl
+      ? ([
+          ['Site', host],
+          ['Score', score == null ? 'not scored' : `${score}/100`],
+          ['Issues', findings == null ? '—' : String(findings)],
+          ['Report', reportUrl],
+        ] as [string, string][])
+      : []),
   ];
 
   const resend = new Resend(key);
@@ -70,7 +81,7 @@ export async function POST(request: Request) {
     from,
     to,
     replyTo: email,
-    subject: `UX audit fixes — ${host || 'a report'} — ${firstName} ${lastName}`,
+    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${firstName} ${lastName}` : `Audix enquiry — ${firstName} ${lastName}`,
     text: `${lines.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
     html: `<table>${lines.map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table><p style="white-space:pre-wrap">${esc(message)}</p>`,
   });

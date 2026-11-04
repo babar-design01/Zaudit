@@ -27,7 +27,7 @@ const COLUMNS = [
     heading: 'Company',
     links: [
       { label: 'About', href: '#' },
-      { label: 'Contact', href: '/report/sample#contact' },
+      { label: 'Contact', href: '/#contact' },
       { label: 'Privacy policy', href: '#' },
       { label: 'Terms of service', href: '#' },
     ],
