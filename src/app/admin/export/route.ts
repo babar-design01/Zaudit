@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   return new Response(visitors ? peopleToCsv(peopleFrom(runs)) : runsToCsv(runs), {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="audix-${visitors ? 'visitors' : 'audits'}-${date}.csv"`,
+      'Content-Disposition': `attachment; filename="procurveux-${visitors ? 'visitors' : 'audits'}-${date}.csv"`,
       'Cache-Control': 'no-store',
     },
   });

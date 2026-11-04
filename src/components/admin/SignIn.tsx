@@ -1,4 +1,5 @@
 import { submitPassword } from '@/app/admin/actions';
+import { Logo } from '@/components/site/Logo';
 import { Button } from '@/components/ui';
 
 export function SignIn({ error }: { error?: string }) {
@@ -6,7 +7,8 @@ export function SignIn({ error }: { error?: string }) {
   return (
     <main className="admin-signin">
       <form action={submitPassword} className="admin-card">
-        <h1>Audix admin</h1>
+        <Logo height={16} />
+        <h1>Admin sign in</h1>
         <label>
           Password
           <input type="password" name="password" required autoFocus autoComplete="current-password" />
