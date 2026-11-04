@@ -6,12 +6,16 @@ const DESCRIPTION =
   'Paste a URL. Audix tests your site in a real browser and scores it against UX laws, design principles and accessibility rules, then tells you which element to fix first and why it matters.';
 
 export const metadata: Metadata = {
+  // Share previews need the image's full address, and only this domain is the
+  // one people are meant to see.
+  metadataBase: new URL('https://www.procurveux.com'),
   title: 'Audix – Free Website UX Audit Tool',
   description: DESCRIPTION,
   openGraph: {
     title: 'Audix – Free Website UX Audit Tool',
     description: DESCRIPTION,
     siteName: 'Audix',
+    url: '/',
     type: 'website',
   },
   twitter: { card: 'summary_large_image', title: 'Audix – Free Website UX Audit Tool', description: DESCRIPTION },
