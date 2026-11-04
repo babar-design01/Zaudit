@@ -7,6 +7,7 @@ import { assertPublicUrl } from '@/lib/audit/net';
 import { DEFAULT_GOAL, GOALS, type GoalId } from '@/lib/audit/framework';
 import { putReport } from '@/lib/report/store';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
+import { recordRun, requester, runFromResult, runThatStopped } from '@/lib/usage';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
 
   const encoder = new TextEncoder();
   const ip = clientIp(request);
+  const who = requester(request, ip);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -120,6 +122,7 @@ export async function POST(request: Request) {
       const heartbeat = setInterval(() => send({ type: 'ping' }), 10_000);
       /** Named once the credit is spent, so a failure can give it back. */
       let runId = '';
+      const startedAt = Date.now();
 
       try {
         if (!url.trim()) throw new AuditError('Enter a website address first.');
@@ -132,6 +135,7 @@ export async function POST(request: Request) {
           // single frame the reader has no chance to follow.
           for (let i = 0; i < 4; i += 1) send({ type: 'stage', index: i });
           send({ type: 'result', result: hit });
+          await recordRun(runFromResult(hit, who, true));
           return;
         }
 
@@ -188,9 +192,17 @@ export async function POST(request: Request) {
         }
 
         send({ type: 'result', result });
+        // Awaited because a serverless function can freeze once the stream ends.
+        await recordRun(runFromResult(result, who, false));
       } catch (err) {
         // A run that was paid for and then broke is on us, not the reader.
         if (runId) {
+          await recordRun(
+            runThatStopped(
+              { id: runId, url, goal, startedAt, cancelled: request.signal.aborted, error: err instanceof Error ? err.message : String(err) },
+              who,
+            ),
+          );
           await failRun(runId, err instanceof Error ? err.message : String(err)).catch(() => {});
           const given = await refund(runId, 'The audit did not finish, so the credit was returned.').catch(() => false);
           if (given) send({ type: 'credits', left: null, refunded: true });

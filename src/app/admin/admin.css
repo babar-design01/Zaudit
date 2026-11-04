@@ -1,0 +1,86 @@
+/* The hover states inline styles cannot express. */
+
+.admin-bar {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.admin-bar > i {
+  display: block;
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  background: var(--blue);
+}
+
+.admin-bar:hover > i {
+  opacity: 0.75;
+}
+
+.admin-bar > span {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 4px 8px;
+  white-space: nowrap;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--on-action);
+  background: var(--action);
+  border-radius: 2px;
+}
+
+.admin-bar:first-child > span {
+  left: 0;
+  transform: none;
+}
+
+.admin-bar:last-child > span {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.admin-bar:hover > span {
+  display: block;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  font: 400 13px/20px var(--font-sans);
+}
+
+.admin-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table a {
+  color: var(--accent-fg);
+}
