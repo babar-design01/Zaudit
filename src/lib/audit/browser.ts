@@ -244,6 +244,12 @@ let idleTimer: ReturnType<typeof setTimeout> | null = null;
 function keepWarm(): void {
   if (idleTimer) clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
+    // A slow page is still being captured a minute in, and closing now would
+    // throw away the whole audit. Every capture holds a context while it runs.
+    if (shared?.contexts().length) {
+      keepWarm();
+      return;
+    }
     shared?.close().catch(() => {});
     shared = null;
   }, 60_000);

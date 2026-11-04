@@ -70,7 +70,7 @@ export async function audit(
       (error: unknown) => ({ ok: false as const, error }),
     ),
     wantBrowser
-      ? measurePage(gotoLoader(url.href), { signal }).then(
+      ? measureWithRetry(url.href, signal).then(
           (value) => ({ ok: true as const, value }),
           (error: unknown) => ({ ok: false as const, error }),
         )
@@ -303,6 +303,24 @@ export async function audit(
 
 /** Criteria in the catalog, for the interface to show what an audit covers. */
 export const CRITERIA_COUNT = CRITERIA.length;
+
+/** A failure later than this leaves too little of the function's five minutes to start over. */
+const RETRY_WITHIN_MS = 120_000;
+
+/**
+ * One more try when the browser fails. A slow load or a crashed renderer is
+ * usually gone on the second visit, and without the browser there is no score.
+ */
+async function measureWithRetry(url: string, signal?: AbortSignal): Promise<Measured | null> {
+  const started = Date.now();
+  try {
+    return await measurePage(gotoLoader(url), { signal });
+  } catch (err) {
+    if (signal?.aborted || Date.now() - started > RETRY_WITHIN_MS) throw err;
+    console.warn('audit: retrying the browser measurement —', reason(err));
+    return measurePage(gotoLoader(url), { signal });
+  }
+}
 
 function reason(err: unknown): string {
   return err instanceof Error ? err.message.split('\n')[0].slice(0, 160) : String(err);

@@ -59,7 +59,9 @@ function cached(key: string): AuditResult | null {
 }
 
 async function remember(key: string, result: AuditResult): Promise<void> {
-  cache.set(key, { at: Date.now(), result });
+  // A run that could not be scored is usually a slow load or a crashed browser.
+  // Caching it would hand the same failure to whoever presses "try again".
+  if (result.overall != null) cache.set(key, { at: Date.now(), result });
   // The report page asks for this by id — from another instance, and possibly
   // tomorrow — so it goes to the report store rather than only to this map.
   await putReport(result);
