@@ -19,7 +19,7 @@ const RED = '#E5484D';
 let controller = null;
 
 chrome.runtime.onMessage.addListener((message) => {
-  if (message.type === 'start') run(message.url, message.goal);
+  if (message.type === 'start') run(message.url, message.goals);
   if (message.type === 'cancel') controller?.abort();
 });
 
@@ -32,11 +32,11 @@ chrome.storage.session.get('run').then(({ run }) => {
   }
 });
 
-async function run(url, goal) {
+async function run(url, goals) {
   if (controller) return;
   const current = new AbortController();
   controller = current;
-  const state = { status: 'running', url, goal, stageIndex: 0, startedAt: Date.now() };
+  const state = { status: 'running', url, goals, stageIndex: 0, startedAt: Date.now() };
 
   try {
     await chrome.storage.session.set({ run: state });
@@ -46,7 +46,7 @@ async function run(url, goal) {
     const res = await fetch(`${SITE}/api/audit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, goal, email }),
+      body: JSON.stringify({ url, goals, email }),
       credentials: 'include',
       signal: current.signal,
     });
@@ -92,8 +92,12 @@ async function readStream(body, state) {
         // Chrome ends a worker after 30 idle seconds, and reading a stream does
         // not count as activity. Calling an extension API does.
         await chrome.storage.session.set({ alive: Date.now() });
+      } else if (event.type === 'check') {
+        state.check = event.label;
+        await chrome.storage.session.set({ run: state });
       } else if (event.type === 'stage') {
         state.stageIndex = event.index;
+        state.check = null;
         await chrome.storage.session.set({ run: state });
       } else if (event.type === 'result') {
         await finish(state, event.result);
@@ -117,7 +121,7 @@ async function finish(state, result) {
 }
 
 async function fail(state, message, action) {
-  await chrome.storage.session.set({ run: { status: 'error', url: state.url, goal: state.goal, message, action } });
+  await chrome.storage.session.set({ run: { status: 'error', url: state.url, goals: state.goals, message, action } });
   await badge('!', RED);
 }
 
@@ -130,7 +134,7 @@ function summarize(url, result) {
     url,
     overall: result.overall,
     band: result.band,
-    goalId: result.goal.id,
+    goals: result.goal.ids,
     goal: result.goal.name,
     counts: { critical: result.counts[4] ?? 0, major: result.counts[3] ?? 0, minor: result.counts[2] ?? 0 },
     // Two criteria can fail on the same fault, and name it the same way.

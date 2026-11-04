@@ -42,6 +42,10 @@ a:hover {
   from { opacity: 0; transform: translateY(36px); }
   to { opacity: 1; transform: none; }
 }
+@keyframes ax-scan {
+  from { top: -92px; }
+  to { top: 100%; }
+}
 @keyframes za-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -376,6 +380,17 @@ footer a:hover {
     box-shadow: 0 22px 44px rgba(21, 20, 25, 0.12);
   }
 
+  /* ----------------------------------------- the audit's scanner */
+  [data-scan-line] {
+    animation: ax-scan 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  [data-scan-bone] {
+    animation: za-blink 1.8s ease-in-out infinite;
+  }
+  [data-scan-image] {
+    animation: za-in 0.5s ease both;
+  }
+
   /* --------------------------------------------- annotations breathe */
   span:is([style*='background:var(--critical);color:#FFFFFF'], [style*='background: var(--critical); color: rgb(255, 255, 255)']) {
     animation: za-ping 2.2s ease-out infinite;
@@ -506,4 +521,11 @@ footer a:hover {
 @media (max-width: 640px) {
   #contact form { grid-template-columns: minmax(0, 1fr) !important; max-width: none !important; }
   #contact [data-dots] { display: none; }
+}
+
+/* With motion turned down the line would sit still over the page, so it goes. */
+@media (prefers-reduced-motion: reduce) {
+  [data-scan-line] {
+    display: none;
+  }
 }

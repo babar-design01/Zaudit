@@ -14,7 +14,7 @@ import type { ContractFinding, PageType, PageTypeResult, RuleOutcome } from '../
 import { docFacts, parseHtml } from '../src/lib/audit/document';
 import { MISSING_CHECKS, ORPHAN_CHECKS } from '../src/lib/audit/catalog';
 import { evaluate, holdAssisted, type Evaluation } from '../src/lib/audit/evaluate';
-import { GOALS, type GoalId } from '../src/lib/audit/framework';
+import { GOALS, type GoalId, combineGoals, toggleGoal } from '../src/lib/audit/framework';
 import { applyReview, fixProblem, proseProblem, type ReviewReply } from '../src/lib/audit/review';
 import { score } from '../src/lib/audit/score';
 import { acceptExpertReply, type ExpertReply } from '../src/lib/audit/expert';
@@ -555,6 +555,18 @@ async function main() {
   const weighted = score(land.ev.criteria, land.ev.findings, goalOf('accessible'));
   const flat = score(land.ev.criteria, land.ev.findings, goalOf('health'));
   check('the goal changes the weights, not the criteria', weighted.pillars.length === flat.pillars.length && weighted.pillars.find((p) => p.id === 'accessibility')!.weight === 2, `accessibility weight ${weighted.pillars.find((p) => p.id === 'accessibility')!.weight}`);
+  const both = combineGoals(['accessible', 'conversion']);
+  check('combined goals weigh what either goal weighs', ['accessibility', 'states', 'usability', 'hierarchy', 'performance', 'content'].every((p) => (both.heavier as string[]).includes(p)));
+  check('combined goals switch on what either goal switches on', both.toggles.includes('conversion'));
+  check('a combined goal names both', both.name === 'Make it accessible + Improve conversion' && both.id === 'accessible+conversion');
+  check('goals combine the same in any order', combineGoals(['conversion', 'accessible']).id === both.id);
+  check('one goal stays exactly itself', JSON.stringify(combineGoals(['support']).heavier) === JSON.stringify(goalOf('support').heavier) && combineGoals(['support']).name === goalOf('support').name);
+  check('the health check does not dilute a chosen goal', combineGoals(['health', 'support']).id === 'support');
+  check('nothing recognisable falls back to the health check', combineGoals(['nope', 7, null]).id === 'health' && combineGoals([]).id === 'health');
+  check('choosing the health check clears the others', JSON.stringify(toggleGoal(['support', 'redesign'], 'health')) === '["health"]');
+  check('choosing a goal clears the health check', JSON.stringify(toggleGoal(['health'], 'support')) === '["support"]');
+  check('goals add up', JSON.stringify(toggleGoal(['support'], 'redesign')) === '["support","redesign"]');
+  check('removing the last goal returns to the health check', JSON.stringify(toggleGoal(['support'], 'support')) === '["health"]');
   const conv = score(land.ev.criteria, land.ev.findings, goalOf('conversion'));
   check('an optional pillar is off until a goal switches it on', !flat.pillars.some((p) => p.id === 'conversion') && conv.pillars.some((p) => p.id === 'conversion'));
   check('a pillar score is the share of its judged criteria that passed', flat.pillars.every((p) => p.score === null || (p.score >= 0 && p.score <= 100)));

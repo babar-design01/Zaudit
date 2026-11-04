@@ -162,10 +162,12 @@ export function runThatStopped(
   };
 }
 
+/** The record as written, giving up the least useful details first when it will not fit in a name. */
 function encodeName(run: RunRecord): string {
   const name = (r: RunRecord) => `${PREFIX}${r.at}-${r.id}-${Buffer.from(JSON.stringify(r)).toString('base64url')}`;
-  const full = name(run);
-  return full.length <= PATHNAME_MAX ? full : name({ ...run, note: null, url: run.url.slice(0, 120) });
+  const shorter = { ...run, note: null, url: run.url.slice(0, 120) };
+  const attempts = [run, shorter, { ...shorter, url: run.url.slice(0, 60), city: null }];
+  return attempts.map(name).find((n) => n.length <= PATHNAME_MAX) ?? name(attempts[2]);
 }
 
 function decodeName(pathname: string): RunRecord | null {
@@ -373,7 +375,8 @@ export function summarize(runs: RunRecord[]) {
     averageScore: average(scored.filter((r) => !r.cached).map((r) => r.overall as number)),
     averageMs: average(engineRuns.filter((r) => r.status === 'scored' || r.status === 'unscored').map((r) => r.tookMs as number)),
     bands: tally(scored.map((r) => r.band)),
-    goals: tally(runs.map((r) => r.goal)),
+    // Counted per goal, so a combined audit adds one to each goal it asked for.
+    goals: tally(runs.flatMap((r) => r.goal.split(' + '))),
     sources: tally(runs.map((r) => (r.source === 'extension' ? 'Chrome extension' : r.source === 'site' ? 'Website' : null))),
     countries: tally(runs.map((r) => countryName(r.country))),
     topSites: tally(runs.map((r) => hostOf(r.url))),

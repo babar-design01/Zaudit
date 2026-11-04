@@ -93,7 +93,8 @@ export type AuditResult = {
   /** How long the audit took, in milliseconds. */
   tookMs: number;
 
-  goal: { id: GoalId; name: string; blurb: string; heavier: string[]; toggles: string[] };
+  /** `ids` is every goal chosen. Absent on reports from when an audit had only one. */
+  goal: { id: string; ids?: GoalId[]; name: string; blurb: string; heavier: string[]; toggles: string[] };
   platforms: Platform[];
   pageType: PageTypeResult;
 
@@ -151,6 +152,10 @@ export type AuditResult = {
 export type AuditEvent =
   | { type: 'stage'; index: number }
   | { type: 'ping' }
+  /** A browser check starting, with how many came before it. */
+  | { type: 'check'; label: string; done: number; total: number }
+  /** A small capture of the page being audited. */
+  | { type: 'preview'; image: string }
   /** What the run cost, and whether it was given back. Only when accounts are on. */
   | { type: 'credits'; left: number | null; refunded?: boolean }
   | { type: 'result'; result: AuditResult }

@@ -164,8 +164,37 @@ export const GOALS: GoalDef[] = [
 
 export const DEFAULT_GOAL: GoalId = 'health';
 
+/** What an audit is actually weighted for: one goal, or several taken together. */
+export type AuditGoal = Omit<GoalDef, 'id'> & { id: string; ids: GoalId[] };
+
+/**
+ * Several goals weigh what any of them weighs, and switch on what any of them
+ * switches on. The health check is equal weight on everything, which nothing can
+ * be combined with, so it only stands when it is alone. Anything unrecognised is
+ * dropped, which is what lets this take a request's body as it came.
+ */
+export function combineGoals(asked: readonly unknown[]): AuditGoal {
+  const specific = GOALS.filter((g) => g.id !== DEFAULT_GOAL && asked.includes(g.id));
+  const goals = specific.length ? specific : GOALS.filter((g) => g.id === DEFAULT_GOAL);
+  return {
+    id: goals.map((g) => g.id).join('+'),
+    ids: goals.map((g) => g.id),
+    name: goals.map((g) => g.name).join(' + '),
+    blurb: goals.map((g) => g.blurb).join(' '),
+    heavier: [...new Set(goals.flatMap((g) => g.heavier))],
+    toggles: [...new Set(goals.flatMap((g) => g.toggles))],
+  };
+}
+
+/** One press on a goal in a picker. There is always at least one goal chosen. */
+export function toggleGoal(current: readonly GoalId[], id: GoalId): GoalId[] {
+  if (id === DEFAULT_GOAL) return [DEFAULT_GOAL];
+  const next = current.includes(id) ? current.filter((g) => g !== id) : [...current.filter((g) => g !== DEFAULT_GOAL), id];
+  return next.length ? next : [DEFAULT_GOAL];
+}
+
 /** The weight each pillar carries for a goal. A heavier pillar counts double. */
-export function weightsFor(goal: GoalDef, pillars: PillarDef[]): Record<string, number> {
+export function weightsFor(goal: Pick<GoalDef, 'heavier' | 'toggles'>, pillars: PillarDef[]): Record<string, number> {
   const out: Record<string, number> = {};
   for (const p of pillars) {
     if (p.optional && !goal.toggles.includes(p.id)) continue;

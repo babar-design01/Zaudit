@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { rememberReport } from '@/components/report/ReportView';
-import { DEFAULT_GOAL, type GoalId } from '@/lib/audit/framework';
+import { DEFAULT_GOAL, toggleGoal, type GoalId } from '@/lib/audit/framework';
 import { normalizeEmail } from '@/lib/email';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
 
@@ -22,8 +22,12 @@ export const STAGES = [
 export type AuditState = {
   stage: AuditStage;
   url: string;
-  /** The goal the audit is weighted for. */
-  goal: GoalId;
+  /** The goals the audit is weighted for. Always at least one. */
+  goals: GoalId[];
+  /** The browser check under way. Its count only rises, even if the visit is retried. */
+  check: { label: string; done: number; total: number } | null;
+  /** A capture of the page being audited, once the browser has reached it. */
+  preview: string | null;
   /** Who is asking. Required to run, and remembered for the next audit. */
   email: string;
   stageIndex: number;
@@ -49,7 +53,9 @@ export function useAudit() {
   const [state, setState] = useState<AuditState>({
     stage: 'idle',
     url: '',
-    goal: DEFAULT_GOAL,
+    goals: [DEFAULT_GOAL],
+    check: null,
+    preview: null,
     email: '',
     stageIndex: 0,
     elapsed: 0,
@@ -85,7 +91,7 @@ export function useAudit() {
   latest.current = state;
 
   const setUrl = useCallback((url: string) => setState((s) => ({ ...s, url })), []);
-  const setGoal = useCallback((goal: GoalId) => setState((s) => ({ ...s, goal })), []);
+  const pressGoal = useCallback((id: GoalId) => setState((s) => ({ ...s, goals: toggleGoal(s.goals, id) })), []);
   const setEmail = useCallback((email: string) => setState((s) => ({ ...s, email })), []);
 
   // Read after mounting, because the server has no storage to render it from.
@@ -145,6 +151,8 @@ export function useAudit() {
       ...s,
       stage: 'running',
       stageIndex: 0,
+      check: null,
+      preview: null,
       elapsed: 0,
       stageStartedAt: t0,
       error: null,
@@ -166,7 +174,7 @@ export function useAudit() {
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: target, goal: latest.current.goal, email }),
+        body: JSON.stringify({ url: target, goals: latest.current.goals, email }),
         signal: controller.signal,
       });
       if (!res.body) throw new Error('The audit stream could not be opened.');
@@ -191,6 +199,11 @@ export function useAudit() {
           const event = JSON.parse(line) as AuditEvent;
           if (event.type === 'ping') {
             continue;
+          } else if (event.type === 'check') {
+            const { label, done, total } = event;
+            setState((s) => ({ ...s, stageStartedAt: Date.now(), check: { label, total, done: Math.max(done, s.check?.done ?? 0) } }));
+          } else if (event.type === 'preview') {
+            setState((s) => ({ ...s, preview: event.image }));
           } else if (event.type === 'stage') {
             setState((s) => ({ ...s, stageIndex: event.index, stageStartedAt: Date.now() }));
           } else if (event.type === 'credits') {
@@ -199,7 +212,7 @@ export function useAudit() {
           } else if (event.type === 'result') {
             stopTick();
             rememberReport(event.result);
-            setState((s) => ({ ...s, stage: 'done', result: event.result }));
+            setState((s) => ({ ...s, stage: 'done', result: event.result, preview: s.preview ?? event.result.screenshot?.data ?? null }));
           } else if (event.type === 'error') {
             stopTick();
             setState((s) => ({ ...s, stage: 'error', error: event.message, quota: event.quota, action: event.action }));
@@ -249,7 +262,7 @@ export function useAudit() {
     });
   }, [stopTick]);
 
-  return { state, setUrl, setGoal, setEmail, openGoal, start, reset, closeDialog };
+  return { state, setUrl, pressGoal, setEmail, openGoal, start, reset, closeDialog };
 }
 
 /** Scrolls to the hero and focuses the URL field — every CTA on the page lands here. */

@@ -4,7 +4,7 @@ import { OutOfCredits, attachRun, balance, refund, spend } from '@/lib/credits';
 import { accountsEnabled } from '@/lib/db';
 import { failRun, finishRun, newRunId, startRun } from '@/lib/runs';
 import { assertPublicUrl } from '@/lib/audit/net';
-import { DEFAULT_GOAL, GOALS, type GoalId } from '@/lib/audit/framework';
+import { combineGoals } from '@/lib/audit/framework';
 import { normalizeEmail } from '@/lib/email';
 import { putReport } from '@/lib/report/store';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
@@ -80,7 +80,10 @@ function clientIp(request: Request): string {
 /* ------------------------------------------------------------------- route */
 
 /**
- * POST /api/audit  { url: string, email: string, goal?: GoalId }
+ * POST /api/audit  { url: string, email: string, goals?: GoalId[] }
+ *
+ * `goal`, a single id, is still read: extensions installed before goals could be
+ * combined keep sending it.
  *
  * Responds with a newline-delimited JSON stream so the dialog's progress list
  * reflects the real stage the engine is on rather than a timer:
@@ -95,13 +98,13 @@ function clientIp(request: Request): string {
  */
 export async function POST(request: Request) {
   let url = '';
-  let goal: GoalId = DEFAULT_GOAL;
+  let goal = combineGoals([]);
   let email: string | null = null;
   try {
-    const body = (await request.json()) as { url?: unknown; goal?: unknown; email?: unknown };
+    const body = (await request.json()) as { url?: unknown; goal?: unknown; goals?: unknown; email?: unknown };
     email = normalizeEmail(body.email);
     url = typeof body.url === 'string' ? body.url : '';
-    if (typeof body.goal === 'string' && GOALS.some((g) => g.id === body.goal)) goal = body.goal as GoalId;
+    goal = combineGoals(Array.isArray(body.goals) ? body.goals : [body.goal]);
   } catch {
     url = '';
   }
@@ -136,7 +139,7 @@ export async function POST(request: Request) {
         if (!email) throw new AuditError('An email is needed to run an audit. If you are using the Chrome extension, please update it.');
 
         // The goal changes the weighting, so it is part of what is cached.
-        const key = url.trim().toLowerCase() + '|' + goal;
+        const key = url.trim().toLowerCase() + '|' + goal.id;
         const hit = cached(key);
         if (hit) {
           // Still walk the stages, so a cached result does not flash past as a
@@ -178,14 +181,16 @@ export async function POST(request: Request) {
         // The run is named here rather than inside the engine, because the
         // credit was spent before the engine started and the two have to point
         // at each other.
-        runId = newRunId(url, goal);
-        await startRun({ id: runId, userId, url, goal, charged: !!entryId });
+        runId = newRunId(url, goal.id);
+        await startRun({ id: runId, userId, url, goal: goal.id, charged: !!entryId });
         if (entryId) await attachRun(entryId, runId);
 
         const result = await audit(url, {
-          goal,
+          goals: goal.ids,
           id: runId,
           onStage: (index) => send({ type: 'stage', index }),
+          onCheck: (check) => send({ type: 'check', ...check }),
+          onPreview: (image) => send({ type: 'preview', image }),
           signal: request.signal,
         });
         await remember(key, result);
@@ -207,7 +212,7 @@ export async function POST(request: Request) {
         if (runId) {
           await recordRun(
             runThatStopped(
-              { id: runId, url, goal, startedAt, cancelled: request.signal.aborted, error: err instanceof Error ? err.message : String(err) },
+              { id: runId, url, goal: goal.name, startedAt, cancelled: request.signal.aborted, error: err instanceof Error ? err.message : String(err) },
               who,
             ),
           );

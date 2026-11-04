@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Modal } from '@/components/ui';
 import { Logo } from '@/components/site/Logo';
-import { AUDIT_STAGE_LINES } from '@/content/homepage';
+import { AuditScanner } from './AuditScanner';
 import { GOALS, type GoalId } from '@/lib/audit/framework';
 import { normalizeEmail } from '@/lib/email';
 import { STAGES, type AuditState } from '@/hooks/useAudit';
@@ -21,25 +21,50 @@ import { color, radius, t, text, tracking } from '@/design/tokens';
  * it is the engine's.
  */
 
-/** The one-line focus each goal gets under the grid, from the design. */
-const FOCUS: Record<GoalId, string> = {
-  accessible: 'Accessibility, content and clear system states.',
-  conversion: 'Usability, content, visual hierarchy and speed.',
-  redesign: 'Visual hierarchy, consistency and content.',
-  support: 'Usability, navigation and clear system states.',
-  prelaunch: 'States, consistency, accessibility and speed.',
-  health: 'Equal weight on every area. A good default.',
+/** What each goal leans on, for the line under the grid. Combined goals lean on all of it. */
+const FOCUS: Record<Exclude<GoalId, 'health'>, string[]> = {
+  accessible: ['accessibility', 'content', 'clear system states'],
+  conversion: ['usability', 'content', 'visual hierarchy', 'speed'],
+  redesign: ['visual hierarchy', 'consistency', 'content'],
+  support: ['usability', 'navigation', 'clear system states'],
+  prelaunch: ['clear system states', 'consistency', 'accessibility', 'speed'],
 };
 
+function focusOf(goals: GoalId[]): string {
+  const areas = [...new Set(goals.flatMap((g) => (g === 'health' ? [] : FOCUS[g])))];
+  if (!areas.length) return 'Equal weight on every area. A good default.';
+  const list = areas.length > 1 ? `${areas.slice(0, -1).join(', ')} and ${areas[areas.length - 1]}` : areas[0];
+  return `${list[0].toUpperCase()}${list.slice(1)}.`;
+}
+
 /**
- * How far along the bar sits. Stage boundaries only move on a real stage event;
- * inside a stage the bar eases toward the next boundary without arriving, so it
- * says "still working" without claiming progress the engine has not reported.
+ * Where each stage starts on the bar. The browser's visit is most of an audit's
+ * time, so it gets most of the bar; the stages after it are quick by comparison.
  */
-function progressFor(stageIndex: number, secondsInStage: number): number {
-  const span = 100 / STAGES.length;
-  const creep = 1 - Math.exp(-secondsInStage / 7);
-  return Math.min(99, stageIndex * span + span * creep * 0.85);
+const STAGE_STARTS = [0, 80, 84, 90, 96, 100];
+
+/** A short name for what each stage after the browser's visit is doing. */
+const STAGE_NAMES = ['Page load', 'Page type', 'Design criteria', 'Evidence', 'Final score'];
+
+/** Roughly how many checks a browser visit reports, for the moments before it says. */
+const BROWSER_CHECK_COUNT = 18;
+
+/**
+ * How far along the bar sits. It only moves forward on what the engine reports:
+ * checks finished in the first stage, stage changes after it. Between reports it
+ * eases toward the next step without arriving, so it says "still working" without
+ * claiming progress nobody has reported.
+ */
+function progressFor(stageIndex: number, check: AuditState['check'], secondsSinceReport: number): number {
+  const start = STAGE_STARTS[stageIndex] ?? 0;
+  const span = (STAGE_STARTS[stageIndex + 1] ?? 100) - start;
+  // The first report can take a while on a cold server. Until it comes, the first
+  // stage is still many small steps: treated as one, the bar would race ahead and
+  // then jump back when the real count arrived.
+  const steps = stageIndex === 0 ? (check?.total ?? BROWSER_CHECK_COUNT) : 1;
+  const stepsDone = stageIndex === 0 && check ? check.done : 0;
+  const creep = 1 - Math.exp(-secondsSinceReport / 7);
+  return Math.min(99, start + (span / steps) * (stepsDone + creep * 0.85));
 }
 
 const eyebrow = { font: text.eyebrow, letterSpacing: tracking.eyebrow, textTransform: 'uppercase' as const, color: color.accentFg };
@@ -82,19 +107,19 @@ function Tick() {
 export function AuditDialog({
   state,
   start,
-  setGoal,
+  pressGoal,
   setEmail,
   close,
 }: {
   state: AuditState;
   start: () => void;
-  setGoal: (g: GoalId) => void;
+  pressGoal: (g: GoalId) => void;
   setEmail: (email: string) => void;
   close: () => void;
 }) {
   const router = useRouter();
   const [emailRefused, setEmailRefused] = useState(false);
-  const { stage, url, goal, email, stageIndex, elapsed, stageStartedAt, result, error, action, credits, refunded, dialogOpen } = state;
+  const { stage, url, goals, check, preview, email, stageIndex, elapsed, stageStartedAt, result, error, action, credits, refunded, dialogOpen } = state;
 
   let host = '';
   try {
@@ -104,14 +129,14 @@ export function AuditDialog({
   }
 
   const secondsInStage = stageStartedAt ? Math.max(0, (Date.now() - stageStartedAt) / 1000) : 0;
-  const pct = stage === 'done' ? 100 : Math.round(progressFor(stageIndex, secondsInStage));
-  const line = AUDIT_STAGE_LINES[stageIndex]?.[0] ?? '';
+  const pct = stage === 'done' ? 100 : Math.round(progressFor(stageIndex, check, secondsInStage));
+  const checking = stageIndex === 0 && check ? check.label : STAGE_NAMES[stageIndex];
 
   const title =
-    stage === 'goal' ? 'Pick a goal for your audit' : stage === 'done' ? 'Audit complete' : stage === 'error' ? 'The audit could not complete' : `Auditing ${host}`;
+    stage === 'goal' ? 'Pick the goals for your audit' : stage === 'done' ? 'Audit complete' : stage === 'error' ? 'The audit could not complete' : `Auditing ${host}`;
 
   return (
-    <Modal open={dialogOpen} onClose={close} title={title} dismissOnBackdrop={stage !== 'running'} width={540}>
+    <Modal open={dialogOpen} onClose={close} title={title} dismissOnBackdrop={stage !== 'running'} width={stage === 'running' || stage === 'done' ? 940 : 540}>
       {/* header: the logo and a square close */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '16px 16px 16px 28px', borderBottom: `1px solid ${color.border}` }}>
         <Logo height={16} />
@@ -137,21 +162,21 @@ export function AuditDialog({
               <span style={eyebrow}>Step 1 of 2 · {host}</span>
               <h2 style={heading}>What is this audit for?</h2>
               <p style={{ margin: 0, font: t(400, 14, 22), color: color.inkSecondary }}>
-                Every check runs either way. Your goal decides what counts most.
+                Every check runs either way. Pick one or more goals to decide what counts most.
               </p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div role="radiogroup" aria-label="Audit goal" data-goal-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+              <div role="group" aria-label="Audit goals" data-goal-grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
                 {GOALS.map((g) => {
-                  const on = g.id === goal;
+                  const on = goals.includes(g.id);
                   return (
                     <button
                       key={g.id}
                       type="button"
-                      role="radio"
+                      role="checkbox"
                       aria-checked={on}
-                      onClick={() => setGoal(g.id)}
+                      onClick={() => pressGoal(g.id)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -176,9 +201,9 @@ export function AuditDialog({
                   );
                 })}
               </div>
-              <p key={goal} data-goal-note style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'baseline', font: t(400, 13, 20), color: color.inkSecondary }}>
+              <p key={goals.join()} data-goal-note style={{ margin: 0, display: 'flex', gap: 8, alignItems: 'baseline', font: t(400, 13, 20), color: color.inkSecondary }}>
                 <span style={{ fontWeight: 600, color: color.accentFg }}>Focus</span>
-                {FOCUS[goal]}
+                {focusOf(goals)}
               </p>
             </div>
 
@@ -235,7 +260,9 @@ export function AuditDialog({
 
         {/* ------------------------------------------ step 2: running, done */}
         {(stage === 'running' || stage === 'done') && (
-          <>
+          <div data-audit-run style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(300px, 100%), 1fr))', gap: 24 }}>
+            <AuditScanner host={host} image={preview} label={stage === 'done' ? 'Scan complete' : checking} finished={stage === 'done'} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
                 <span style={eyebrow}>Step 2 of 2 · {host}</span>
@@ -252,12 +279,12 @@ export function AuditDialog({
                 <div style={{ width: `${Math.max(2, pct)}%`, height: '100%', borderRadius: radius.button, background: color.blue, transition: 'width .6s cubic-bezier(.2,.7,.2,1)' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <span key={stageIndex} data-status aria-live="polite" style={{ font: t(400, 13, 20), color: color.inkSecondary }}>
+                <span key={stageIndex} data-status style={{ font: t(400, 13, 20), color: color.inkSecondary }}>
                   {stage === 'done' && result
                     ? `${result.findings.length} issue${result.findings.length === 1 ? '' : 's'} found, ranked by what to fix first`
-                    : line}
+                    : <>Checking <b style={{ fontWeight: 600, color: color.ink }}>{checking}</b>{stageIndex === 0 && check ? ` · ${check.done + 1} of ${check.total}` : ''}</>}
                 </span>
-                <span style={{ font: t(500, 13, 20), color: color.inkMuted }}>{elapsed}s</span>
+                <span style={{ flex: 'none', font: t(500, 13, 20), color: color.inkMuted }}>{elapsed}s</span>
               </div>
             </div>
 
@@ -320,7 +347,8 @@ export function AuditDialog({
                 </div>
               </div>
             )}
-          </>
+            </div>
+          </div>
         )}
 
         {/* ---------------------------------------------------------- error */}

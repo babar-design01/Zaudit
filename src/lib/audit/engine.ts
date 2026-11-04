@@ -1,13 +1,13 @@
 import { createHash } from 'node:crypto';
 import { annotate, overview } from './annotate';
-import { axeVersion, gotoLoader, measurePage, type Measured } from './browser';
+import { axeVersion, gotoLoader, measurePage, type Measured, type OnCheck } from './browser';
 import { CRITERIA, PILLARS, criterion as criterionOf, pillar as pillarOf } from './catalog';
 import { classifyBySignals } from './classify';
 import { VIEWPORT, type ContractFinding, type PageTypeResult } from './contract';
 import { docFacts, parseHtml, type DocFacts } from './document';
 import { evaluate, holdAssisted, type Evaluation } from './evaluate';
 import { FetchError, fetchPage, type PageFetch } from './fetch';
-import { DEFAULT_GOAL, GOALS, weightsFor, type GoalId, type Platform, type Severity, type Verdict } from './framework';
+import { DEFAULT_GOAL, combineGoals, weightsFor, type GoalId, type Platform, type Severity, type Verdict } from './framework';
 import { UnsafeUrlError, assertPublicUrl } from './net';
 import { classifyWithModel, describeModelError, modelAvailable, reviewFindings } from './review';
 import { expertReview } from './expert';
@@ -44,10 +44,10 @@ export class AuditError extends Error {
  */
 export async function audit(
   rawUrl: string,
-  { goal: goalId = DEFAULT_GOAL, onStage, signal, id: givenId }: { goal?: GoalId; onStage?: (index: number) => void; signal?: AbortSignal; /** The caller's own id for this run, when it has already named it. */ id?: string } = {},
+  { goals = [DEFAULT_GOAL], onStage, onCheck, onPreview, signal, id: givenId }: { goals?: GoalId[]; onStage?: (index: number) => void; onCheck?: OnCheck; onPreview?: (image: string) => void; signal?: AbortSignal; /** The caller's own id for this run, when it has already named it. */ id?: string } = {},
 ): Promise<AuditResult> {
   const startedAt = Date.now();
-  const goal = GOALS.find((g) => g.id === goalId) ?? GOALS.find((g) => g.id === DEFAULT_GOAL)!;
+  const goal = combineGoals(goals);
   const stage = (i: number) => onStage?.(i);
   const cancelled = () => {
     if (signal?.aborted) throw new AuditError('The audit was cancelled.');
@@ -70,7 +70,7 @@ export async function audit(
       (error: unknown) => ({ ok: false as const, error }),
     ),
     wantBrowser
-      ? measureWithRetry(url.href, signal).then(
+      ? measureWithRetry(url.href, { signal, onCheck, onPreview }).then(
           (value) => ({ ok: true as const, value }),
           (error: unknown) => ({ ok: false as const, error }),
         )
@@ -273,7 +273,7 @@ export async function audit(
     finalUrl: source.url,
     fetchedAt: new Date().toISOString(),
     tookMs: Date.now() - startedAt,
-    goal: { id: goal.id, name: goal.name, blurb: goal.blurb, heavier: goal.heavier.map((h) => pillarOf(h).name), toggles: goal.toggles.map((t) => pillarOf(t).name) },
+    goal: { id: goal.id, ids: goal.ids, name: goal.name, blurb: goal.blurb, heavier: goal.heavier.map((h) => pillarOf(h).name), toggles: goal.toggles.map((t) => pillarOf(t).name) },
     platforms,
     pageType,
     overall: thin ? null : scored.overall,
@@ -311,14 +311,14 @@ const RETRY_WITHIN_MS = 120_000;
  * One more try when the browser fails. A slow load or a crashed renderer is
  * usually gone on the second visit, and without the browser there is no score.
  */
-async function measureWithRetry(url: string, signal?: AbortSignal): Promise<Measured | null> {
+async function measureWithRetry(url: string, options: { signal?: AbortSignal; onCheck?: OnCheck; onPreview?: (image: string) => void }): Promise<Measured | null> {
   const started = Date.now();
   try {
-    return await measurePage(gotoLoader(url), { signal });
+    return await measurePage(gotoLoader(url), options);
   } catch (err) {
-    if (signal?.aborted || Date.now() - started > RETRY_WITHIN_MS) throw err;
+    if (options.signal?.aborted || Date.now() - started > RETRY_WITHIN_MS) throw err;
     console.warn('audit: retrying the browser measurement —', reason(err));
-    return measurePage(gotoLoader(url), { signal });
+    return measurePage(gotoLoader(url), options);
   }
 }
 

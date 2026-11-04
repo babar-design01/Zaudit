@@ -57,7 +57,7 @@ export type Scoring = {
   coverage: { assessed: number; total: number; byMethod: Record<string, { assessed: number; total: number }> };
 };
 
-export function score(criteria: CriterionReport[], findings: ContractFinding[], goal: GoalDef): Scoring {
+export function score(criteria: CriterionReport[], findings: ContractFinding[], goal: Pick<GoalDef, 'heavier' | 'toggles'>): Scoring {
   const weights = weightsFor(goal, PILLARS as PillarDef[]);
   const confirmed = findings.filter((f) => f.status === 'confirmed');
 

@@ -1109,6 +1109,31 @@ async function probeReflow(page: Page): Promise<ReflowProbe> {
 
 /* ================================================================ visit */
 
+/** The checks a visit runs, in order, so progress can be stated as how many are behind it. */
+const BROWSER_CHECKS = [
+  'Page load',
+  'Page structure',
+  'Usability patterns',
+  'Interface elements',
+  'Accessibility rules',
+  'Motion and flashing',
+  'Keyboard navigation',
+  'Reduced motion',
+  'Dialogs and forms',
+  'Page speed',
+  'Technical quality',
+  'Broken links',
+  'Hover and focus states',
+  'Dark mode',
+  'Long content',
+  'Full page capture',
+  'Small screen layout',
+  'Phone layout',
+] as const;
+
+/** Called as each check starts. `done` is how many came before it. */
+export type OnCheck = (check: { label: string; done: number; total: number }) => void;
+
 /**
  * The page as a keyboard-and-screen user meets it, measured.
  *
@@ -1117,8 +1142,10 @@ async function probeReflow(page: Page): Promise<ReflowProbe> {
  */
 export async function measurePage(
   load: (page: Page) => Promise<number | null>,
-  { signal }: { signal?: AbortSignal } = {},
+  { signal, onCheck, onPreview }: { signal?: AbortSignal; onCheck?: OnCheck; onPreview?: (image: string) => void } = {},
 ): Promise<Measured | null> {
+  const check = (name: (typeof BROWSER_CHECKS)[number]) => onCheck?.({ label: name, done: BROWSER_CHECKS.indexOf(name), total: BROWSER_CHECKS.length });
+  check('Page load');
   const b = await browser();
   if (!b) return null;
   const context = await newContext(b);
@@ -1157,19 +1184,33 @@ export async function measurePage(
     await page.evaluate(installHelpers, { vw: VIEWPORT.width, vh: VIEWPORT.height });
     const screenshot = await page.screenshot({ type: 'png', animations: 'allow', caret: 'initial' });
     const baseline = await raw(screenshot);
+    // Small on purpose: this is the reader's view of the audit, not evidence.
+    if (onPreview) {
+      await sharp(screenshot)
+        .resize({ width: 720, withoutEnlargement: true })
+        .webp({ quality: 60 })
+        .toBuffer()
+        .then((small) => onPreview(`data:image/webp;base64,${small.toString('base64')}`))
+        .catch(() => {});
+    }
 
+    check('Page structure');
     const facts = await step(() => page.evaluate(collectFacts));
+    check('Usability patterns');
     const ux = await step(() => page.evaluate(collectUxFacts));
+    check('Interface elements');
     const ui = await step(() => page.evaluate(collectUiFacts));
     const imageText: StepResult<ImageSample[]> = ui.ok
       ? await step(async () => sampleImageText(baseline, ui.value.imageText))
       : { ok: false, error: 'the UI facts could not be read', ms: 0 };
 
+    check('Accessibility rules');
     const axeResult = await step(async () => {
       await page.addScriptTag({ content: axe() });
       return page.evaluate(runAxe, AXE_RULES);
     });
 
+    check('Motion and flashing');
     const f = facts.ok ? facts.value : null;
     const animated = f
       ? f.animatedSources.animations + f.animatedSources.video + f.animatedSources.canvas + f.animatedSources.gif
@@ -1177,8 +1218,10 @@ export async function measurePage(
     const flash = f && animated > 0 ? await step(() => measureFlash(page)) : null;
 
     if (signal?.aborted) throw new Error('cancelled');
+    check('Keyboard navigation');
     const keyboard = await step(() => walkKeyboard(page, baseline, f?.focusableCount ?? 60));
 
+    check('Reduced motion');
     const reduce = await step(async () => {
       const ids = (f?.motion ?? []).filter((m) => m.inView).map((m) => m.id);
       if (!ids.length) return {};
@@ -1190,13 +1233,17 @@ export async function measurePage(
     if (signal?.aborted) throw new Error('cancelled');
     // Interaction comes last: everything above measured the page untouched.
     const uxv = ux.ok ? ux.value : null;
+    check('Dialogs and forms');
     const modal = uxv?.modal ? await step(() => probeModal(page, uxv.modal!)) : null;
     const forms: StepResult<FormProbe[]> = uxv
       ? await step(() => probeForms(page, uxv))
       : { ok: false, error: 'the usability facts could not be read', ms: 0 };
+    check('Page speed');
     const toasts = await step(() => page.evaluate(readToasts));
     const vitals = await step(() => page.evaluate(readVitals));
+    check('Technical quality');
     const tech = await step(() => page.evaluate(collectTechFacts));
+    check('Broken links');
     const links: StepResult<LinkCheck[]> = tech.ok
       ? await step(() => checkLinks(page, tech.value.links))
       : { ok: false, error: 'the page facts could not be read', ms: 0 };
@@ -1209,14 +1256,20 @@ export async function measurePage(
     });
     await page.waitForTimeout(150);
     const noUi = { ok: false as const, error: 'the UI facts could not be read', ms: 0 };
+    check('Hover and focus states');
     const states = uiv ? await step(() => probeStates(page, uiv)) : noUi;
+    check('Dark mode');
     const dark = uiv ? await step(() => probeDark(page, uiv)) : noUi;
+    check('Long content');
     const stress = uiv ? await step(() => probeStress(page, uiv)) : noUi;
     // Last, because it changes the window: everything above measured 1440×900.
+    check('Full page capture');
     const full = await step(() => captureFullPage(page, VIEWPORT.width, FULL_PAGE_MAX, 'd'));
+    check('Small screen layout');
     const reflow = await step(() => probeReflow(page));
     // A phone is a second visit, in its own context: this page has been typed
     // into, tabbed through and resized, and none of that belongs in it.
+    check('Phone layout');
     const mobile = await step(() => probeMobile(b, load, signal));
 
     return {

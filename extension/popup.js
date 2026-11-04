@@ -10,6 +10,7 @@ const STAGES = [
 ];
 
 /** Mirrors GOALS in src/lib/audit/framework.ts, with the default first. */
+const DEFAULT_GOAL = 'health';
 const GOALS = [
   ['health', 'General health check'],
   ['conversion', 'Improve conversion'],
@@ -25,7 +26,7 @@ let clock = null;
 /** The result this popup is showing, held so it stays up once it has been marked as seen. */
 let shown = null;
 /** Set when the reader asks to run this page again, so its old result stops answering for it. */
-let rerunGoal = null;
+let rerunGoals = null;
 
 /** Builds an element. Audit text comes from other people's pages, so it only ever goes in as text. */
 function h(tag, props = {}, ...children) {
@@ -57,17 +58,27 @@ function reportUrl(id) {
   return `${SITE}/report/${encodeURIComponent(id)}`;
 }
 
-function start(url, goal) {
+function start(url, goals) {
   shown = null;
-  rerunGoal = null;
-  chrome.runtime.sendMessage({ type: 'start', url, goal });
+  rerunGoals = null;
+  chrome.runtime.sendMessage({ type: 'start', url, goals });
 }
+
+/** Mirrors toggleGoal in src/lib/audit/framework.ts. */
+function toggleGoal(current, id) {
+  if (id === DEFAULT_GOAL) return [DEFAULT_GOAL];
+  const next = current.includes(id) ? current.filter((g) => g !== id) : [...current.filter((g) => g !== DEFAULT_GOAL), id];
+  return next.length ? next : [DEFAULT_GOAL];
+}
+
+/** Results saved before goals could be combined hold a single id. */
+const goalsOf = (summary) => summary.goals ?? (summary.goalId ? [summary.goalId] : [DEFAULT_GOAL]);
 
 async function refresh() {
   clearInterval(clock);
-  const [{ run }, { recent = [], goal = 'health', email = '' }] = await Promise.all([
+  const [{ run }, { recent = [], goal = DEFAULT_GOAL, goals = [goal], email = '' }] = await Promise.all([
     chrome.storage.session.get('run'),
-    chrome.storage.local.get(['recent', 'goal', 'email']),
+    chrome.storage.local.get(['recent', 'goal', 'goals', 'email']),
   ]);
 
   if (run?.status === 'running') {
@@ -82,16 +93,27 @@ async function refresh() {
     await chrome.action.setBadgeText({ text: '' });
   }
 
-  const summary = shown || (rerunGoal ? null : recent.find((r) => r.url === tabUrl));
-  view.replaceChildren(...(summary ? resultView(summary) : idleView(rerunGoal || goal, recent, email)));
+  const summary = shown || (rerunGoals ? null : recent.find((r) => r.url === tabUrl));
+  view.replaceChildren(...(summary ? resultView(summary) : idleView(rerunGoals || goals, recent, email)));
 }
 
-function idleView(goal, recent, email) {
-  const select = h(
-    'select',
-    { onchange: () => chrome.storage.local.set({ goal: select.value }) },
-    ...GOALS.map(([id, name]) => h('option', { value: id, textContent: name, selected: id === goal })),
-  );
+function idleView(goals, recent, email) {
+  let chosen = goals;
+  const boxes = GOALS.map(([id, name]) => {
+    const input = h('input', {
+      type: 'checkbox',
+      checked: chosen.includes(id),
+      onchange: () => {
+        chosen = toggleGoal(chosen, id);
+        // Choosing one goal can clear another, so every box is set again.
+        boxes.forEach((box) => {
+          box.input.checked = chosen.includes(box.id);
+        });
+        chrome.storage.local.set({ goals: chosen });
+      },
+    });
+    return { id, input, label: h('label', { className: 'check' }, input, name) };
+  });
   const emailInput = h('input', { type: 'email', value: email, placeholder: 'you@company.com', autocomplete: 'email', required: true });
   const emailNote = h('p', { className: 'muted', textContent: 'Required. We keep it with your audit and may contact you about your results.' });
   const run = async (event) => {
@@ -106,7 +128,7 @@ function idleView(goal, recent, email) {
     }
     // Stored first, because the worker reads it from here.
     await chrome.storage.local.set({ email: typed });
-    start(tabUrl, select.value);
+    start(tabUrl, chosen);
   };
   const heading = tabUrl
     ? [h('h1', { textContent: 'Audit this page' }), h('p', { className: 'host', textContent: tabUrl })]
@@ -118,7 +140,7 @@ function idleView(goal, recent, email) {
       ? h(
           'form',
           { className: 'section form', noValidate: true, onsubmit: run },
-          h('label', {}, 'What is the goal?', select),
+          h('fieldset', { className: 'goals' }, h('legend', { textContent: 'Goals (pick one or more)' }), ...boxes.map((box) => box.label)),
           h('label', {}, 'Your email', emailInput),
           emailNote,
           h('button', { className: 'primary', type: 'submit', textContent: 'Run audit' }),
@@ -163,7 +185,7 @@ function runningView(run) {
   clock = setInterval(tick, 1000);
 
   return [
-    h('div', { className: 'section' }, h('h1', { textContent: 'Auditing…' }), h('p', { className: 'host', textContent: run.url })),
+    h('div', { className: 'section' }, h('h1', { textContent: 'Auditing…' }), h('p', { className: 'host', textContent: run.url }), run.check ? h('p', { className: 'muted', textContent: `Checking ${run.check}` }) : null),
     h(
       'ol',
       { className: 'stages' },
@@ -205,7 +227,7 @@ function errorView(run) {
       { className: 'actions' },
       fix
         ? h('button', { className: 'primary', textContent: fix[0], onclick: () => dismiss().then(() => openTab(fix[1])) })
-        : h('button', { className: 'primary', textContent: 'Try again', onclick: () => dismiss().then(() => start(run.url, run.goal)) }),
+        : h('button', { className: 'primary', textContent: 'Try again', onclick: () => dismiss().then(() => start(run.url, run.goals ?? [DEFAULT_GOAL])) }),
       h('button', { className: 'secondary', textContent: 'Back', onclick: dismiss }),
     ),
   ];
@@ -235,7 +257,7 @@ function unscoredView(summary) {
     h(
       'div',
       { className: 'actions' },
-      h('button', { className: 'primary', textContent: 'Try again', onclick: () => start(summary.url, summary.goalId) }),
+      h('button', { className: 'primary', textContent: 'Try again', onclick: () => start(summary.url, goalsOf(summary)) }),
       h('button', { className: 'secondary', textContent: 'See what was checked', onclick: () => openTab(reportUrl(summary.id)) }),
     ),
   ];
@@ -249,7 +271,7 @@ function resultView(summary) {
     shown = null;
     // Back to the form, so a second run can use a different goal. For another
     // page, this goes to whatever this tab already has.
-    if (isThisTab) rerunGoal = summary.goalId;
+    if (isThisTab) rerunGoals = goalsOf(summary);
     refresh();
   };
 
