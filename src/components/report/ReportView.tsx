@@ -83,7 +83,8 @@ export function ReportView({ id, initial = null }: { id: string; initial?: Audit
 
   return (
     <div style={{ minHeight: '100vh', background: color.bg, color: color.ink }}>
-      <div data-print-hide>
+      {/* No box of its own, or the nav would only stay pinned within it. */}
+      <div data-print-hide style={{ display: 'contents' }}>
         <SiteNav current={id === 'sample' ? 'sample' : undefined} />
       </div>
 

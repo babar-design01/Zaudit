@@ -11,7 +11,7 @@ import { Pricing } from '@/components/home/Pricing';
 import { Problem } from '@/components/home/Problem';
 import { Proof } from '@/components/home/Proof';
 import { Solutions } from '@/components/home/Solutions';
-import { Stories } from '@/components/home/Stories';
+// import { Stories } from '@/components/home/Stories';
 import { AuditDialog } from '@/components/sections/AuditDialog';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav, type Account } from '@/components/site/SiteNav';
@@ -51,7 +51,8 @@ export function Homepage({ account = null, accounts = false }: { account?: Accou
         <Features onRunAudit={openGoal} />
         <Covered onRunAudit={openGoal} />
         <Solutions onRunAudit={openGoal} />
-        <Stories />
+        {/* Hidden until there are real customer results to show. */}
+        {/* <Stories /> */}
         <Pricing onRunAudit={openGoal} />
         <Faq onRunAudit={openGoal} />
         <ClosingCta onRunAudit={openGoal} />

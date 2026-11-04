@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button, ButtonLink } from '@/components/ui';
-import { color, hairline, layout, radius, t } from '@/design/tokens';
+import { color, layout, radius, t } from '@/design/tokens';
 import { Logo } from './Logo';
 
 /** Who is signed in and what they have left, when accounts are switched on. */
@@ -19,8 +19,9 @@ const LINKS = [
 /**
  * The nav, identical on the homepage and the report.
  *
- * 72px, white, a bottom hairline. Logo left; the links sit right, beside the
- * one small primary action. On the report "Sample report" is the current page.
+ * 72px, white, a bottom hairline, pinned to the top of the window. Logo left; the
+ * links sit right, beside the one small primary action. On the report "Sample
+ * report" is the current page.
  */
 export function SiteNav({
   onRunAudit,
@@ -46,8 +47,18 @@ export function SiteNav({
     return () => document.removeEventListener('keydown', onKey);
   }, [open]);
 
+  // Solid at the top of the page, glass once there is something to see through
+  // it. Read on mount too, because a reload can land halfway down the page.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <header style={{ position: 'relative', background: color.surface, borderBottom: hairline() }}>
+    <header className="site-nav" data-scrolled={scrolled ? '' : undefined}>
       <div
         style={{
           maxWidth: layout.frame,

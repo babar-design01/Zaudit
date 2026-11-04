@@ -87,6 +87,42 @@ a {
   text-decoration: none;
 }
 
+/* A link to a section stops clear of the pinned nav rather than underneath it. */
+html {
+  scroll-padding-top: 88px;
+}
+
+/* The nav stays pinned, under the dialog (60) and over the page's own layers. */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s ease;
+}
+
+.site-nav[data-scrolled] {
+  background: color-mix(in srgb, var(--surface) 68%, transparent);
+  -webkit-backdrop-filter: saturate(170%) blur(16px);
+  backdrop-filter: saturate(170%) blur(16px);
+}
+
+/* Without the blur, or for someone who asked for less of it, text needs a solid ground. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-nav[data-scrolled] {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .site-nav[data-scrolled] {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 /* Headings balance, paragraphs read pretty — the brand book's rule. */
 h1,
 h2,

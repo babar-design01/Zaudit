@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, type MouseEvent } from 'react';
+import { ProofCapture } from './ProofCapture';
 
 export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
   const run = (e: MouseEvent) => {
@@ -42,9 +43,8 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.25fr) minmax(0, 1fr)" }}>
               {/* annotated capture */}
               <div style={{ background: "#FFFFFF", borderRight: "1px solid var(--border)", padding: "24px" }}>
-                <div role="img" aria-label="Audix UX audit report showing a high-impact finding on a primary call-to-action button" style={{ position: "relative", height: "520px", border: "1px dashed var(--border-strong)", borderRadius: "8px", background: "#F3F3F3", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ font: "400 13px/18px var(--font-sans)", color: "var(--ink-muted)" }}>Drop the annotated page capture</span>
-                  <span style={{ position: "absolute", left: "20px", bottom: "20px", width: "26px", height: "26px", borderRadius: "8px", background: "var(--critical)", color: "#FFFFFF", font: "500 13px/26px var(--font-sans)", textAlign: "center" }}>1</span>
+                <div role="img" aria-label="An example page where the Start free trial and Learn more buttons look identical. Audix outlines both and marks them as finding 1." style={{ position: "relative", height: "520px", border: "1px solid var(--border)", borderRadius: "8px", background: "#FFFFFF" }}>
+                  <ProofCapture />
                 </div>
               </div>
       
