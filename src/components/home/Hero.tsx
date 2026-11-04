@@ -39,7 +39,7 @@ export function Hero({ onRunAudit, url, setUrl }: { onRunAudit: () => void; url:
               </div>
             </div>
       
-            <p style={{ margin: "0", font: "400 13px/18px var(--font-sans)", color: "var(--ink-muted)" }}>No sign-up. No credit card. First audit is free.</p>
+            <p style={{ margin: "0", font: "400 13px/18px var(--font-sans)", color: "var(--ink-muted)" }}>No account needed. No credit card. First audit is free.</p>
           </div>
         </div>
       </section>

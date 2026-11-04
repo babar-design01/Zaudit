@@ -37,14 +37,20 @@ export type RunRecord = {
   minor: number;
   /** Whether the model reviewed the page, which is the part that costs money. */
   expert: boolean;
+  /** As typed: nothing confirms the person owns it. Null on audits from before it was asked for. */
+  email: string | null;
   /** A keyed hash of the network address. Null on reports from before the log. */
   visitor: string | null;
   source: 'site' | 'extension' | null;
   country: string | null;
+  city: string | null;
+  browser: string | null;
+  os: string | null;
+  device: string | null;
   note: string | null;
 };
 
-export type Requester = Pick<RunRecord, 'visitor' | 'source' | 'country'>;
+export type Requester = Pick<RunRecord, 'email' | 'visitor' | 'source' | 'country' | 'city' | 'browser' | 'os' | 'device'>;
 
 const DISK_FILE = '.data/runs.jsonl';
 const PREFIX = 'runs/';
@@ -68,13 +74,36 @@ export function hostOf(url: string): string {
   }
 }
 
+/** First match wins, so each browser sits above the ones it also names in its user agent. */
+function parseAgent(ua: string): Pick<RunRecord, 'browser' | 'os' | 'device'> {
+  if (!ua) return { browser: null, os: null, device: null };
+  const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Other';
+  const os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Other';
+  const device = /iPad|Tablet/.test(ua) ? 'Tablet' : /Mobi|iPhone|Android/.test(ua) ? 'Phone' : 'Desktop';
+  return { browser, os, device };
+}
+
+function cityOf(request: Request): string | null {
+  const raw = request.headers.get('x-vercel-ip-city');
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw).slice(0, 40);
+  } catch {
+    return raw.slice(0, 40);
+  }
+}
+
 /**
- * Enough to count different visitors without keeping anyone's address. People
- * sharing an office network count as one, so this reads low rather than high.
+ * Who asked. The network address is only ever kept as a hash, which is enough to
+ * tell repeat visitors apart. People sharing an office network share one hash, so
+ * the email is what separates them.
  */
-export function requester(request: Request, ip: string): Requester {
+export function requester(request: Request, ip: string, email: string | null): Requester {
   const key = process.env.BLOB_READ_WRITE_TOKEN || 'local';
   return {
+    email,
+    city: cityOf(request),
+    ...parseAgent(request.headers.get('user-agent') || ''),
     visitor: createHmac('sha256', key).update(ip).digest('hex').slice(0, 10),
     source: (request.headers.get('origin') || '').startsWith('chrome-extension://') ? 'extension' : 'site',
     country: request.headers.get('x-vercel-ip-country'),
@@ -185,6 +214,8 @@ async function listBlobRuns(): Promise<{ runs: RunRecord[]; backfilled: boolean 
   return { runs, backfilled };
 }
 
+const NOBODY: Requester = { email: null, visitor: null, source: null, country: null, city: null, browser: null, os: null, device: null };
+
 /**
  * Audits from before this log have a report but no record. Each is read once and
  * given one, a few per view, so the first visit to the page does not have to pay
@@ -209,7 +240,7 @@ async function backfill(runs: RunRecord[]): Promise<RunRecord[]> {
   for (const id of missing.slice(0, BACKFILL_PER_VIEW)) {
     const result = await getReport(id);
     if (!result) continue;
-    const run = runFromResult(result, { visitor: null, source: null, country: null }, false);
+    const run = runFromResult(result, NOBODY, false);
     await recordRun(run);
     added.push(run);
   }
@@ -254,6 +285,74 @@ function tally(values: (string | null)[], limit = 8): Tally[] {
 
 const average = (values: number[]) => (values.length ? values.reduce((a, b) => a + b, 0) / values.length : null);
 
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+/** Vercel sends a two-letter code. An unknown one is shown as it came. */
+export function countryName(code: string | null): string | null {
+  if (!code) return null;
+  try {
+    return countryNames.of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+/** The same person across audits: their email when they gave one, or else their network. */
+export function personKey(run: RunRecord): string | null {
+  return run.email ?? (run.visitor ? `visitor:${run.visitor}` : null);
+}
+
+export type Person = {
+  key: string;
+  email: string | null;
+  visitor: string | null;
+  country: string | null;
+  city: string | null;
+  browser: string | null;
+  os: string | null;
+  device: string | null;
+  source: RunRecord['source'];
+  audits: number;
+  sites: number;
+  averageScore: number | null;
+  firstSeen: number;
+  lastSeen: number;
+};
+
+/** Everyone who ran an audit, most recently active first. Details come from their latest audit. */
+export function peopleFrom(runs: RunRecord[]): Person[] {
+  const groups = new Map<string, RunRecord[]>();
+  for (const run of runs) {
+    const key = personKey(run);
+    if (!key) continue;
+    const group = groups.get(key);
+    if (group) group.push(run);
+    else groups.set(key, [run]);
+  }
+  return [...groups.entries()]
+    .map(([key, group]) => {
+      const byTime = [...group].sort((a, b) => b.at - a.at);
+      const latest = byTime[0];
+      return {
+        key,
+        email: latest.email,
+        visitor: latest.visitor,
+        country: latest.country,
+        city: latest.city,
+        browser: latest.browser,
+        os: latest.os,
+        device: latest.device,
+        source: latest.source,
+        audits: group.length,
+        sites: new Set(group.map((r) => hostOf(r.url))).size,
+        averageScore: average(group.filter((r) => r.status === 'scored' && !r.cached).map((r) => r.overall as number)),
+        firstSeen: byTime[byTime.length - 1].at,
+        lastSeen: latest.at,
+      };
+    })
+    .sort((a, b) => b.lastSeen - a.lastSeen);
+}
+
 export function summarize(runs: RunRecord[]) {
   const finished = runs.filter((r) => r.status !== 'cancelled');
   const scored = runs.filter((r) => r.status === 'scored');
@@ -261,7 +360,8 @@ export function summarize(runs: RunRecord[]) {
   const engineRuns = runs.filter((r) => !r.cached);
   return {
     audits: runs.length,
-    visitors: new Set(runs.map((r) => r.visitor).filter(Boolean)).size,
+    people: new Set(runs.map(personKey).filter(Boolean)).size,
+    emails: new Set(runs.map((r) => r.email).filter(Boolean)).size,
     sites: new Set(runs.map((r) => hostOf(r.url))).size,
     scored: scored.length,
     finished: finished.length,
@@ -275,15 +375,15 @@ export function summarize(runs: RunRecord[]) {
     bands: tally(scored.map((r) => r.band)),
     goals: tally(runs.map((r) => r.goal)),
     sources: tally(runs.map((r) => (r.source === 'extension' ? 'Chrome extension' : r.source === 'site' ? 'Website' : null))),
-    countries: tally(runs.map((r) => r.country)),
+    countries: tally(runs.map((r) => countryName(r.country))),
     topSites: tally(runs.map((r) => hostOf(r.url))),
     reasons: tally(runs.filter((r) => r.status === 'unscored' || r.status === 'failed').map((r) => r.note ?? 'No reason recorded')),
   };
 }
 
 const CSV_COLUMNS = [
-  'date', 'site', 'url', 'goal', 'status', 'score', 'band', 'critical', 'major', 'minor', 'findings', 'seconds',
-  'cached', 'expert_review', 'source', 'country', 'visitor', 'report_id', 'note',
+  'date', 'email', 'site', 'url', 'goal', 'status', 'score', 'band', 'critical', 'major', 'minor', 'findings', 'seconds',
+  'cached', 'expert_review', 'source', 'country', 'city', 'browser', 'os', 'device', 'visitor', 'report_id', 'note',
 ] as const;
 
 /** A spreadsheet runs a cell starting with one of these as a formula, and URLs and errors come from outside. */
@@ -296,11 +396,24 @@ function csvCell(value: unknown): string {
 export function runsToCsv(runs: RunRecord[]): string {
   const rows = runs.map((r) =>
     [
-      new Date(r.at).toISOString(), hostOf(r.url), r.url, r.goal, r.status, r.overall, r.band, r.critical, r.major, r.minor, r.findings,
-      r.tookMs == null ? '' : Math.round(r.tookMs / 1000), r.cached, r.expert, r.source, r.country, r.visitor, r.id, r.note,
+      new Date(r.at).toISOString(), r.email, hostOf(r.url), r.url, r.goal, r.status, r.overall, r.band, r.critical, r.major, r.minor, r.findings,
+      r.tookMs == null ? '' : Math.round(r.tookMs / 1000), r.cached, r.expert, r.source, countryName(r.country), r.city, r.browser, r.os, r.device, r.visitor, r.id, r.note,
     ]
       .map(csvCell)
       .join(','),
   );
   return [CSV_COLUMNS.join(','), ...rows].join('\r\n') + '\r\n';
+}
+
+export function peopleToCsv(people: Person[]): string {
+  const head = 'email,visitor,country,city,browser,os,device,source,audits,sites,average_score,first_seen,last_seen';
+  const rows = people.map((p) =>
+    [
+      p.email, p.visitor, countryName(p.country), p.city, p.browser, p.os, p.device, p.source, p.audits, p.sites,
+      p.averageScore == null ? '' : Math.round(p.averageScore), new Date(p.firstSeen).toISOString(), new Date(p.lastSeen).toISOString(),
+    ]
+      .map(csvCell)
+      .join(','),
+  );
+  return [head, ...rows].join('\r\n') + '\r\n';
 }

@@ -1,10 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { Modal } from '@/components/ui';
 import { Logo } from '@/components/site/Logo';
 import { AUDIT_STAGE_LINES } from '@/content/homepage';
 import { GOALS, type GoalId } from '@/lib/audit/framework';
+import { normalizeEmail } from '@/lib/email';
 import { STAGES, type AuditState } from '@/hooks/useAudit';
 import { color, radius, t, text, tracking } from '@/design/tokens';
 
@@ -81,15 +83,18 @@ export function AuditDialog({
   state,
   start,
   setGoal,
+  setEmail,
   close,
 }: {
   state: AuditState;
   start: () => void;
   setGoal: (g: GoalId) => void;
+  setEmail: (email: string) => void;
   close: () => void;
 }) {
   const router = useRouter();
-  const { stage, url, goal, stageIndex, elapsed, stageStartedAt, result, error, action, credits, refunded, dialogOpen } = state;
+  const [emailRefused, setEmailRefused] = useState(false);
+  const { stage, url, goal, email, stageIndex, elapsed, stageStartedAt, result, error, action, credits, refunded, dialogOpen } = state;
 
   let host = '';
   try {
@@ -177,8 +182,43 @@ export function AuditDialog({
               </p>
             </div>
 
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label htmlFor="audit-email" style={{ font: t(600, 14, 20), color: color.ink }}>
+                Your email
+              </label>
+              <input
+                id="audit-email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@company.com"
+                required
+                value={email}
+                aria-invalid={emailRefused}
+                aria-describedby="audit-email-note"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailRefused(false);
+                }}
+                style={{ height: 44, padding: '0 12px', font: t(400, 15, 20), color: color.ink, background: color.bg, border: `1px solid ${emailRefused ? color.critical : color.borderStrong}`, borderRadius: radius.sm }}
+              />
+              <p id="audit-email-note" role={emailRefused ? 'alert' : undefined} style={{ margin: 0, font: t(400, 12, 18), color: emailRefused ? color.critical : color.inkMuted }}>
+                {emailRefused ? 'Enter a valid email to run the audit.' : 'Required. We keep it with your audit and may contact you about your results.'}
+              </p>
+            </div>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 4 }}>
-              <button type="button" data-cta="primary" onClick={start} style={primaryWide}>
+              <button
+                type="button"
+                data-cta="primary"
+                onClick={() => {
+                  if (normalizeEmail(email)) start();
+                  else {
+                    setEmailRefused(true);
+                    document.getElementById('audit-email')?.focus();
+                  }
+                }}
+                style={primaryWide}
+              >
                 Run the audit
               </button>
               <button type="button" onClick={close} style={plainAction}>

@@ -65,9 +65,9 @@ function start(url, goal) {
 
 async function refresh() {
   clearInterval(clock);
-  const [{ run }, { recent = [], goal = 'health' }] = await Promise.all([
+  const [{ run }, { recent = [], goal = 'health', email = '' }] = await Promise.all([
     chrome.storage.session.get('run'),
-    chrome.storage.local.get(['recent', 'goal']),
+    chrome.storage.local.get(['recent', 'goal', 'email']),
   ]);
 
   if (run?.status === 'running') {
@@ -83,23 +83,47 @@ async function refresh() {
   }
 
   const summary = shown || (rerunGoal ? null : recent.find((r) => r.url === tabUrl));
-  view.replaceChildren(...(summary ? resultView(summary) : idleView(rerunGoal || goal, recent)));
+  view.replaceChildren(...(summary ? resultView(summary) : idleView(rerunGoal || goal, recent, email)));
 }
 
-function idleView(goal, recent) {
+function idleView(goal, recent, email) {
   const select = h(
     'select',
     { onchange: () => chrome.storage.local.set({ goal: select.value }) },
     ...GOALS.map(([id, name]) => h('option', { value: id, textContent: name, selected: id === goal })),
   );
+  const emailInput = h('input', { type: 'email', value: email, placeholder: 'you@company.com', autocomplete: 'email', required: true });
+  const emailNote = h('p', { className: 'muted', textContent: 'Required. We keep it with your audit and may contact you about your results.' });
+  const run = async (event) => {
+    event.preventDefault();
+    const typed = emailInput.value.trim().toLowerCase();
+    // Mirrors normalizeEmail in src/lib/email.ts, which is the check that counts.
+    if (typed.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(typed)) {
+      emailNote.textContent = 'Enter a valid email to run the audit.';
+      emailNote.className = 'error';
+      emailInput.focus();
+      return;
+    }
+    // Stored first, because the worker reads it from here.
+    await chrome.storage.local.set({ email: typed });
+    start(tabUrl, select.value);
+  };
   const heading = tabUrl
     ? [h('h1', { textContent: 'Audit this page' }), h('p', { className: 'host', textContent: tabUrl })]
     : [h('h1', { textContent: 'Open a website to audit it' }), h('p', { className: 'muted', textContent: 'Audix can only audit public web pages.' })];
 
   return [
     h('div', { className: 'section' }, ...heading),
-    tabUrl ? h('label', {}, 'What is the goal?', select) : null,
-    tabUrl ? h('button', { className: 'primary', textContent: 'Run audit', onclick: () => start(tabUrl, select.value) }) : null,
+    tabUrl
+      ? h(
+          'form',
+          { className: 'section form', noValidate: true, onsubmit: run },
+          h('label', {}, 'What is the goal?', select),
+          h('label', {}, 'Your email', emailInput),
+          emailNote,
+          h('button', { className: 'primary', type: 'submit', textContent: 'Run audit' }),
+        )
+      : null,
     tabUrl ? h('p', { className: 'muted', textContent: 'Audix opens this address in its own browser, signed out. A page behind a login is audited as its login screen.' }) : null,
     recent.length ? recentList(recent) : null,
   ].filter(Boolean);

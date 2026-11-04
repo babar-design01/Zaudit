@@ -5,6 +5,7 @@ import { accountsEnabled } from '@/lib/db';
 import { failRun, finishRun, newRunId, startRun } from '@/lib/runs';
 import { assertPublicUrl } from '@/lib/audit/net';
 import { DEFAULT_GOAL, GOALS, type GoalId } from '@/lib/audit/framework';
+import { normalizeEmail } from '@/lib/email';
 import { putReport } from '@/lib/report/store';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
 import { recordRun, requester, runFromResult, runThatStopped } from '@/lib/usage';
@@ -79,7 +80,7 @@ function clientIp(request: Request): string {
 /* ------------------------------------------------------------------- route */
 
 /**
- * POST /api/audit  { url: string, goal?: GoalId }
+ * POST /api/audit  { url: string, email: string, goal?: GoalId }
  *
  * Responds with a newline-delimited JSON stream so the dialog's progress list
  * reflects the real stage the engine is on rather than a timer:
@@ -95,8 +96,10 @@ function clientIp(request: Request): string {
 export async function POST(request: Request) {
   let url = '';
   let goal: GoalId = DEFAULT_GOAL;
+  let email: string | null = null;
   try {
-    const body = (await request.json()) as { url?: unknown; goal?: unknown };
+    const body = (await request.json()) as { url?: unknown; goal?: unknown; email?: unknown };
+    email = normalizeEmail(body.email);
     url = typeof body.url === 'string' ? body.url : '';
     if (typeof body.goal === 'string' && GOALS.some((g) => g.id === body.goal)) goal = body.goal as GoalId;
   } catch {
@@ -105,7 +108,7 @@ export async function POST(request: Request) {
 
   const encoder = new TextEncoder();
   const ip = clientIp(request);
-  const who = requester(request, ip);
+  const who = requester(request, ip, email);
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
@@ -128,6 +131,9 @@ export async function POST(request: Request) {
 
       try {
         if (!url.trim()) throw new AuditError('Enter a website address first.');
+        // Names the extension too, because a copy installed before this field
+        // has no way to send one.
+        if (!email) throw new AuditError('An email is needed to run an audit. If you are using the Chrome extension, please update it.');
 
         // The goal changes the weighting, so it is part of what is cached.
         const key = url.trim().toLowerCase() + '|' + goal;

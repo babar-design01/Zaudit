@@ -26,7 +26,7 @@ import { useAudit } from '@/hooks/useAudit';
  * same dialog: goal, then the run, then the report.
  */
 export function Homepage({ account = null, accounts = false }: { account?: Account; accounts?: boolean } = {}) {
-  const { state, setUrl, setGoal, openGoal, start, closeDialog } = useAudit();
+  const { state, setUrl, setGoal, openGoal, start, closeDialog, setEmail } = useAudit();
 
   // The report's nav sends people here with ?audit=1 to start one.
   useEffect(() => {
@@ -41,7 +41,7 @@ export function Homepage({ account = null, accounts = false }: { account?: Accou
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>
       <SiteNav onRunAudit={openGoal} account={account} accounts={accounts} />
 
-      <AuditDialog state={state} start={start} setGoal={setGoal} close={closeDialog} />
+      <AuditDialog state={state} start={start} setGoal={setGoal} setEmail={setEmail} close={closeDialog} />
 
       <main id="main">
         <Hero onRunAudit={openGoal} url={state.url} setUrl={setUrl} />

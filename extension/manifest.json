@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Audix – UX Audit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Audit the page you are on. Audix tests it in a real browser and tells you what to fix first.",
   "minimum_chrome_version": "116",
   "action": {

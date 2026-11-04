@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { rememberReport } from '@/components/report/ReportView';
 import { DEFAULT_GOAL, type GoalId } from '@/lib/audit/framework';
+import { normalizeEmail } from '@/lib/email';
 import type { AuditEvent, AuditResult } from '@/lib/audit/types';
+
+const EMAIL_KEY = 'audix-email';
 
 export type AuditStage = 'idle' | 'goal' | 'running' | 'error' | 'done';
 
@@ -21,6 +24,8 @@ export type AuditState = {
   url: string;
   /** The goal the audit is weighted for. */
   goal: GoalId;
+  /** Who is asking. Required to run, and remembered for the next audit. */
+  email: string;
   stageIndex: number;
   /** Whole seconds since `start`, for the dialog's clock. */
   elapsed: number;
@@ -45,6 +50,7 @@ export function useAudit() {
     stage: 'idle',
     url: '',
     goal: DEFAULT_GOAL,
+    email: '',
     stageIndex: 0,
     elapsed: 0,
     stageStartedAt: 0,
@@ -80,6 +86,17 @@ export function useAudit() {
 
   const setUrl = useCallback((url: string) => setState((s) => ({ ...s, url })), []);
   const setGoal = useCallback((goal: GoalId) => setState((s) => ({ ...s, goal })), []);
+  const setEmail = useCallback((email: string) => setState((s) => ({ ...s, email })), []);
+
+  // Read after mounting, because the server has no storage to render it from.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(EMAIL_KEY);
+      if (saved) setEmail(saved);
+    } catch {
+      /* storage blocked: the field just starts empty */
+    }
+  }, [setEmail]);
 
   /**
    * The framework asks for the goal before the audit starts, because the goal
@@ -114,6 +131,15 @@ export function useAudit() {
       return;
     }
 
+    // The dialog will not call this without a valid address; this is its backstop.
+    const email = normalizeEmail(latest.current.email);
+    if (!email) return;
+    try {
+      localStorage.setItem(EMAIL_KEY, email);
+    } catch {
+      /* storage blocked: they retype it next time */
+    }
+
     const t0 = Date.now();
     setState((s) => ({
       ...s,
@@ -140,7 +166,7 @@ export function useAudit() {
       const res = await fetch('/api/audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: target, goal: latest.current.goal }),
+        body: JSON.stringify({ url: target, goal: latest.current.goal, email }),
         signal: controller.signal,
       });
       if (!res.body) throw new Error('The audit stream could not be opened.');
@@ -223,7 +249,7 @@ export function useAudit() {
     });
   }, [stopTick]);
 
-  return { state, setUrl, setGoal, openGoal, start, reset, closeDialog };
+  return { state, setUrl, setGoal, setEmail, openGoal, start, reset, closeDialog };
 }
 
 /** Scrolls to the hero and focuses the URL field — every CTA on the page lands here. */

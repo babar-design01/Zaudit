@@ -42,10 +42,11 @@ async function run(url, goal) {
     await chrome.storage.session.set({ run: state });
     await badge('…', BLUE);
 
+    const { email } = await chrome.storage.local.get('email');
     const res = await fetch(`${SITE}/api/audit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, goal }),
+      body: JSON.stringify({ url, goal, email }),
       credentials: 'include',
       signal: current.signal,
     });
