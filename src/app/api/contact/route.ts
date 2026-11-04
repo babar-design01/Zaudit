@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * different road.
  */
 
-const MAX = { name: 80, email: 200, phone: 40, country: 80, message: 4000 };
+const MAX = { name: 120, email: 200, phone: 40, country: 80, message: 4000 };
 
 const hits = new Map<string, number[]>();
 function limited(ip: string): boolean {
@@ -44,12 +44,12 @@ export async function POST(request: Request) {
   const from = process.env.CONTACT_FROM || process.env.AUTH_EMAIL_FROM || 'Audix <hello@audix.com>';
   if (!key || !to) return Response.json({ error: 'Mail is not set up on this deployment.' }, { status: 503 });
 
-  const firstName = clean(body.firstName, MAX.name);
-  const lastName = clean(body.lastName, MAX.name);
+  // A page opened before this was one field can still send the old two.
+  const name = clean(body.name, MAX.name) || clean(`${clean(body.firstName, MAX.name)} ${clean(body.lastName, MAX.name)}`, MAX.name);
   const email = clean(body.email, MAX.email);
   const message = typeof body.message === 'string' ? body.message.trim().slice(0, MAX.message) : '';
-  if (!firstName || !lastName || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !message) {
-    return Response.json({ error: 'First name, last name, a valid email and a message are all needed.' }, { status: 400 });
+  if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !message) {
+    return Response.json({ error: 'Your name, a valid email and a message are all needed.' }, { status: 400 });
   }
 
   const phone = clean(body.phone, MAX.phone);
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
   const findings = typeof body.findings === 'number' ? body.findings : null;
 
   const lines: [string, string][] = [
-    ['Name', `${firstName} ${lastName}`],
+    ['Name', name],
     ['Email', email],
     ...(phone ? ([['Phone', `${phoneCode} ${phone}`]] as [string, string][]) : []),
     ...(country ? ([['Country', country]] as [string, string][]) : []),
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     from,
     to,
     replyTo: email,
-    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${firstName} ${lastName}` : `Audix enquiry — ${firstName} ${lastName}`,
+    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${name}` : `Audix enquiry — ${name}`,
     text: `${lines.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
     html: `<table>${lines.map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table><p style="white-space:pre-wrap">${esc(message)}</p>`,
   });

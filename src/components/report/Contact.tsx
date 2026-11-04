@@ -88,13 +88,9 @@ export function Contact({ result }: { result?: AuditResult }) {
             <div aria-hidden="true" data-dots="" style={{ position: "absolute", top: "0", bottom: "0", left: "0", width: "72px", backgroundImage: "radial-gradient(circle, rgba(10, 11, 13, 0.0) 0, rgba(10, 11, 13, 0) 100%), radial-gradient(circle, #5E9BFF 1.2px, transparent 1.6px), linear-gradient(180deg, rgba(168, 243, 255, 0) 0%, rgba(168, 243, 255, 0.55) 25%, rgba(94, 155, 255, 0.45) 55%, rgba(127, 178, 255, 0.35) 80%, rgba(127, 178, 255, 0) 100%)", backgroundSize: "auto, 9px 9px, auto", WebkitMaskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)", maskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)" }}></div>
             <div aria-hidden="true" data-dots="" style={{ position: "absolute", top: "0", bottom: "0", right: "0", width: "72px", backgroundImage: "radial-gradient(circle, rgba(10, 11, 13, 0.0) 0, rgba(10, 11, 13, 0) 100%), radial-gradient(circle, #5E9BFF 1.2px, transparent 1.6px), linear-gradient(180deg, rgba(168, 243, 255, 0) 0%, rgba(168, 243, 255, 0.55) 25%, rgba(94, 155, 255, 0.45) 55%, rgba(127, 178, 255, 0.35) 80%, rgba(127, 178, 255, 0) 100%)", backgroundSize: "auto, 9px 9px, auto", WebkitMaskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)", maskImage: "linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent)" }}></div>
             <form aria-label={result ? 'Ask us to fix these findings' : 'Contact us'} onSubmit={submit} noValidate={false} style={{ position: "relative", width: "100%", maxWidth: "520px", display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "24px 16px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label htmlFor="c-first" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>First name<span style={{ color: "var(--critical)" }}>*</span></label>
-                <input id="c-first" name="firstName" type="text" autoComplete="given-name" required placeholder="For example, Jerry" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label htmlFor="c-last" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Last name<span style={{ color: "var(--critical)" }}>*</span></label>
-                <input id="c-last" name="lastName" type="text" autoComplete="family-name" required placeholder="For example, Liu" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
+              <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label htmlFor="c-name" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Full name<span style={{ color: "var(--critical)" }}>*</span></label>
+                <input id="c-name" name="name" type="text" autoComplete="name" required placeholder="For example, Jerry Liu" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
               </div>
               <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <label htmlFor="c-email" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Email address<span style={{ color: "var(--critical)" }}>*</span></label>
@@ -143,9 +139,9 @@ const hostOf = (url: string) => {
 
 /** The same message, addressed to the team, for when there is no mail backend. */
 function mailtoFor(p: Record<string, unknown>): string {
-  const subject = p.host ? `UX audit fixes — ${p.host}` : `Audix enquiry — ${p.firstName ?? ''} ${p.lastName ?? ''}`;
+  const subject = p.host ? `UX audit fixes — ${p.host}` : `Audix enquiry — ${p.name ?? ''}`;
   const body = [
-    `Name: ${p.firstName ?? ''} ${p.lastName ?? ''}`,
+    `Name: ${p.name ?? ''}`,
     `Email: ${p.email ?? ''}`,
     p.phone ? `Phone: ${p.phoneCode ?? ''} ${p.phone}` : '',
     p.country ? `Country: ${p.country}` : '',
