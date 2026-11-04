@@ -55,7 +55,7 @@ export function SiteFooter() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <Logo height={22} fill="#FFFFFF" />
+          <Logo height={18} fill="#FFFFFF" />
           <p style={{ margin: 0, maxWidth: 320, font: t(400, 14, 22), color: MUTED }}>
             Audix — automated UX audits for websites and web apps. Find what&apos;s hurting your user experience, fix
             what matters first.

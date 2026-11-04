@@ -72,7 +72,7 @@ export function SiteNav({
         }}
       >
         <a href="/" aria-label="ProcurveUX home" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <Logo height={20} />
+          <Logo height={16} />
         </a>
 
         <button
