@@ -94,6 +94,7 @@ async function readStream(body, state) {
         await chrome.storage.session.set({ alive: Date.now() });
       } else if (event.type === 'check') {
         state.check = event.label;
+        state.checksDone = Math.max(event.done, state.checksDone ?? 0);
         await chrome.storage.session.set({ run: state });
       } else if (event.type === 'stage') {
         state.stageIndex = event.index;

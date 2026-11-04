@@ -1,13 +1,26 @@
 import { SITE } from './config.js';
 
-/** Mirrors STAGES in src/hooks/useAudit.ts, in the order the engine reports them. */
-const STAGES = [
-  'Loading and measuring the page',
-  'Working out what kind of page this is',
-  'Judging it against the criteria',
-  'Checking the findings against their evidence',
-  'Scoring the pillars against your goal',
+/** Mirrors RUN_STEPS and runPosition in src/hooks/useAudit.ts. */
+const RUN_STEPS = [
+  ['Page load', 1],
+  ['Structure and usability', 3],
+  ['Accessibility and keyboard', 4],
+  ['Forms, speed and links', 4],
+  ['States and dark mode', 3],
+  ['Mobile and full page', 3],
+  ['Findings and score', 4],
 ];
+
+function runPosition(stageIndex, checksDone) {
+  const last = RUN_STEPS.length - 1;
+  if (stageIndex > 0) return { row: last, doneInRow: stageIndex - 1 };
+  let behind = 0;
+  for (let row = 0; row < last; row += 1) {
+    if (checksDone < behind + RUN_STEPS[row][1]) return { row, doneInRow: checksDone - behind };
+    behind += RUN_STEPS[row][1];
+  }
+  return { row: last, doneInRow: 0 };
+}
 
 /** Mirrors GOALS in src/lib/audit/framework.ts, with the default first. */
 const DEFAULT_GOAL = 'health';
@@ -176,6 +189,7 @@ function recentList(recent) {
 }
 
 function runningView(run) {
+  const position = runPosition(run.stageIndex, run.checksDone ?? 0);
   const time = h('p', { className: 'muted' });
   const tick = () => {
     const seconds = Math.max(0, Math.round((Date.now() - run.startedAt) / 1000));
@@ -189,12 +203,13 @@ function runningView(run) {
     h(
       'ol',
       { className: 'stages' },
-      ...STAGES.map((label, i) =>
+      ...RUN_STEPS.map(([label, count], i) =>
         h(
           'li',
-          { className: i < run.stageIndex ? 'done' : i === run.stageIndex ? 'current' : '' },
+          { className: i < position.row ? 'done' : i === position.row ? 'current' : '' },
           h('span', { className: 'dot' }),
           label,
+          h('span', { className: 'count', textContent: `${i < position.row ? count : i === position.row ? position.doneInRow : 0}/${count}` }),
         ),
       ),
     ),

@@ -7,7 +7,7 @@ import { Logo } from '@/components/site/Logo';
 import { AuditScanner } from './AuditScanner';
 import { GOALS, type GoalId } from '@/lib/audit/framework';
 import { normalizeEmail } from '@/lib/email';
-import { STAGES, type AuditState } from '@/hooks/useAudit';
+import { RUN_STEPS, runPosition, type AuditState } from '@/hooks/useAudit';
 import { color, radius, t, text, tracking } from '@/design/tokens';
 
 /**
@@ -131,6 +131,7 @@ export function AuditDialog({
   const secondsInStage = stageStartedAt ? Math.max(0, (Date.now() - stageStartedAt) / 1000) : 0;
   const pct = stage === 'done' ? 100 : Math.round(progressFor(stageIndex, check, secondsInStage));
   const checking = stageIndex === 0 && check ? check.label : STAGE_NAMES[stageIndex];
+  const position = runPosition(stageIndex, check?.done ?? 0);
 
   const title =
     stage === 'goal' ? 'Pick the goals for your audit' : stage === 'done' ? 'Audit complete' : stage === 'error' ? 'The audit could not complete' : `Auditing ${host}`;
@@ -266,7 +267,7 @@ export function AuditDialog({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12 }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
                 <span style={eyebrow}>Step 2 of 2 · {host}</span>
-                <h2 style={heading}>{stage === 'done' ? 'Audit complete' : STAGES[stageIndex]}</h2>
+                <h2 style={heading}>{stage === 'done' ? 'Audit complete' : RUN_STEPS[position.row].label}</h2>
               </div>
               <span style={{ font: t(700, 28, 1), letterSpacing: tracking.tight, color: color.blue }}>
                 {pct}
@@ -289,12 +290,13 @@ export function AuditDialog({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', border: `1px solid ${color.border}`, borderRadius: radius.sm }}>
-              {STAGES.map((label, i) => {
-                const doneUpTo = stage === 'done' ? STAGES.length : stageIndex;
+              {RUN_STEPS.map(({ label, count }, i) => {
+                const doneUpTo = stage === 'done' ? RUN_STEPS.length : position.row;
+                const finished = i < doneUpTo ? count : i === doneUpTo ? position.doneInRow : 0;
                 const done = i < doneUpTo;
                 const active = i === doneUpTo;
                 return (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderBottom: i < STAGES.length - 1 ? '1px solid #F0F1F3' : 'none' }}>
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px', borderBottom: i < RUN_STEPS.length - 1 ? '1px solid #F0F1F3' : 'none' }}>
                     <span style={{ display: 'inline-flex', width: 18, height: 18, alignItems: 'center', justifyContent: 'center', color: done ? color.blue : active ? color.ink : '#A1A6AE' }}>
                       {done ? (
                         <span data-tick style={{ width: 18, height: 18, borderRadius: radius.sm, background: color.blue, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -311,6 +313,9 @@ export function AuditDialog({
                       )}
                     </span>
                     <span style={{ font: t(500, 14, 20), color: i <= doneUpTo ? color.ink : color.inkMuted }}>{label}</span>
+                    <span data-step-count style={{ marginLeft: 'auto', font: t(500, 12, 20), fontVariantNumeric: 'tabular-nums', color: color.inkMuted }}>
+                      {finished}/{count}
+                    </span>
                   </div>
                 );
               })}

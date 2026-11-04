@@ -10,14 +10,32 @@ const EMAIL_KEY = 'audix-email';
 
 export type AuditStage = 'idle' | 'goal' | 'running' | 'error' | 'done';
 
-/** The engine's stages, in the order `audit()` reports them. */
-export const STAGES = [
-  'Loading and measuring the page',
-  'Working out what kind of page this is',
-  'Judging it against the criteria',
-  'Checking the findings against their evidence',
-  'Scoring the pillars against your goal',
+/**
+ * The rows the dialog shows, each a run of the engine's real reports. The browser's
+ * visit is most of an audit, so it is split by what it is testing, in the order of
+ * BROWSER_CHECKS in lib/audit/browser.ts. The last row is the engine's stages 1 to 4.
+ */
+export const RUN_STEPS = [
+  { label: 'Page load', count: 1 },
+  { label: 'Structure and usability', count: 3 },
+  { label: 'Accessibility and keyboard', count: 4 },
+  { label: 'Forms, speed and links', count: 4 },
+  { label: 'States and dark mode', count: 3 },
+  { label: 'Mobile and full page', count: 3 },
+  { label: 'Findings and score', count: 4 },
 ];
+
+/** Which row is under way and how much of it is finished, from what the engine last reported. */
+export function runPosition(stageIndex: number, checksDone: number): { row: number; doneInRow: number } {
+  const last = RUN_STEPS.length - 1;
+  if (stageIndex > 0) return { row: last, doneInRow: stageIndex - 1 };
+  let behind = 0;
+  for (let row = 0; row < last; row += 1) {
+    if (checksDone < behind + RUN_STEPS[row].count) return { row, doneInRow: checksDone - behind };
+    behind += RUN_STEPS[row].count;
+  }
+  return { row: last, doneInRow: 0 };
+}
 
 export type AuditState = {
   stage: AuditStage;
@@ -201,7 +219,11 @@ export function useAudit() {
             continue;
           } else if (event.type === 'check') {
             const { label, done, total } = event;
-            setState((s) => ({ ...s, stageStartedAt: Date.now(), check: { label, total, done: Math.max(done, s.check?.done ?? 0) } }));
+            // The bar's easing restarts only when a check has finished, or it would slide back.
+            setState((s) => {
+              const behind = s.check?.done ?? 0;
+              return { ...s, stageStartedAt: done > behind ? Date.now() : s.stageStartedAt, check: { label, total, done: Math.max(done, behind) } };
+            });
           } else if (event.type === 'preview') {
             setState((s) => ({ ...s, preview: event.image }));
           } else if (event.type === 'stage') {
