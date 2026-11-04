@@ -425,6 +425,14 @@ main section,
 /* Save as PDF is the browser's print. The page furniture goes; each issue keeps
    its screenshot and its list on one sheet. */
 @media print {
+  /* Paper has no scrolling, so a scroll reveal never runs and would leave its
+     content invisible: blank pages, in the size of everything it should show. */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
   [data-print-hide],
   header,
   footer {
@@ -437,6 +445,30 @@ main section,
   [data-finding] {
     break-inside: avoid;
     page-break-inside: avoid;
+  }
+  /* Small enough to share a sheet with the words about them. At full width a
+     screenshot does not fit below the text, and moves to a sheet of its own. */
+  [data-finding] > div {
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    gap: 16px !important;
+  }
+  [data-finding] figure > [role='img'] {
+    width: 56% !important;
+    margin: 0 auto;
+  }
+  [data-finding] figure img {
+    max-height: 360px !important;
+  }
+  /* The list under a screenshot can run on, so a long one does not take the
+     screenshot with it. The picture and each line still stay whole. */
+  [data-finding] figure {
+    gap: 14px !important;
+    break-inside: auto !important;
+  }
+  [data-finding] figure > [role='img'],
+  [data-finding] figure li {
+    break-inside: avoid;
   }
   [data-blob] {
     display: none !important;
