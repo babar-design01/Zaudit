@@ -12,3 +12,6 @@ public/_tpl
 
 # Reports kept on disk by a local server
 .data/
+
+# The extension as handed to the team, rebuilt from extension/
+audix-extension.zip
