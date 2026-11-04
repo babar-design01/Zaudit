@@ -71,7 +71,7 @@ export function SiteNav({
           gap: 24,
         }}
       >
-        <a href="/" aria-label="Audix home" style={{ display: 'inline-flex', alignItems: 'center' }}>
+        <a href="/" aria-label="ProcurveUX home" style={{ display: 'inline-flex', alignItems: 'center' }}>
           <Logo height={20} />
         </a>
 

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { leave } from '@/app/admin/actions';
+import { Logo } from '@/components/site/Logo';
 
 const NAV = [
   { href: '/admin', id: 'overview', label: 'Overview', icon: 'M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z' },
@@ -23,9 +24,8 @@ export function AdminShell({
   return (
     <div className="admin-app">
       <aside className="admin-side">
-        <Link href="/admin" className="admin-brand" aria-label="Audix admin">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/audix-logo.svg" alt="" width={89} height={14} />
+        <Link href="/admin" className="admin-brand" aria-label="ProcurveUX admin">
+          <Logo height={14} />
           <span>Admin</span>
         </Link>
         <nav aria-label="Admin" className="admin-nav">

@@ -25,8 +25,9 @@
 
 .admin-brand {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
   padding: 4px 8px;
   font-size: 12px;
   font-weight: 600;
