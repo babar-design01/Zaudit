@@ -118,28 +118,6 @@
   font-weight: 600;
 }
 
-.admin-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.admin-main .admin-tabs a {
-  padding: 6px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-secondary);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-
-.admin-main .admin-tabs a[aria-current='page'] {
-  color: var(--on-action);
-  background: var(--action);
-  border-color: var(--action);
-}
-
 /* ---- cards ---- */
 
 .admin-card {
@@ -357,6 +335,14 @@
   background: var(--action);
   border-color: var(--action);
   cursor: pointer;
+}
+
+.admin-main .admin-clear {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 4px;
+  font-weight: 600;
 }
 
 .admin-filtered {

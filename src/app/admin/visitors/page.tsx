@@ -1,36 +1,37 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AdminFilters } from '@/components/admin/AdminFilters';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { Where, Who } from '@/components/admin/AuditsTable';
+import { filterPeople, filterQuery, readFilters, type Asked } from '@/components/admin/filters';
 import { whenLabel } from '@/components/admin/format';
 import { SignIn } from '@/components/admin/SignIn';
 import { adminEnabled, isAdmin } from '@/lib/admin';
-import { countryName, listRuns, peopleFrom } from '@/lib/usage';
+import { listRuns } from '@/lib/usage';
 
 export const dynamic = 'force-dynamic';
 
 const TABLE_MAX = 500;
 
 /** Everyone who has run an audit. Someone who only looked at the site is not recorded. */
-export default async function VisitorsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function VisitorsPage({ searchParams }: { searchParams: Promise<Asked> }) {
   if (!adminEnabled()) notFound();
   if (!(await isAdmin())) return <SignIn />;
 
-  const { q: asked } = await searchParams;
-  const q = (asked ?? '').trim().toLowerCase();
-  const everyone = peopleFrom(await listRuns());
-  const people = q
-    ? everyone.filter((p) => [p.email, p.visitor, p.city, countryName(p.country)].some((field) => field?.toLowerCase().includes(q)))
-    : everyone;
-  const withEmail = everyone.filter((p) => p.email).length;
-  const returning = everyone.filter((p) => p.audits > 1).length;
+  // Someone is listed when at least one of their audits matches, so this page has no person filter of its own.
+  const filters = { ...readFilters(await searchParams), person: '' };
+  const people = filterPeople(await listRuns(), filters);
+  const withEmail = people.filter((p) => p.email).length;
+  const returning = people.filter((p) => p.audits > 1).length;
 
   return (
-    <AdminShell active="visitors" title="Visitors" actions={<a href="/admin/export?view=visitors" className="admin-link">Download CSV</a>}>
+    <AdminShell active="visitors" title="Visitors" actions={<a href={`/admin/export${filterQuery(filters, { view: 'visitors' })}`} className="admin-link">Download CSV</a>}>
+      <AdminFilters filters={filters} path="/admin/visitors" />
+
       <div className="admin-tiles">
         <div className="admin-card admin-tile">
           <span>People</span>
-          <strong>{everyone.length}</strong>
+          <strong>{people.length}</strong>
         </div>
         <div className="admin-card admin-tile">
           <span>With an email</span>
@@ -38,7 +39,7 @@ export default async function VisitorsPage({ searchParams }: { searchParams: Pro
         </div>
         <div className="admin-card admin-tile">
           <span>Anonymous</span>
-          <strong>{everyone.length - withEmail}</strong>
+          <strong>{people.length - withEmail}</strong>
           <small>From before emails were required</small>
         </div>
         <div className="admin-card admin-tile">
@@ -48,20 +49,12 @@ export default async function VisitorsPage({ searchParams }: { searchParams: Pro
         </div>
       </div>
 
-      <form method="get" className="admin-filters">
-        <label>
-          Search
-          <input type="search" name="q" defaultValue={asked ?? ''} placeholder="Email, city or country" />
-        </label>
-        <button type="submit">Search</button>
-      </form>
-
       <section className="admin-card admin-flush">
         <div className="admin-card-head">
           <h2>
             {people.length} {people.length === 1 ? 'person' : 'people'}
           </h2>
-          <small>Emails are as typed, and are not verified.</small>
+          <small>{filters.active ? 'Audits, sites and score count only the audits that match. ' : ''}Emails are as typed, and are not verified.</small>
         </div>
         {people.length === 0 ? (
           <p className="admin-empty">No one matches.</p>
@@ -95,7 +88,7 @@ export default async function VisitorsPage({ searchParams }: { searchParams: Pro
                     <td className="nowrap">{whenLabel(p.firstSeen)}</td>
                     <td className="nowrap">{whenLabel(p.lastSeen)}</td>
                     <td>
-                      <Link href={`/admin/audits?person=${encodeURIComponent(p.key)}`}>View</Link>
+                      <Link href={`/admin/audits${filterQuery({ ...filters, person: p.key })}`}>View</Link>
                     </td>
                   </tr>
                 ))}

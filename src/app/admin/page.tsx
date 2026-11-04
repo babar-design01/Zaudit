@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AdminFilters } from '@/components/admin/AdminFilters';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { AuditsTable } from '@/components/admin/AuditsTable';
-import { RANGES, dayKey, dayLabel, days, inRange, rangeOf } from '@/components/admin/format';
+import { filterQuery, filterRuns, matching, one, readFilters, type Asked } from '@/components/admin/filters';
+import { dayKey, dayLabel, days } from '@/components/admin/format';
 import { SignIn } from '@/components/admin/SignIn';
 import { adminEnabled, isAdmin } from '@/lib/admin';
 import { listRuns, summarize, type RunRecord, type Tally } from '@/lib/usage';
@@ -13,30 +15,20 @@ const CHART_DAYS = 30;
 const LATEST = 8;
 
 /** The owner's view of the product: how much it is used, by how many, and how often it fails. */
-export default async function OverviewPage({ searchParams }: { searchParams: Promise<{ range?: string; error?: string }> }) {
+export default async function OverviewPage({ searchParams }: { searchParams: Promise<Asked> }) {
   if (!adminEnabled()) notFound();
-  const { range: asked, error } = await searchParams;
-  if (!(await isAdmin())) return <SignIn error={error} />;
+  const asked = await searchParams;
+  if (!(await isAdmin())) return <SignIn error={one(asked.error)} />;
 
-  const range = rangeOf(asked, '30d');
+  const filters = readFilters(asked, '30d');
   const all = await listRuns();
-  const runs = inRange(all, range);
+  const runs = filterRuns(all, filters);
   const s = summarize(runs);
 
   return (
-    <AdminShell
-      active="overview"
-      title="Overview"
-      actions={
-        <nav aria-label="Time range" className="admin-tabs">
-          {RANGES.map((r) => (
-            <Link key={r.id} href={`/admin?range=${r.id}`} aria-current={r.id === range ? 'page' : undefined}>
-              {r.label}
-            </Link>
-          ))}
-        </nav>
-      }
-    >
+    <AdminShell active="overview" title="Overview">
+      <AdminFilters filters={filters} path="/admin" />
+
       <div className="admin-tiles">
         <Tile label="Audits" value={s.audits} note={s.cached ? `${s.cached} answered from cache` : undefined} />
         <Tile label="People" value={s.people} note={`${s.emails} with an email`} />
@@ -48,7 +40,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         <Tile label="Expert reviews" value={s.expert} note="Each one spends Claude credit" />
       </div>
 
-      <PerDay runs={all} />
+      <PerDay runs={matching(all, filters)} />
 
       <div className="admin-panels">
         <Breakdown title="Countries" rows={s.countries} />
@@ -62,7 +54,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       <section className="admin-card admin-flush">
         <div className="admin-card-head">
           <h2>Latest audits</h2>
-          <Link href="/admin/audits">See all</Link>
+          <Link href={`/admin/audits${filterQuery(filters)}`}>See all</Link>
         </div>
         <AuditsTable runs={runs.slice(0, LATEST)} />
       </section>
@@ -80,7 +72,7 @@ function Tile({ label, value, note }: { label: string; value: string | number; n
   );
 }
 
-/** Always the last 30 days whatever range is chosen: its job is the trend, which a one-day range would erase. */
+/** Always the last 30 days whatever period is chosen: its job is the trend, which a one-day period would erase. */
 function PerDay({ runs }: { runs: RunRecord[] }) {
   const counts = new Map<string, number>();
   for (const run of runs) counts.set(dayKey(run.at), (counts.get(dayKey(run.at)) ?? 0) + 1);
