@@ -54,7 +54,7 @@ export function Homepage({ account = null, accounts = false }: { account?: Accou
         <Solutions onRunAudit={openGoal} />
         {/* Hidden until there are real customer results to show. */}
         {/* <Stories /> */}
-        <Pricing onRunAudit={openGoal} />
+        <Pricing onRunAudit={openGoal} accounts={accounts} />
         <Faq onRunAudit={openGoal} />
         <Contact />
         <ClosingCta onRunAudit={openGoal} />

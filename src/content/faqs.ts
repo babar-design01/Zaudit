@@ -31,7 +31,7 @@ export const FAQS = [
   { q: 'Do I need to install anything?', a: 'No script, no plugin, no code. Paste a URL and go.' },
   {
     q: 'Can I share or export the report?',
-    a: 'Yes. Every report has a shareable link, and paid plans add PDF export, CSV export and white-label branding for client delivery.',
+    a: 'Yes. Every report has a shareable link and can be saved as a PDF, on every plan.',
   },
   {
     q: 'What happens to my data?',
@@ -39,7 +39,7 @@ export const FAQS = [
   },
   {
     q: 'Is the free audit really free?',
-    a: 'Yes. One full audit a month on one website, no card, no trial countdown. You only pay when you want unlimited runs, more sites, or team features.',
+    a: 'Yes. Your first full audit needs only your email, with no card and no trial countdown. You only pay when you want to keep auditing, from $5 a month.',
   },
 ];
 
