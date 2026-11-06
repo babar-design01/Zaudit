@@ -1,5 +1,6 @@
 import { authorOf, formatDate, initials, readMinutes, type Author, type Post } from '@/content/blog';
 import { BlogCover } from './BlogCover';
+import { OrgLinked } from './OrgLinked';
 import { ShareMenu } from './ShareMenu';
 
 /** The topic label above a title. */
@@ -94,7 +95,9 @@ export function Byline({ post }: { post: Post }) {
               {author.name}
             </a>
           </span>
-          <span style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--ink-muted)' }}>{author.role}</span>
+          <span style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--ink-muted)' }}>
+            <OrgLinked text={author.role} />
+          </span>
         </span>
       </div>
 

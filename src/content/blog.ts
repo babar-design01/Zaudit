@@ -68,6 +68,11 @@ export type Source = { title: string; publisher: string; url: string; note?: str
 
 export type Cover = 'coverage' | 'browser' | 'conversion' | 'lawsuits';
 
+/** Organisations whose name links to their site wherever an author's role or bio mentions it. */
+export const ORG_LINKS: Record<string, string> = {
+  ZeeFrames: 'https://zeeframes.com/',
+};
+
 export type Author = {
   name: string;
   /** One line under the name: what they do, in plain words. */
@@ -94,8 +99,8 @@ export type Author = {
 /*
  * Muhammad Babar: name and role as he gave them. Photo, bio facts and
  * expertise are from his site, babar.info (read 6 Nov 2026).
- * TODO(content): LinkedIn, Dribbble and Behance links, the topics and his
- * education are to come from him.
+ * LinkedIn, Dribbble and Behance links as he gave them (6 Nov 2026).
+ * TODO(content): his topics and education are to come from him.
  */
 export const AUTHORS = {
   'muhammad-babar': {
@@ -110,7 +115,7 @@ export const AUTHORS = {
       'On the ProCurveUX blog he writes about the UX problems that quietly cost websites customers, and the specific changes that fix them.',
     ],
     roles: [
-      { title: 'Co-Founder and Design Director', org: 'ZeeFrames', note: 'Digital design agency, Lahore.' },
+      { title: 'Co-Founder and Design Director', org: 'ZeeFrames', href: 'https://zeeframes.com/', note: 'Digital design agency, Lahore.' },
     ],
     expertise: [
       'UX research and strategy',
@@ -124,9 +129,9 @@ export const AUTHORS = {
     education: [],
     links: [
       { label: 'Website', href: 'https://babar.info' },
-      { label: 'LinkedIn', href: '#' },
-      { label: 'Dribbble', href: '#' },
-      { label: 'Behance', href: '#' },
+      { label: 'LinkedIn', href: 'https://www.linkedin.com/in/babar-product-designer-ux-ui-designer/' },
+      { label: 'Dribbble', href: 'https://dribbble.com/mbadobe2' },
+      { label: 'Behance', href: 'https://www.behance.net/mbadobe2' },
     ],
   },
 } satisfies Record<string, Author>;

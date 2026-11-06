@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { AuthorPhoto, BlogCard } from '@/components/blog/BlogCard';
+import { OrgLinked } from '@/components/blog/OrgLinked';
 import { ClosingCta } from '@/components/home/ClosingCta';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -159,7 +160,9 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                 <p style={{ margin: '4px 0 0', display: 'flex', flexWrap: 'wrap', gap: '6px 20px', font: '400 14px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                     <Icon name="role" />
-                    {author.role}
+                    <span>
+                      <OrgLinked text={author.role} />
+                    </span>
                   </span>
                   {author.location && (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
@@ -188,7 +191,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                 <h2 style={h2}>About {first}</h2>
                 {author.bio.map((para) => (
                   <p key={para.slice(0, 24)} style={{ margin: 0, font: '400 17px/29px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' }}>
-                    {para}
+                    <OrgLinked text={para} />
                   </p>
                 ))}
               </div>
