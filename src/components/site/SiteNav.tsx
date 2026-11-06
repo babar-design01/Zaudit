@@ -9,8 +9,7 @@ import { Logo } from './Logo';
 export type Account = { email: string | null; credits: number } | null;
 
 const LINKS = [
-  { label: 'Features', href: '/#features' },
-  { label: 'How it works', href: '/#how' },
+  { label: 'About', href: '/about', id: 'about' },
   { label: 'Pricing', href: '/#plans' },
   { label: 'Blog', href: '/blog', id: 'blog' },
   { label: 'Contact', href: '/#contact' },
@@ -34,7 +33,7 @@ export function SiteNav({
   account?: Account;
   accounts?: boolean;
   /** Which link is the page the reader is on. */
-  current?: 'sample' | 'blog';
+  current?: 'sample' | 'blog' | 'about';
 }) {
   // TODO(design): the handoff draws the nav at 1440 only. Below 900px the
   // links fold behind a square Menu control — a desktop nav left at phone

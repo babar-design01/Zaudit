@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const newest = POSTS.map((p) => p.date).sort().at(-1);
   return [
     { url: `${SITE}/`, changeFrequency: 'weekly', priority: 1 },
+    { url: `${SITE}/about`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE}/report/sample`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE}/blog`, lastModified: newest, changeFrequency: 'weekly', priority: 0.8 },
     ...POSTS.map((p) => ({ url: `${SITE}/blog/${p.slug}`, lastModified: p.date, changeFrequency: 'monthly' as const, priority: 0.7 })),
