@@ -3,8 +3,8 @@ import { ReportView } from '@/components/report/ReportView';
 import type { AuditResult } from '@/lib/audit/types';
 
 export const metadata: Metadata = {
-  title: 'UX audit report | Audix',
-  description: 'One Audix audit: the score, what was checked, and each issue with where it is and what to change.',
+  title: 'UX audit report | ProCurveUX',
+  description: 'One ProCurveUX audit: the score, what was checked, and each issue with where it is and what to change.',
   robots: { index: false, follow: false },
 };
 

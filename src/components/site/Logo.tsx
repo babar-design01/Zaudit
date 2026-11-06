@@ -1,24 +1,45 @@
 import type { CSSProperties } from 'react';
 
-const WIDTH = 1957;
 const HEIGHT = 168;
+
+/** Which part of the artwork to show, as [left edge, width] in the SVG's own units. */
+const PARTS = {
+  full: [0, 1957],
+  /** The PCX icon on its own. */
+  mark: [0, 487],
+  /** The PROCURVEUX text on its own. */
+  wordmark: [536, 1421],
+} as const;
 
 /**
  * The ProcurveUX logo: the PCX mark and the wordmark, from the supplied SVG.
+ * `part` shows the whole logo, the icon alone or the text alone.
  *
  * Single-colour by design: it takes its fill from the caller — ink on light,
  * white on dark — and nothing else about it changes.
  */
-export function Logo({ height = 20, fill = '#0A0B0D', style }: { height?: number; fill?: string; style?: CSSProperties }) {
+export function Logo({
+  height = 20,
+  fill = '#0A0B0D',
+  part = 'full',
+  style,
+}: {
+  height?: number;
+  fill?: string;
+  part?: keyof typeof PARTS;
+  style?: CSSProperties;
+}) {
+  const [x, w] = PARTS[part];
   return (
     <svg
       role="img"
       aria-label="ProcurveUX"
-      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+      viewBox={`${x} 0 ${w} ${HEIGHT}`}
       fill={fill}
       // An explicit width: with `auto`, a stretching parent widens the box and the
       // artwork centres itself inside it, away from the edge it should sit on.
-      style={{ display: 'block', height, width: (height * WIDTH) / HEIGHT, flexShrink: 0, ...style }}
+      // Hidden overflow: the other part's paths sit outside the box.
+      style={{ display: 'block', height, width: (height * w) / HEIGHT, flexShrink: 0, overflow: 'hidden', ...style }}
     >
       <path d="M247.863 0.81958C300.517 -4.22441 331.121 14.2575 366.18 49.6145L340.516 74.7649C318.286 53.6379 299.196 32.7935 266.036 31.9495C249.015 31.5155 231.497 36.3206 218.987 48.3274C209.607 57.2483 204.187 69.5515 203.934 82.4934C203.607 95.4344 208.539 107.955 217.604 117.195C229.268 129.023 246.52 134.363 262.839 134.494C308.794 134.861 338.705 90.7773 368.617 61.7073C371.988 58.4315 372.879 59.2131 377.244 59.2161C382.222 59.2201 427.828 10.6557 434.6 3.8147L486.628 3.73267C460.214 30.6146 433.515 57.2146 406.535 83.5276C425.895 102.693 445.141 121.973 464.273 141.366C468.174 145.346 482.967 160.014 485.315 163.583L483.943 164.593L435.476 164.666C420.131 149.011 393.835 120.57 377.793 106.859C370.418 112.534 360.566 122.441 353.684 129.239C334.046 148.736 310.135 161.972 282.476 165.899C227.829 173.658 178.182 150.743 169.831 92.2502C162.61 99.1102 155.199 105.377 145.562 108.47C127.022 114.421 57.7715 111.464 34.6514 111.475L34.5312 164.678L0 164.638L0.015625 3.64673C26.4225 3.16074 53.7713 3.0664 80.2041 3.45239C123.446 4.08339 159.58 -5.13132 180.073 42.3694C199.304 15.4745 215.013 5.88357 247.863 0.81958ZM130.501 37.5559C120.152 36.4479 107.948 37.0555 97.4355 37.0715L34.6221 37.1858L34.6182 78.1448L97.0068 78.2854C110.795 78.3194 132.612 81.084 143.35 72.175C153.486 58.39 148.461 39.4789 130.501 37.5559Z" />
       <path d="M536.813 4.521C556.63 4.41299 597.526 2.23489 615.274 5.90088C671.66 17.5469 672.461 91.4577 609.188 100.404C596.143 100.742 581.678 100.487 568.526 100.518L568.402 146.8L536.735 146.831L536.813 4.521ZM617.252 38.2241C604.504 30.2852 583.036 32.8621 568.442 33.0581L568.46 72.895C584.851 73.008 606.168 75.8662 618.887 66.8022C625.563 57.4943 628.502 45.2311 617.252 38.2241Z" />

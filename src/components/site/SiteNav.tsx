@@ -12,8 +12,7 @@ const LINKS = [
   { label: 'Features', href: '/#features' },
   { label: 'How it works', href: '/#how' },
   { label: 'Pricing', href: '/#plans' },
-  // TODO(design): Blog has no destination yet.
-  { label: 'Blog', href: '#' },
+  { label: 'Blog', href: '/blog', id: 'blog' },
   { label: 'Contact', href: '/#contact' },
 ] as const;
 
@@ -35,7 +34,7 @@ export function SiteNav({
   account?: Account;
   accounts?: boolean;
   /** Which link is the page the reader is on. */
-  current?: 'sample';
+  current?: 'sample' | 'blog';
 }) {
   // TODO(design): the handoff draws the nav at 1440 only. Below 900px the
   // links fold behind a square Menu control — a desktop nav left at phone
@@ -71,8 +70,16 @@ export function SiteNav({
           gap: 24,
         }}
       >
-        <a href="/" aria-label="ProcurveUX home" style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <Logo height={16} />
+        {/* At the top of the page the PCX icon; once the page scrolls, the
+            PROCURVEUX text. Both sit in one grid cell and cross-fade, so the
+            nav keeps its width and nothing beside the logo moves. */}
+        <a href="/" aria-label="ProcurveUX home" data-nav-logo style={{ display: 'inline-grid', alignItems: 'center', justifyItems: 'start' }}>
+          <span data-logo-part="mark" aria-hidden={scrolled} style={{ gridArea: '1 / 1', opacity: scrolled ? 0 : 1, transform: scrolled ? 'translateY(-6px)' : 'none' }}>
+            <Logo part="mark" height={17} />
+          </span>
+          <span data-logo-part="wordmark" aria-hidden={!scrolled} style={{ gridArea: '1 / 1', opacity: scrolled ? 1 : 0, transform: scrolled ? 'none' : 'translateY(6px)' }}>
+            <Logo part="wordmark" height={16} />
+          </span>
         </a>
 
         <button

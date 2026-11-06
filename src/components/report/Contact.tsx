@@ -20,7 +20,7 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hello@audix.com'
  * The same form closes the homepage, where there is no report to talk about and
  * the copy and the message say so.
  *
- * TODO(design): confirm the trust badges are Audix's own, or label them.
+ * TODO(design): confirm the trust badges are ProCurveUX's own, or label them.
  */
 export function Contact({ result }: { result?: AuditResult }) {
   const [busy, setBusy] = useState(false);
@@ -76,8 +76,8 @@ export function Contact({ result }: { result?: AuditResult }) {
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "stretch" }}>
           <div style={{ flex: "1 1 520px", minWidth: "0", background: "var(--bg-subtle)", padding: "96px clamp(16px, 5.56vw, 80px)", display: "flex", flexDirection: "column", justifyContent: "space-between", gap: "56px" }}>
             <div style={{ maxWidth: "560px", display: "flex", flexDirection: "column", gap: "24px" }}>
-              <h2 style={{ margin: "0", font: "600 clamp(40px, 4vw, 60px)/1.08 var(--font-sans)", letterSpacing: "-0.035em", background: "linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textWrap: "balance" }}>{result ? 'Talk to our team about these fixes' : 'Contact us'}</h2>
-              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>{result ? "Send us this report and we'll come back with what each fix takes, in hours, not a proposal." : 'Questions about an audit, a plan, or getting the fixes done? Send us a message.'}</p>
+              <h2 style={{ margin: "0", font: "600 clamp(40px, 4vw, 60px)/1.08 var(--font-sans)", letterSpacing: "-0.035em", background: "linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", textWrap: "balance" }}>{result ? 'Talk to our team about these fixes' : 'Need help fixing what ProCurveUX found?'}</h2>
+              <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>{result ? "Send us this report and we'll come back with what each fix takes, in hours, not a proposal." : 'Our design team at ZeeFrames can design and build the fixes for you. Tell us about your site.'}</p>
               <p style={{ margin: "0", font: "400 18px/30px var(--font-sans)", color: "var(--ink)", textWrap: "pretty" }}>{result ? 'Prefer to fix it yourself? Every issue above shows exactly what to change.' : 'A person will reply within a working day.'}</p>
             </div>
             {result && <div style={{ paddingTop: "28px", borderTop: "1px solid #E3E7EF" }}>
@@ -92,17 +92,13 @@ export function Contact({ result }: { result?: AuditResult }) {
                 <label htmlFor="c-name" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Full name<span style={{ color: "var(--critical)" }}>*</span></label>
                 <input id="c-name" name="name" type="text" autoComplete="name" required placeholder="For example, Jerry Liu" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
               </div>
-              <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ minWidth: "0", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <label htmlFor="c-email" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Email address<span style={{ color: "var(--critical)" }}>*</span></label>
-                <input id="c-email" name="email" type="email" autoComplete="email" required placeholder="For example, jane@company.com" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
+                <input id="c-email" name="email" type="email" autoComplete="email" required placeholder="jane@company.com" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
               </div>
-              <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label htmlFor="c-phone" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Phone number</label>
-                <div style={{ display: "flex", gap: "8px" }}><span style={{ position: "relative", flex: "0 0 116px" }}><label htmlFor="c-code" style={{ position: "absolute", width: "1px", height: "1px", overflow: "hidden", clipPath: "inset(50%)" }}>Country code</label><select id="c-code" name="phoneCode" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#F3F4F6", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none", appearance: "none", cursor: "pointer", paddingRight: "32px", borderColor: "#F3F4F6" }}><option value="+1">US +1</option><option value="+44">UK +44</option><option value="+61">AU +61</option><option value="+49">DE +49</option><option value="+33">FR +33</option><option value="+91">IN +91</option><option value="+92">PK +92</option><option value="+971">AE +971</option><option value="+966">SA +966</option><option value="+65">SG +65</option></select><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3D44" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", right: "14px", top: "50%", translate: "0 -50%", pointerEvents: "none" }}><path d="m6 9 6 6 6-6"></path></svg></span><input id="c-phone" name="phone" type="tel" autoComplete="tel-national" placeholder="(201) 555-0123" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} /></div>
-              </div>
-              <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label htmlFor="c-country" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Country (optional)</label>
-                <span style={{ position: "relative", display: "block" }}><select id="c-country" name="country" autoComplete="country-name" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#F3F4F6", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none", appearance: "none", cursor: "pointer", paddingRight: "36px", borderColor: "#F3F4F6" }}><option value="">Please select</option><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option><option>Germany</option><option>France</option><option>India</option><option>Pakistan</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Singapore</option><option>Other</option></select><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3D44" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", right: "14px", top: "50%", translate: "0 -50%", pointerEvents: "none" }}><path d="m6 9 6 6 6-6"></path></svg></span>
+              <div style={{ minWidth: "0", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <label htmlFor="c-website" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Website URL (optional)</label>
+                <input id="c-website" name="website" type="text" inputMode="url" autoComplete="url" placeholder="https://yourwebsite.com" style={{ width: "100%", border: "1px solid var(--border-strong)", borderRadius: "2px", background: "#FFFFFF", padding: "12px 14px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)", outline: "none" }} />
               </div>
               <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" }}>
                 <label htmlFor="c-message" style={{ font: "600 14px/20px var(--font-sans)", color: "var(--ink)" }}>Message<span style={{ color: "var(--critical)" }}>*</span></label>
@@ -120,7 +116,7 @@ export function Contact({ result }: { result?: AuditResult }) {
               )}
               {!sent && captchaFailed && !captcha && <p role="alert" style={{ gridColumn: "1 / -1", margin: 0, font: "400 14px/20px var(--font-sans)", color: "var(--critical)" }}>The check could not load. Refresh the page, or email {CONTACT_EMAIL}.</p>}
               {!sent && problem && <p role="alert" style={{ gridColumn: "1 / -1", margin: 0, font: "400 14px/20px var(--font-sans)", color: "var(--critical)" }}>{problem}</p>}
-              {sent ? (<p role="status" style={{ gridColumn: "1 / -1", margin: 0, padding: "14px 16px", background: "var(--blue-tint)", borderRadius: "8px", font: "500 15px/22px var(--font-sans)", color: "var(--ink)" }}>{sent}</p>) : (<button type="submit" disabled={busy} data-cta="primary" style={{ gridColumn: "1 / -1", marginTop: "8px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)", color: "#FFFFFF", border: "none", cursor: "pointer", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "18px 24px", borderRadius: "2px" }}>{busy ? "Sending…" : "Submit inquiry"}</button>)}
+              {sent ? (<p role="status" style={{ gridColumn: "1 / -1", margin: 0, padding: "14px 16px", background: "var(--blue-tint)", borderRadius: "8px", font: "500 15px/22px var(--font-sans)", color: "var(--ink)" }}>{sent}</p>) : (<button type="submit" disabled={busy} data-cta="primary" style={{ gridColumn: "1 / -1", marginTop: "8px", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--ink)", color: "#FFFFFF", border: "none", cursor: "pointer", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "18px 24px", borderRadius: "2px" }}>{busy ? "Sending…" : "Send message"}</button>)}
             </form>
           </div>
         </div>
@@ -139,12 +135,11 @@ const hostOf = (url: string) => {
 
 /** The same message, addressed to the team, for when there is no mail backend. */
 function mailtoFor(p: Record<string, unknown>): string {
-  const subject = p.host ? `UX audit fixes — ${p.host}` : `Audix enquiry — ${p.name ?? ''}`;
+  const subject = p.host ? `UX audit fixes — ${p.host}` : `ProCurveUX enquiry — ${p.name ?? ''}`;
   const body = [
     `Name: ${p.name ?? ''}`,
     `Email: ${p.email ?? ''}`,
-    p.phone ? `Phone: ${p.phoneCode ?? ''} ${p.phone}` : '',
-    p.country ? `Country: ${p.country}` : '',
+    p.website ? `Website: ${p.website}` : '',
     '',
     String(p.message ?? ''),
     '',

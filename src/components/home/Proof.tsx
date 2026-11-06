@@ -20,9 +20,9 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
               <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>What you get</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>See exactly what's getting in the way</h2>
+              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Every finding is a ticket your developer can act on</h2>
             </div>
-            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Every finding names the element, the UX principle it breaks, the people it affects and the fix. No vague "improve your hierarchy" advice, just a list you can hand to a developer today.</p>
+            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>No vague advice. Each issue comes with the exact element, the UX principle behind it, how it hurts conversions, and a fix your developer can ship today.</p>
           </div>
       
           <div style={{ marginTop: "48px", border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "#FFFFFF", boxShadow: "0 8px 24px rgba(20, 40, 90, 0.07)" }}>
@@ -34,7 +34,7 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
                 <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px" }}>
                   <span style={{ background: "var(--critical)", color: "#FFFFFF", font: "600 12px/16px var(--font-sans)", padding: "4px 10px", borderRadius: "4px" }}>High impact</span>
                   <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--ink-secondary)", padding: "4px 10px", borderRadius: "4px", boxShadow: "inset 0 0 0 1px var(--border)" }}>Conversion</span>
-                  <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--ink-secondary)", padding: "4px 10px", borderRadius: "4px", boxShadow: "inset 0 0 0 1px var(--border)" }}>Fitts's Law</span>
+                  <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--ink-secondary)", padding: "4px 10px", borderRadius: "4px", boxShadow: "inset 0 0 0 1px var(--border)" }}>Hick's Law</span>
                   <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--ink-secondary)", padding: "4px 10px", borderRadius: "4px", boxShadow: "inset 0 0 0 1px var(--border)" }}>Visual hierarchy</span>
                 </div>
               </div>
@@ -43,7 +43,7 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
             <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.25fr) minmax(0, 1fr)" }}>
               {/* annotated capture */}
               <div style={{ background: "#FFFFFF", borderRight: "1px solid var(--border)", padding: "24px" }}>
-                <div role="img" aria-label="An example page where the Start free trial and Learn more buttons look identical. Audix outlines both and marks them as finding 1." style={{ position: "relative", height: "520px", border: "1px solid var(--border)", borderRadius: "8px", background: "#FFFFFF" }}>
+                <div role="img" aria-label="An example page where the Start free trial and Learn more buttons look identical. ProCurveUX outlines both and marks them as finding 1." style={{ position: "relative", height: "520px", border: "1px solid var(--border)", borderRadius: "8px", background: "#FFFFFF" }}>
                   <ProofCapture />
                 </div>
               </div>
@@ -67,7 +67,7 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
                   <p style={{ margin: "0", font: "400 14px/22px var(--font-sans)", textWrap: "pretty" }}>Screenshot with the element highlighted · Element: button.hero-cta · Found on 3 pages</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "20px 24px", background: "#F3F3F3", flexGrow: "1" }}>
-                  <a href="/report/sample" data-cta="primary" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", background: "var(--ink)", color: "#FFFFFF", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "16px 24px", borderRadius: "2px" }}>Explore a sample report</a>
+                  <a href="/report/sample" data-cta="primary" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", background: "var(--ink)", color: "#FFFFFF", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "16px 24px", borderRadius: "2px" }}>View a real audit</a>
                 </div>
               </div>
             </div>

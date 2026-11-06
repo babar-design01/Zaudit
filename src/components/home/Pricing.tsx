@@ -103,7 +103,7 @@ export function Pricing({ onRunAudit, accounts = false }: { onRunAudit: () => vo
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px 64px' }}>
           <div style={{ flex: '1 1 520px', maxWidth: '680px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <span style={{ font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' }}>Pricing</span>
-            <h2 style={{ margin: 0, font: '800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'pretty' }}>Start free. Go deeper when you need to.</h2>
+            <h2 style={{ margin: 0, font: '800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'pretty' }}>Less than the cost of one lost customer.</h2>
           </div>
           <p style={{ margin: 0, flex: '0 1 440px', minWidth: 0, font: '400 16px/28px var(--font-sans)', color: 'var(--ink-muted)', textWrap: 'pretty' }}>
             {accounts
@@ -128,12 +128,13 @@ export function Pricing({ onRunAudit, accounts = false }: { onRunAudit: () => vo
             <Card
               key={plan.id}
               name={plan.name}
+              // 'agency' is the plan shown as Pro.
               badge={plan.id === 'agency' ? 'Recommended' : undefined}
               price={priceOf(plan)}
               per="/ month"
               summary={plan.summary}
               audits={[`${plan.auditsPerMonth} audits a month`]}
-              cta={accounts ? `Choose ${plan.name}` : 'Contact us'}
+              cta={`Get ${plan.name}`}
               href={accounts ? '/account' : '/#contact'}
               note={accounts ? 'Cancel anytime' : `To start ${plan.name}, send us a message`}
             />

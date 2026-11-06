@@ -7,7 +7,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 const STEPS = [
   {
     title: 'Enter your website',
-    body: 'Paste any public URL. Audix loads it in a real browser, at desktop and mobile sizes, the way your visitors see it.',
+    body: 'Paste any public URL. ProCurveUX loads it in a real browser, at desktop and mobile sizes, the way your visitors see it.',
   },
   {
     title: 'We analyse the experience',
@@ -104,9 +104,9 @@ export function HowItWorks(_props: { onRunAudit?: () => void }) {
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
               <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>How it works</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>From one URL to a fix list in four steps</h2>
+              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>From one URL to more conversions in four steps</h2>
             </div>
-            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>No tracking script, no code snippet, no onboarding call. Enter your website and Audix does the rest.</p>
+            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>No tracking script, no code snippet, no onboarding call. Enter your website and ProCurveUX does the rest.</p>
           </div>
       
           {/* the scroll track: the row below stays pinned while the page scrolls through it, one step per stretch */}
@@ -128,7 +128,7 @@ export function HowItWorks(_props: { onRunAudit?: () => void }) {
             </div>
       
             {/* the visual for the active step */}
-            <div role="img" aria-label="Audix running a website UX audit from a single URL and listing ranked findings" style={{ flex: "999 1 560px", minWidth: "0", position: "relative", height: "560px", borderRadius: "8px", overflow: "hidden", background: "radial-gradient(circle at 64% 42%, rgba(232, 244, 255, 0.95) 0%, rgba(170, 206, 245, 0.7) 30%, rgba(120, 165, 225, 0) 60%), linear-gradient(135deg, #1B4F8F 0%, #5D93D0 48%, #CFE2F5 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+            <div role="img" aria-label="ProCurveUX running a website UX audit from a single URL and listing ranked findings" style={{ flex: "999 1 560px", minWidth: "0", position: "relative", height: "560px", borderRadius: "8px", overflow: "hidden", background: "radial-gradient(circle at 64% 42%, rgba(232, 244, 255, 0.95) 0%, rgba(170, 206, 245, 0.7) 30%, rgba(120, 165, 225, 0) 60%), linear-gradient(135deg, #1B4F8F 0%, #5D93D0 48%, #CFE2F5 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
               <div data-orb="" aria-hidden="true" style={{ position: "absolute", right: "-80px", top: "-60px", width: "420px", height: "420px", borderRadius: "8px", background: "radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 60%)" }}></div>
       
               {s1 && (<>

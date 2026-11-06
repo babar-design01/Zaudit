@@ -16,7 +16,7 @@ const COLUMNS = [
   {
     heading: 'Resources',
     links: [
-      { label: 'Blog', href: '#' },
+      { label: 'Blog', href: '/blog' },
       { label: 'UX laws explained', href: '#' },
       { label: 'Accessibility checklist', href: '#' },
       { label: 'UX audit template', href: '#' },
@@ -57,8 +57,8 @@ export function SiteFooter() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Logo height={18} fill="#FFFFFF" />
           <p style={{ margin: 0, maxWidth: 320, font: t(400, 14, 22), color: MUTED }}>
-            Audix — automated UX audits for websites and web apps. Find what&apos;s hurting your user experience, fix
-            what matters first.
+            ProCurveUX: automated UX audits for live websites. Find out why visitors don&apos;t convert, and fix what
+            matters first.
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export function SiteFooter() {
       </div>
 
       <div style={{ maxWidth: layout.frame, margin: '0 auto', padding: `22px ${layout.gutter} 40px`, borderTop: '1px solid #23252B' }}>
-        <span style={{ font: t(400, 13, 18), color: MUTED }}>© 2026 Audix. All rights reserved.</span>
+        <span style={{ font: t(400, 13, 18), color: MUTED }}>© 2026 ProCurveUX. All rights reserved.</span>
       </div>
     </footer>
   );

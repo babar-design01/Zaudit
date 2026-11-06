@@ -19,9 +19,9 @@ export function Solutions({ onRunAudit }: { onRunAudit: () => void }) {
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
               <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>Who it’s for</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Built for people who care about better experiences</h2>
+              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>For anyone who wants more visitors to become customers</h2>
             </div>
-            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Whether you're launching your first product or shipping your fortieth release, Audix gives you the senior-designer second opinion you'd otherwise wait weeks for.</p>
+            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Whether you're launching your first product or shipping your fortieth release, ProCurveUX gives you the senior-designer second opinion you'd otherwise wait weeks for.</p>
           </div>
       
           <div style={{ marginTop: "48px", display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "20px", alignItems: "stretch" }}>
@@ -51,7 +51,7 @@ export function Solutions({ onRunAudit }: { onRunAudit: () => void }) {
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <h3 style={{ margin: "0", font: "700 20px/28px var(--font-sans)", letterSpacing: "-0.02em", color: "var(--ink)", textWrap: "pretty" }}>Agencies</h3>
-                <p style={{ margin: "0", font: "400 15px/24px var(--font-sans)", color: "var(--ink-secondary)", textWrap: "pretty" }}>Scale client audits. Produce a branded, professional UX audit in minutes for every prospect and every project, and win the retainer with it.</p>
+                <p style={{ margin: "0", font: "400 15px/24px var(--font-sans)", color: "var(--ink-secondary)", textWrap: "pretty" }}>Scale client audits. Run a professional UX audit on every prospect and client site in minutes, then send the PDF with your pitch to win the retainer.</p>
                 <a href="/?audit=1" onClick={run} data-cta="secondary" style={{ marginTop: "24px", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255, 255, 255, 0.18)", color: "var(--ink)", font: "600 14px/20px var(--font-sans)", letterSpacing: "0.1em", textTransform: "uppercase", padding: "16px 24px", borderRadius: "2px", boxShadow: "inset 0 0 0 1px rgba(20, 60, 140, 0.35)", whiteSpace: "nowrap", width: "100%", alignSelf: "stretch" }}>For agencies</a>
               </div>
             </div>

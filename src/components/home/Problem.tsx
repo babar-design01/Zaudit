@@ -19,9 +19,9 @@ export function Problem({ onRunAudit }: { onRunAudit: () => void }) {
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
               <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>The problem</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.14 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>You know something isn't working. Finding out why is the hard part.</h2>
+              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.14 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>You're getting the clicks. You're just not getting the customers.</h2>
             </div>
-            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Analytics tells you where people leave. Heatmaps show where they hover. Neither tells you why the button got ignored, the form got abandoned or the pricing page felt confusing. Until now, the only way to get that answer was a UX consultant and a four-week wait.</p>
+            <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Maybe the button got ignored, the form felt too long, or the pricing confused people. Your dashboards can't tell you which. A UX expert can, but most teams can only afford one review a year.</p>
           </div>
       
           <div style={{ marginTop: "48px", display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "20px" }}>
@@ -57,8 +57,8 @@ export function Problem({ onRunAudit }: { onRunAudit: () => void }) {
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="#16181D" aria-hidden="true"><path fillRule="evenodd" d="M10.6 2.6a2 2 0 0 1 2.8 0l1.2 1.1 1.6-.2a2 2 0 0 1 2.2 1.7l.3 1.6 1.4.8a2 2 0 0 1 .9 2.6l-.7 1.5.7 1.5a2 2 0 0 1-.9 2.6l-1.4.8-.3 1.6a2 2 0 0 1-2.2 1.7l-1.6-.2-1.2 1.1a2 2 0 0 1-2.8 0l-1.2-1.1-1.6.2a2 2 0 0 1-2.2-1.7l-.3-1.6-1.4-.8a2 2 0 0 1-.9-2.6l.7-1.5-.7-1.5a2 2 0 0 1 .9-2.6l1.4-.8.3-1.6a2 2 0 0 1 2.2-1.7l1.6.2Zm4.9 7.1a.9.9 0 0 0-1.3-1.3l-3.3 3.4-1.5-1.5a.9.9 0 1 0-1.3 1.3l2.1 2.1a.9.9 0 0 0 1.3 0Z"></path></svg>
               </span>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <h3 style={{ margin: "0", font: "700 20px/28px var(--font-sans)", letterSpacing: "-0.02em", color: "#FFFFFF" }}>Audix UX audit</h3>
-                <p style={{ margin: "0", font: "400 15px/24px var(--font-sans)", color: "#C9CDD4", textWrap: "pretty" }}>Reads your live site like a senior designer would, scores every page against proven UX laws and accessibility standards, and hands you a ranked fix list in about a minute. Every release, not once a year.</p>
+                <h3 style={{ margin: "0", font: "700 20px/28px var(--font-sans)", letterSpacing: "-0.02em", color: "#FFFFFF" }}>ProCurveUX audit</h3>
+                <p style={{ margin: "0", font: "400 15px/24px var(--font-sans)", color: "#C9CDD4", textWrap: "pretty" }}>Finds what's blocking conversions on your live site, explains why it matters, and ranks every fix by impact. About a minute per audit, so you can run one before every release.</p>
               </div>
             </div>
           </div>

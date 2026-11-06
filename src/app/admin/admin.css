@@ -489,6 +489,15 @@
 
   .admin-brand {
     padding: 0;
+    min-height: 40px;
+  }
+
+  /* Text links keep their look but get a 40px row to tap. */
+  .admin-main .admin-link,
+  .admin-card-head a {
+    display: inline-block;
+    padding: 10px 0;
+    margin: -10px 0;
   }
 
   .admin-signout {

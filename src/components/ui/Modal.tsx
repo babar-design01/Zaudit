@@ -102,7 +102,7 @@ export function Modal({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 24,
+        padding: 'var(--modal-pad)',
         // The glow field, veiled at 28%: the backdrop every Audix dialog sits on.
         background: color.bgMist,
         overflow: 'hidden',
@@ -132,7 +132,8 @@ export function Modal({
         style={{
           width: '100%',
           maxWidth: width,
-          maxHeight: 'calc(100vh - 48px)',
+          // dvh, so a phone's browser bar does not hide the bottom of the panel.
+          maxHeight: 'calc(100dvh - 2 * var(--modal-pad))',
           overflowY: 'auto',
           position: 'relative',
           background: color.surface,

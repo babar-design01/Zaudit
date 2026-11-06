@@ -58,7 +58,7 @@ export function Stories(_props: { onRunAudit?: () => void }) {
         <div style={{ position: "relative", maxWidth: "1440px", margin: "0 auto", padding: "96px clamp(16px, 5.56vw, 80px)", display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "720px", marginBottom: "32px" }}>
             <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>Results</span>
-            <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--ink)", textWrap: "balance" }}>Teams ship better experiences with Audix</h2>
+            <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--ink)", textWrap: "balance" }}>Teams ship better experiences with ProCurveUX</h2>
           </div>
           <span style={{ font: "600 12px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-secondary)" }}>Used by product teams at</span>
           <div role="tablist" aria-label="Customer stories" style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>

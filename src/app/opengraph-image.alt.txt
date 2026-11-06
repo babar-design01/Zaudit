@@ -1,1 +1,1 @@
-Audix: find what's hurting your user experience. Audix tests your site in a real browser and tells you what to fix first.
+ProCurveUX: find out why visitors don't convert, and what to fix first. ProCurveUX tests your site in a real browser and ranks what to fix first.

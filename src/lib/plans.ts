@@ -24,10 +24,13 @@ export type Plan = {
   summary: string;
 };
 
+// The ids are the plans' first names and stay as they are, because they are what
+// Stripe and the database record. Only the names people see moved down a step:
+// 'pro' is shown as Starter, 'agency' as Pro and 'max' as Agency.
 export const PLANS: Plan[] = [
-  { id: 'pro', name: 'Pro', amount: 500, currency: 'usd', auditsPerMonth: 5, summary: 'For freelancers checking a site now and then' },
-  { id: 'agency', name: 'Agency', amount: 990, currency: 'usd', auditsPerMonth: 15, summary: 'For teams and agencies auditing client sites' },
-  { id: 'max', name: 'Max', amount: 1990, currency: 'usd', auditsPerMonth: 40, summary: 'For auditing every release across many sites' },
+  { id: 'pro', name: 'Starter', amount: 500, currency: 'usd', auditsPerMonth: 5, summary: 'For founders and freelancers checking a site now and then' },
+  { id: 'agency', name: 'Pro', amount: 990, currency: 'usd', auditsPerMonth: 15, summary: 'For designers and small teams auditing every release' },
+  { id: 'max', name: 'Agency', amount: 1990, currency: 'usd', auditsPerMonth: 40, summary: 'For agencies auditing many client sites' },
 ];
 
 export const planById = (id: unknown): Plan | undefined => PLANS.find((p) => p.id === id);

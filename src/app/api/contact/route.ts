@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
- * POST /api/contact — "Submit inquiry", from the homepage and from a report.
+ * POST /api/contact — "Send message", from the homepage and from a report.
  *
  * Emails the team when the deployment has a mail key and somewhere to send it
  * (`CONTACT_RESEND_KEY` or `AUTH_RESEND_KEY`, and `CONTACT_TO`). Without them it
@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
  * different road.
  */
 
-const MAX = { name: 120, email: 200, phone: 40, country: 80, message: 4000 };
+const MAX = { name: 120, email: 200, website: 300, phone: 40, country: 80, message: 4000 };
 
 const hits = new Map<string, number[]>();
 function limited(ip: string): boolean {
@@ -52,6 +52,8 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Your name, a valid email and a message are all needed.' }, { status: 400 });
   }
 
+  const website = clean(body.website, MAX.website);
+  // The form no longer asks for these, but a page opened before it changed can still send them.
   const phone = clean(body.phone, MAX.phone);
   const phoneCode = clean(body.phoneCode, 6);
   const country = clean(body.country, MAX.country);
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
   const lines: [string, string][] = [
     ['Name', name],
     ['Email', email],
+    ...(website ? ([['Website', website]] as [string, string][]) : []),
     ...(phone ? ([['Phone', `${phoneCode} ${phone}`]] as [string, string][]) : []),
     ...(country ? ([['Country', country]] as [string, string][]) : []),
     // Only a message sent from a report has any of this to say.
@@ -81,7 +84,7 @@ export async function POST(request: Request) {
     from,
     to,
     replyTo: email,
-    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${name}` : `Audix enquiry — ${name}`,
+    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${name}` : `ProCurveUX enquiry — ${name}`,
     text: `${lines.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
     html: `<table>${lines.map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table><p style="white-space:pre-wrap">${esc(message)}</p>`,
   });
