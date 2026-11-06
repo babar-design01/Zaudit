@@ -92,7 +92,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
   const first = author.name.split(' ').slice(-1)[0];
   const posts = postsBy(author.id);
   const realLinks = author.links.filter((l) => l.href !== '#');
-  const website = realLinks.find((l) => l.label === 'Website');
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'ProfilePage',
@@ -169,12 +168,6 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                       <Icon name="pin" />
                       {author.location}
                     </span>
-                  )}
-                  {website && (
-                    <a href={website.href} target="_blank" rel="me noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '1px 0', color: 'var(--accent-fg)' }}>
-                      <Icon name="globe" />
-                      {website.href.replace(/^https?:\/\//, '')}
-                    </a>
                   )}
                 </p>
               </div>
