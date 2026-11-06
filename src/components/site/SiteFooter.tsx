@@ -16,7 +16,7 @@ const COLUMNS = [
   {
     heading: 'Resources',
     links: [
-      { label: 'Blog', href: '#' },
+      { label: 'Blog', href: '/blog' },
       { label: 'UX laws explained', href: '#' },
       { label: 'Accessibility checklist', href: '#' },
       { label: 'UX audit template', href: '#' },

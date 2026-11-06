@@ -13,7 +13,7 @@ const LINKS = [
   { label: 'How it works', href: '/#how' },
   { label: 'Pricing', href: '/#plans' },
   // TODO(design): Blog has no destination yet.
-  { label: 'Blog', href: '#' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/#contact' },
 ] as const;
 
