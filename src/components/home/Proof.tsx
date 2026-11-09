@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, type MouseEvent } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 import { ProofCapture } from './ProofCapture';
 
 export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
@@ -19,8 +20,8 @@ export function Proof({ onRunAudit }: { onRunAudit: () => void }) {
         <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px clamp(16px, 5.56vw, 80px)" }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>What you get</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Every finding is a ticket your developer can act on</h2>
+              <Eyebrow>What you get</Eyebrow>
+              <h2 style={{ margin: "0", font: "500 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Every finding is a ticket your developer can act on</h2>
             </div>
             <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>No vague advice. Each issue comes with the exact element, the UX principle behind it, how it hurts conversions, and a fix your developer can ship today.</p>
           </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { BlogCard, Byline, Category, FreeAuditCard } from '@/components/blog/BlogCard';
+import { BlogCard, Byline, Category } from '@/components/blog/BlogCard';
 import { ArticleFaq } from '@/components/blog/ArticleFaq';
 import { ArticleToc } from '@/components/blog/ArticleToc';
 import { BlogCover } from '@/components/blog/BlogCover';
@@ -71,7 +71,7 @@ function Body({ block }: { block: Block }) {
         </div>
       );
     case 'h2':
-      return <h2 id={headingId(block.text)} style={{ scrollMarginTop: '104px', margin: '24px 0 0', font: '700 clamp(22px, 2.2vw, 28px)/1.25 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)', textWrap: 'balance' }}>{block.text}</h2>;
+      return <h2 id={headingId(block.text)} style={{ scrollMarginTop: '104px', margin: '24px 0 0', font: '500 clamp(22px, 2.2vw, 28px)/1.25 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)', textWrap: 'balance' }}>{block.text}</h2>;
     case 'h3':
       return <h3 style={{ margin: '12px 0 0', font: '700 20px/28px var(--font-sans)', letterSpacing: '-0.015em', color: 'var(--ink)', textWrap: 'balance' }}>{block.text}</h3>;
     case 'list': {
@@ -142,7 +142,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   const post = postBySlug((await params).slug);
   if (!post) notFound();
 
-  const others = POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
+  const others = POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -217,7 +217,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               <span style={{ marginTop: '20px', display: 'flex' }}>
                 <Category post={post} />
               </span>
-              <h1 style={{ margin: 0, font: '800 clamp(32px, 3.6vw, 48px)/1.1 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>{post.title}</h1>
+              <h1 style={{ margin: 0, font: '500 clamp(32px, 3.6vw, 48px)/1.1 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>{post.title}</h1>
               <p style={{ margin: 0, font: '400 19px/31px var(--font-sans)', color: 'var(--ink-muted)', textWrap: 'pretty' }}>{post.description}</p>
               {/* author, date and sharing on one ruled row, the line under the header */}
               <div style={{ marginTop: '12px' }}>
@@ -264,7 +264,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
                 {post.cta && (
                   <aside aria-labelledby="article-cta" style={{ marginTop: '24px', padding: 'clamp(24px, 3vw, 36px)', display: 'flex', flexDirection: 'column', gap: '14px', background: 'var(--ink)', borderRadius: '8px', boxShadow: '0 12px 32px rgba(20, 40, 90, 0.1)' }}>
-                    <h2 id="article-cta" style={{ margin: 0, font: '700 clamp(22px, 2.2vw, 26px)/1.25 var(--font-sans)', letterSpacing: '-0.02em', color: '#FFFFFF', textWrap: 'balance' }}>
+                    <h2 id="article-cta" style={{ margin: 0, font: '500 clamp(22px, 2.2vw, 26px)/1.25 var(--font-sans)', letterSpacing: '-0.02em', color: '#FFFFFF', textWrap: 'balance' }}>
                       {post.cta.title}
                     </h2>
                     <p style={{ margin: 0, font: '400 16px/27px var(--font-sans)', color: '#C9CDD4', textWrap: 'pretty' }}>{post.cta.text}</p>
@@ -281,16 +281,13 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         {others.length > 0 && (
           <section>
             <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '96px clamp(16px, 5.56vw, 80px) 112px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-              <h2 style={{ margin: 0, font: '800 clamp(28px, 2.8vw, 36px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>More from the blog</h2>
+              <h2 style={{ margin: 0, font: '500 clamp(28px, 2.8vw, 36px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>More from the blog</h2>
               <ul data-blog-list style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '48px 24px' }}>
                 {others.map((p) => (
                   <li key={p.slug} style={{ display: 'flex' }}>
                     <BlogCard post={p} />
                   </li>
                 ))}
-                <li style={{ display: 'flex' }}>
-                  <FreeAuditCard />
-                </li>
               </ul>
             </div>
           </section>

@@ -16,19 +16,34 @@ const SITE = 'https://www.procurveux.com';
  * organisation, the site, and the tool with its free audit and paid plans.
  * Only facts the page itself states; no ratings, since there are none to cite.
  */
+/** How people type the name. Search and AI answers often split it into words. */
+const ALSO_KNOWN_AS = ['Pro Curve UX', 'ProCurve UX', 'Procurveux'];
+
 const PRODUCT_JSON_LD = {
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'Organization', '@id': `${SITE}/#org`, name: 'ProCurveUX', url: `${SITE}/`, logo: `${SITE}/icon.svg` },
-    { '@type': 'WebSite', '@id': `${SITE}/#site`, name: 'ProCurveUX', url: `${SITE}/`, publisher: { '@id': `${SITE}/#org` } },
+    {
+      '@type': 'Organization',
+      '@id': `${SITE}/#org`,
+      name: 'ProCurveUX',
+      alternateName: ALSO_KNOWN_AS,
+      url: `${SITE}/`,
+      logo: `${SITE}/icon.svg`,
+      description: 'ProCurveUX makes an automated UX audit tool for websites.',
+      address: { '@type': 'PostalAddress', addressLocality: 'Lahore', addressCountry: 'PK' },
+      email: 'sales@zeeframes.com',
+    },
+    { '@type': 'WebSite', '@id': `${SITE}/#site`, name: 'ProCurveUX', alternateName: ALSO_KNOWN_AS, url: `${SITE}/`, publisher: { '@id': `${SITE}/#org` } },
     {
       '@type': 'SoftwareApplication',
       name: 'ProCurveUX',
+      alternateName: ALSO_KNOWN_AS,
       url: `${SITE}/`,
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
       description:
         'A website UX audit tool. Paste a URL and ProCurveUX tests the live page in a real browser against 120+ UX, design and accessibility rules, then ranks what to fix first.',
+      featureList: ['Real-browser audit at desktop and mobile sizes', '120+ UX, design and WCAG 2.2 accessibility rules', 'Findings ranked by impact and effort', 'A written fix for every finding', 'PDF report export'],
       publisher: { '@id': `${SITE}/#org` },
       offers: [
         { '@type': 'Offer', name: 'Free UX audit', price: '0', priceCurrency: 'USD' },

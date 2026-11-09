@@ -68,7 +68,7 @@ function progressFor(stageIndex: number, check: AuditState['check'], secondsSinc
 }
 
 const eyebrow = { font: text.eyebrow, letterSpacing: tracking.eyebrow, textTransform: 'uppercase' as const, color: color.accentFg };
-const heading = { margin: 0, font: t(800, 26, 1.15), letterSpacing: tracking.tight, color: color.ink };
+const heading = { margin: 0, font: t(500, 26, 1.15), letterSpacing: tracking.tight, color: color.ink };
 const plainAction = {
   background: 'transparent',
   border: 'none',
@@ -274,7 +274,7 @@ export function AuditDialog({
                 <span style={eyebrow}>Step 2 of 2 · {host}</span>
                 <h2 style={heading}>{stage === 'done' ? 'Audit complete' : RUN_STEPS[position.row].label}</h2>
               </div>
-              <span style={{ font: t(700, 28, 1), letterSpacing: tracking.tight, color: color.blue }}>
+              <span style={{ font: t(500, 28, 1), letterSpacing: tracking.tight, color: color.blue }}>
                 {pct}
                 <span style={{ font: t(600, 14, 1), color: color.inkMuted }}>%</span>
               </span>
@@ -340,7 +340,7 @@ export function AuditDialog({
               <div data-done style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: color.bgSubtle, borderRadius: radius.sm, padding: '14px 16px' }}>
                   <span style={{ font: t(600, 14, 20), color: color.ink }}>Your score</span>
-                  <span style={{ font: t(800, 24, 1), letterSpacing: tracking.tight, color: color.ink }}>
+                  <span style={{ font: t(500, 24, 1), letterSpacing: tracking.tight, color: color.ink }}>
                     {result.overall ?? '—'}
                     <span style={{ font: t(600, 13, 1), color: color.inkMuted }}>
                       {result.overall == null ? ' · not scored' : `/100 · ${result.band}`}

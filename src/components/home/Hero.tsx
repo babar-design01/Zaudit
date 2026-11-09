@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, type MouseEvent } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 
 /**
  * The hero. Items fade up in sequence on load (`data-hero`, in globals.css),
@@ -21,9 +22,9 @@ export function Hero({ onRunAudit, url, setUrl }: { onRunAudit: () => void; url:
       {/* hero */}
       <section id="hero">
         <div data-hero style={{ maxWidth: "1440px", margin: "0 auto", padding: "96px clamp(16px, 5.56vw, 80px) 104px", display: "flex", flexDirection: "column", alignItems: "center", gap: "24px", textAlign: "center" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", background: "#E8F0FE", color: "var(--accent-fg)", font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "8px" }}>AI UX audit for live websites</span>
+          <Eyebrow>ProCurveUX: the AI UX audit tool for live websites</Eyebrow>
 
-          <h1 style={{ margin: "0", maxWidth: "1120px", font: "800 clamp(46px, 4.8vw, 70px)/1.04 var(--font-sans)", letterSpacing: "-0.035em", textWrap: "pretty" }}>
+          <h1 style={{ margin: "0", maxWidth: "1120px", font: "500 clamp(46px, 4.8vw, 70px)/1.04 var(--font-sans)", letterSpacing: "-0.035em", textWrap: "pretty" }}>
             {/* One sentence per line where it fits, so the break never falls mid-sentence. */}
             <span data-hero-line style={{ display: "block" }}>Every experience leaves clues.</span>{" "}
             <span data-hero-line style={{ display: "block" }}>We read them all.</span>

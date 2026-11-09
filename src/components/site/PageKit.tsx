@@ -9,13 +9,23 @@ import { breadcrumbJsonLd } from '@/lib/page-meta';
 
 export const gutter = 'clamp(16px, 5.56vw, 80px)';
 export const frame = { maxWidth: '1440px', margin: '0 auto', padding: `0 ${gutter}` } as const;
-export const eyebrow = { font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' } as const;
-export const h2: CSSProperties = { margin: 0, maxWidth: '760px', font: '800 clamp(30px, 3.4vw, 46px)/1.1 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' };
+/** The small line above a heading: "+ Our story". Plain ink, sentence case. */
+export const eyebrow = { display: 'inline-flex', alignItems: 'center', gap: '10px', font: '400 15px/22px var(--font-sans)', color: 'var(--ink)' } as const;
+export function Eyebrow({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
+  return (
+    <span style={{ ...eyebrow, color: dark ? '#FFFFFF' : eyebrow.color }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <path d="M12 4v16M4 12h16" />
+      </svg>
+      {children}
+    </span>
+  );
+}
+export const h2: CSSProperties = { margin: 0, maxWidth: '760px', font: '500 clamp(30px, 3.4vw, 46px)/1.1 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' };
 export const lead: CSSProperties = { margin: 0, maxWidth: '640px', font: '400 17px/29px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' };
 export const card: CSSProperties = { padding: '28px', background: '#FFFFFF', border: '1px solid var(--border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' };
 export const cardTitle: CSSProperties = { margin: 0, font: '700 19px/26px var(--font-sans)', letterSpacing: '-0.015em', color: 'var(--ink)', textWrap: 'balance' };
 export const cardBody: CSSProperties = { margin: 0, font: '400 15px/25px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' };
-export const gradientText: CSSProperties = { background: 'linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' };
 /** Columns that fold to one on a phone without a media query. */
 export const cols = (min: number, gap = 20): CSSProperties => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${min}px), 1fr))`, gap: `${gap}px` });
 export const textLink: CSSProperties = { color: 'inherit', textDecoration: 'underline', textUnderlineOffset: '3px', textDecorationThickness: '1px' };
@@ -65,10 +75,10 @@ export function PageHero({ label, title, accent, intro, trail, children }: { lab
             <Breadcrumbs trail={trail} />
           </div>
         )}
-        <span style={eyebrow}>{label}</span>
-        <h1 id="page-h" style={{ margin: 0, maxWidth: '1000px', font: '800 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
+        <Eyebrow>{label}</Eyebrow>
+        <h1 id="page-h" style={{ margin: 0, maxWidth: '1000px', font: '500 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
           <span style={{ display: 'block' }}>{title}</span>
-          {accent && <span style={{ display: 'block', ...gradientText }}>{accent}</span>}
+          {accent && <span style={{ display: 'block' }}>{accent}</span>}
         </h1>
         {intro && <p style={{ ...lead, fontSize: '19px', lineHeight: '31px', maxWidth: '680px' }}>{intro}</p>}
         {children}
@@ -83,7 +93,7 @@ export function Band({ id, label, title, intro, tint = false, children }: { id: 
     <section id={id} aria-labelledby={`${id}-h`} style={{ background: tint ? 'var(--bg-subtle)' : 'var(--bg)', borderTop: tint ? '1px solid var(--border)' : undefined, borderBottom: tint ? '1px solid var(--border)' : undefined, scrollMarginTop: '88px' }}>
       <div style={{ ...frame, paddingTop: 'clamp(64px, 8vw, 112px)', paddingBottom: 'clamp(64px, 8vw, 112px)', display: 'flex', flexDirection: 'column', gap: '48px' }}>
         <header style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <span style={eyebrow}>{label}</span>
+          <Eyebrow>{label}</Eyebrow>
           <h2 id={`${id}-h`} style={h2}>
             {title}
           </h2>
@@ -161,7 +171,7 @@ export function LegalLayout({ updated, sections }: { updated: string; sections: 
         <article data-prose style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: '48px' }}>
           {sections.map((s, i) => (
             <section key={s.id} id={s.id} aria-labelledby={`${s.id}-h`} style={{ scrollMarginTop: '96px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h2 id={`${s.id}-h`} style={{ margin: 0, font: '800 clamp(22px, 2.2vw, 28px)/1.2 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)' }}>
+              <h2 id={`${s.id}-h`} style={{ margin: 0, font: '500 clamp(22px, 2.2vw, 28px)/1.2 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)' }}>
                 {i + 1}. {s.title}
               </h2>
               {s.body}

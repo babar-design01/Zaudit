@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 import { STORIES } from '@/content/stories';
 
 /** How long each story stays up before the next one, matching the tab's fill. */
@@ -57,8 +58,8 @@ export function Stories(_props: { onRunAudit?: () => void }) {
         </div>
         <div style={{ position: "relative", maxWidth: "1440px", margin: "0 auto", padding: "96px clamp(16px, 5.56vw, 80px)", display: "flex", flexDirection: "column", gap: "16px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "720px", marginBottom: "32px" }}>
-            <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>Results</span>
-            <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--ink)", textWrap: "balance" }}>Teams ship better experiences with ProCurveUX</h2>
+            <Eyebrow>Results</Eyebrow>
+            <h2 style={{ margin: "0", font: "500 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--ink)", textWrap: "balance" }}>Teams ship better experiences with ProCurveUX</h2>
           </div>
           <span style={{ font: "600 12px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--ink-secondary)" }}>Used by product teams at</span>
           <div role="tablist" aria-label="Customer stories" style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
@@ -93,11 +94,11 @@ export function Stories(_props: { onRunAudit?: () => void }) {
                 </div>
                 <div style={{ borderTop: "1px solid var(--border)", padding: "32px 56px", display: "flex", flexWrap: "wrap", gap: "0" }}>
                   <div style={{ paddingRight: "48px", marginRight: "48px", borderRight: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <span style={{ font: "600 42px/1 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--blue)" }}>{s.stat1}</span>
+                    <span style={{ font: "500 42px/1 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--blue)" }}>{s.stat1}</span>
                     <span style={{ maxWidth: "180px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)" }}>{s.stat1Label}</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                    <span style={{ font: "600 42px/1 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--blue)" }}>{s.stat2}</span>
+                    <span style={{ font: "500 42px/1 var(--font-sans)", letterSpacing: "-0.03em", color: "var(--blue)" }}>{s.stat2}</span>
                     <span style={{ maxWidth: "180px", font: "400 15px/22px var(--font-sans)", color: "var(--ink)" }}>{s.stat2Label}</span>
                   </div>
                 </div>

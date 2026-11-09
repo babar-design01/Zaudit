@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, type MouseEvent } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 
 export function Problem({ onRunAudit }: { onRunAudit: () => void }) {
   const run = (e: MouseEvent) => {
@@ -18,8 +19,8 @@ export function Problem({ onRunAudit }: { onRunAudit: () => void }) {
         <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px clamp(16px, 5.56vw, 80px)" }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>The problem</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.14 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>You're getting the clicks. You're just not getting the customers.</h2>
+              <Eyebrow>The problem</Eyebrow>
+              <h2 style={{ margin: "0", font: "500 clamp(32px, 3.3vw, 44px)/1.14 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>You're getting the clicks. You're just not getting the customers.</h2>
             </div>
             <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>Maybe the button got ignored, the form felt too long, or the pricing confused people. Your dashboards can't tell you which. A UX expert can, but most teams can only afford one review a year.</p>
           </div>

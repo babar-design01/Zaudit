@@ -125,24 +125,6 @@ export function Byline({ post }: { post: Post }) {
   );
 }
 
-/** The card that closes a grid of articles: the free audit, in place of a newsletter sign-up. */
-export function FreeAuditCard() {
-  return (
-    <div style={{ flex: 1, minHeight: '320px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '14px', background: 'var(--blue-tint)', border: '1px solid #D6E4FB', borderRadius: '8px' }}>
-      <span style={{ font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' }}>Free audit</span>
-      <span style={{ font: '700 24px/31px var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)', textWrap: 'balance' }}>
-        See which of these your site gets wrong, in about a minute.
-      </span>
-      <span style={{ font: '400 15px/24px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' }}>
-        Paste a URL. Every finding comes with the element, the rule behind it and the fix.
-      </span>
-      <a href="/?audit=1" data-cta="primary" style={{ marginTop: '10px', alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ink)', color: '#FFFFFF', font: '600 14px/20px var(--font-sans)', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '16px 24px', borderRadius: '2px' }}>
-        Analyze my website
-      </a>
-    </div>
-  );
-}
-
 /**
  * One article in a grid: cover, then category, title, short description, date
  * and reading time, and #tags. The whole card is the link. Titles and

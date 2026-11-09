@@ -4,6 +4,7 @@ import { AuthorPhoto, BlogCard } from '@/components/blog/BlogCard';
 import { ClosingCta } from '@/components/home/ClosingCta';
 import { Contact } from '@/components/report/Contact';
 import { SiteFooter } from '@/components/site/SiteFooter';
+import { Eyebrow } from '@/components/site/PageKit';
 import { SiteNav } from '@/components/site/SiteNav';
 import { AUTHORS, POSTS } from '@/content/blog';
 import { PILLARS } from '@/lib/audit/catalog/pillars';
@@ -34,15 +35,13 @@ export const metadata: Metadata = {
 
 const gutter = 'clamp(16px, 5.56vw, 80px)';
 const frame = { maxWidth: '1440px', margin: '0 auto', padding: `0 ${gutter}` } as const;
-const eyebrow = { font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' } as const;
-const h2: CSSProperties = { margin: 0, maxWidth: '760px', font: '800 clamp(30px, 3.4vw, 46px)/1.1 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' };
+const h2: CSSProperties = { margin: 0, maxWidth: '760px', font: '500 clamp(30px, 3.4vw, 46px)/1.1 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' };
 const lead: CSSProperties = { margin: 0, maxWidth: '640px', font: '400 17px/29px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' };
 const card: CSSProperties = { padding: '28px', background: '#FFFFFF', border: '1px solid var(--border)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '12px' };
 const cardTitle: CSSProperties = { margin: 0, font: '700 19px/26px var(--font-sans)', letterSpacing: '-0.015em', color: 'var(--ink)', textWrap: 'balance' };
 const cardBody: CSSProperties = { margin: 0, font: '400 15px/25px var(--font-sans)', color: 'var(--ink-secondary)', textWrap: 'pretty' };
 /** Columns that fold to one on a phone without a media query. */
 const cols = (min: number): CSSProperties => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${min}px), 1fr))`, gap: '20px' });
-const gradientText: CSSProperties = { background: 'linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' };
 
 /** One band of the page: an eyebrow, a heading, an optional lead, then whatever the section holds. */
 function Band({ id, label, title, intro, tint = false, children }: { id: string; label: string; title: ReactNode; intro?: ReactNode; tint?: boolean; children: ReactNode }) {
@@ -50,7 +49,7 @@ function Band({ id, label, title, intro, tint = false, children }: { id: string;
     <section id={id} aria-labelledby={`${id}-h`} style={{ background: tint ? 'var(--bg-subtle)' : 'var(--bg)', borderTop: tint ? '1px solid var(--border)' : undefined, borderBottom: tint ? '1px solid var(--border)' : undefined }}>
       <div style={{ ...frame, paddingTop: 'clamp(64px, 8vw, 112px)', paddingBottom: 'clamp(64px, 8vw, 112px)', display: 'flex', flexDirection: 'column', gap: '48px' }}>
         <header style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <span style={eyebrow}>{label}</span>
+          <Eyebrow>{label}</Eyebrow>
           <h2 id={`${id}-h`} style={h2}>
             {title}
           </h2>
@@ -193,9 +192,9 @@ export default function AboutPage() {
         {/* 1. hero */}
         <section aria-labelledby="about-h">
           <div style={{ ...frame, paddingTop: '96px', paddingBottom: '72px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <span style={eyebrow}>About ProCurveUX</span>
-            <h1 id="about-h" style={{ margin: 0, maxWidth: '1000px', font: '800 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
-              <span style={{ display: 'block' }}>A UX review in a minute,</span> <span style={{ display: 'block', ...gradientText }}>built by product designers.</span>
+            <Eyebrow>Our story</Eyebrow>
+            <h1 id="about-h" style={{ margin: 0, maxWidth: '1000px', font: '500 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
+              <span style={{ display: 'block' }}>A UX review in a minute,</span> <span style={{ display: 'block' }}>built by product designers.</span>
             </h1>
             <p style={{ ...lead, fontSize: '19px', lineHeight: '31px', maxWidth: '680px' }}>
               ProCurveUX loads your website in a real browser, checks it against 120+ UX, design and accessibility rules, and tells you what is costing you customers, why, and exactly how to fix it.
@@ -219,7 +218,7 @@ export default function AboutPage() {
               {STATS.map((s) => (
                 <div key={s.label} style={{ padding: '32px 20px 32px 0', display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', gap: '8px' }}>
                   <dt style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>{s.label}</dt>
-                  <dd style={{ margin: 0, font: '800 clamp(36px, 3.6vw, 52px)/1 var(--font-sans)', letterSpacing: '-0.035em', color: 'var(--ink)' }}>{s.value}</dd>
+                  <dd style={{ margin: 0, font: '500 clamp(36px, 3.6vw, 52px)/1 var(--font-sans)', letterSpacing: '-0.035em', color: 'var(--ink)' }}>{s.value}</dd>
                 </div>
               ))}
             </dl>
@@ -238,7 +237,7 @@ export default function AboutPage() {
               <li key={g.n} style={{ ...card, background: g.emphasis ? 'var(--ink)' : '#FFFFFF', color: g.emphasis ? '#FFFFFF' : 'var(--ink)', borderColor: g.emphasis ? 'var(--ink)' : 'var(--border)' }}>
                 <span style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px' }}>
                   <span style={{ font: '600 13px/18px var(--font-sans)', color: g.emphasis ? '#7FB2FF' : 'var(--ink-muted)' }}>{g.n}</span>
-                  <span style={{ font: '800 28px/1 var(--font-sans)', letterSpacing: '-0.03em', ...(g.emphasis ? gradientText : { color: 'var(--ink-muted)' }) }}>{g.answer}?</span>
+                  <span style={{ font: '500 28px/1 var(--font-sans)', letterSpacing: '-0.03em', color: g.emphasis ? '#7FB2FF' : 'var(--ink-muted)' }}>{g.answer}?</span>
                 </span>
                 <h3 style={{ ...cardTitle, color: 'inherit' }}>{g.title}</h3>
                 <p style={{ ...cardBody, color: g.emphasis ? '#C9CDD4' : 'var(--ink-secondary)' }}>{g.body}</p>
@@ -433,7 +432,7 @@ export default function AboutPage() {
                 ['20+', 'industries'],
               ].map(([v, l]) => (
                 <span key={l} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <span style={{ font: '800 clamp(28px, 3vw, 40px)/1 var(--font-sans)', letterSpacing: '-0.03em', ...gradientText }}>{v}</span>
+                  <span style={{ font: '500 clamp(28px, 3vw, 40px)/1 var(--font-sans)', letterSpacing: '-0.03em', color: 'var(--ink)' }}>{v}</span>
                   <span style={{ font: '400 14px/20px var(--font-sans)', color: 'var(--ink-muted)' }}>{l}</span>
                 </span>
               ))}

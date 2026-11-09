@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { AuthorPhoto, BlogCard } from '@/components/blog/BlogCard';
 import { OrgLinked } from '@/components/blog/OrgLinked';
+import { Eyebrow } from '@/components/site/PageKit';
 import { ClosingCta } from '@/components/home/ClosingCta';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 const W = '1120px';
 const gutter = 'clamp(16px, 5.56vw, 80px)';
 const eyebrow = { font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' } as const;
-const h2 = { margin: 0, font: '800 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' } as const;
+const h2 = { margin: 0, font: '500 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' } as const;
 const card = { padding: '20px 22px', background: '#FFFFFF', border: '1px solid var(--border)', borderRadius: '8px' } as const;
 
 /** 16px line icons, drawn in the current text colour. */
@@ -154,8 +155,8 @@ export default async function AuthorPage({ params }: { params: Promise<{ id: str
                 <AuthorPhoto author={author} size={136} />
               </span>
               <div style={{ flex: '1 1 420px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <span style={eyebrow}>Author</span>
-                <h1 style={{ margin: 0, font: '800 clamp(36px, 4.2vw, 56px)/1.04 var(--font-sans)', letterSpacing: '-0.035em' }}>{author.name}</h1>
+                <Eyebrow>Author</Eyebrow>
+                <h1 style={{ margin: 0, font: '500 clamp(36px, 4.2vw, 56px)/1.04 var(--font-sans)', letterSpacing: '-0.035em' }}>{author.name}</h1>
                 <p style={{ margin: 0, font: '400 19px/28px var(--font-sans)', color: 'var(--ink-secondary)' }}>{author.tagline}</p>
                 <p style={{ margin: '4px 0 0', display: 'flex', flexWrap: 'wrap', gap: '6px 20px', font: '400 14px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>

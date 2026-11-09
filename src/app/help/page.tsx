@@ -142,7 +142,7 @@ export default function HelpPage() {
         <div style={{ ...frame, paddingBottom: '96px', display: 'flex', flexDirection: 'column', gap: '72px' }}>
           {GROUPS.map((g) => (
             <section key={g.id} id={g.id} aria-labelledby={`${g.id}-h`} style={{ scrollMarginTop: '96px', display: 'flex', flexWrap: 'wrap', gap: '24px 64px', paddingTop: '40px', borderTop: '1px solid var(--border)' }}>
-              <h2 id={`${g.id}-h`} style={{ flex: '0 1 280px', margin: 0, font: '800 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' }}>
+              <h2 id={`${g.id}-h`} style={{ flex: '0 1 280px', margin: 0, font: '500 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' }}>
                 {g.title}
               </h2>
               <dl style={{ flex: '1 1 480px', minWidth: 0, maxWidth: '760px', margin: 0, display: 'flex', flexDirection: 'column', gap: '28px' }}>

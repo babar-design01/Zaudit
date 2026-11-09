@@ -35,7 +35,7 @@ export default function ChangelogPage() {
                   {longDate(e.date)}
                 </time>
                 <div style={{ flex: '1 1 420px', minWidth: 0, maxWidth: '760px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h2 style={{ margin: 0, font: '800 clamp(22px, 2.2vw, 28px)/1.2 var(--font-sans)', letterSpacing: '-0.02em' }}>{e.title}</h2>
+                  <h2 style={{ margin: 0, font: '500 clamp(22px, 2.2vw, 28px)/1.2 var(--font-sans)', letterSpacing: '-0.02em' }}>{e.title}</h2>
                   <ul style={{ margin: 0, paddingLeft: '22px', display: 'flex', flexDirection: 'column', gap: '10px', font: '400 16px/27px var(--font-sans)', color: 'var(--ink-secondary)' }}>
                     {e.items.map((it) => (
                       <li key={it}>{it}</li>

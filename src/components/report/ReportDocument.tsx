@@ -154,7 +154,7 @@ function Cover({ result, findings }: { result: AuditResult; findings: Finding[] 
               <span style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: color.accentFg }}>
                 UX audit report · {host} · {date}
               </span>
-              <h1 style={{ margin: 0, font: t(800, 'clamp(52px, 6vw, 88px)', 1.0), letterSpacing: '-0.04em', color: color.ink }}>Experience audit</h1>
+              <h1 style={{ margin: 0, font: t(500, 'clamp(52px, 6vw, 88px)', 1.0), letterSpacing: '-0.04em', color: color.ink }}>Experience audit</h1>
               <p style={{ margin: 0, maxWidth: 520, font: t(400, 18, 30), color: color.inkSecondary }}>{summarySentence(result, findings)}</p>
               {result.pageGoal && (
                 <p style={{ margin: '8px 0 0', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16, borderLeft: `3px solid ${color.blue}` }}>
@@ -191,7 +191,7 @@ function Cover({ result, findings }: { result: AuditResult; findings: Finding[] 
                       <span aria-hidden="true" style={{ width: 10, height: 10, borderRadius: radius.button, background: SEV[s].swatch }} />
                       {SEV[s].name}
                     </span>
-                    <span style={{ font: t(700, 32, 1), letterSpacing: tracking.tight, color: color.ink }}>{n}</span>
+                    <span style={{ font: t(500, 32, 1), letterSpacing: tracking.tight, color: color.ink }}>{n}</span>
                     <span style={{ font: t(400, 13, 18), color: color.inkMuted }}>{SEV[s].when}</span>
                   </div>
                 ))}
@@ -214,7 +214,7 @@ function Cover({ result, findings }: { result: AuditResult; findings: Finding[] 
 function Figure({ n, label, sub }: { n: number; label: string; sub: string }) {
   return (
     <div style={{ flex: '1 1 240px', minWidth: 0, background: color.bgSubtle, borderRadius: radius.lg, padding: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
-      <span style={{ font: t(800, 44, 1), letterSpacing: '-0.04em', color: color.ink }}>{n}</span>
+      <span style={{ font: t(500, 44, 1), letterSpacing: '-0.04em', color: color.ink }}>{n}</span>
       <span style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ font: t(600, 16, 22), color: color.ink }}>{label}</span>
         <span style={{ font: t(400, 13, 18), color: color.inkMuted }}>{sub}</span>
@@ -249,7 +249,7 @@ function ScoreCard({ result, host }: { result: AuditResult; host: string }) {
       </div>
       <span style={{ position: 'relative', font: t(600, 12, 16), letterSpacing: tracking.button, textTransform: 'uppercase', color: color.ink }}>Your score</span>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span data-score style={{ font: t(800, 'clamp(96px, 11vw, 160px)', 0.85), letterSpacing: '-0.06em', color: color.ink }}>{result.overall ?? '—'}</span>
+        <span data-score style={{ font: t(500, 'clamp(96px, 11vw, 160px)', 0.85), letterSpacing: '-0.06em', color: color.ink }}>{result.overall ?? '—'}</span>
         <span style={{ font: t(600, 28, 1), color: color.inkSecondary }}>/100</span>
       </div>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -389,7 +389,7 @@ function IssueSlide({ finding, index, total, page, host }: { finding: Finding; i
               Issue {index} of {total}
             </span>
           </div>
-          <h2 style={{ margin: 0, font: t(800, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight, color: color.ink }}>{finding.checkName}</h2>
+          <h2 style={{ margin: 0, font: t(500, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight, color: color.ink }}>{finding.checkName}</h2>
           <p style={{ margin: 0, display: 'flex', flexWrap: 'wrap', gap: '6px 16px', font: t(400, 13, 20), color: color.inkMuted }}>
             {meta.map((m, i) => (
               <span key={m} style={i === 0 ? { fontWeight: 600, color: expert ? color.accentFg : color.inkSecondary } : undefined}>
@@ -507,7 +507,7 @@ export function ReportDocument({ result }: { result: AuditResult }) {
       {findings.length === 0 ? (
         <section style={{ background: color.surface, borderBottom: `1px solid ${color.border}` }}>
           <div style={{ ...frame }}>
-            <h2 style={{ margin: 0, font: t(800, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight }}>Nothing to fix on this page</h2>
+            <h2 style={{ margin: 0, font: t(500, 'clamp(28px, 3vw, 40px)', 1.12), letterSpacing: tracking.tight }}>Nothing to fix on this page</h2>
             <p style={{ margin: '16px 0 0', maxWidth: 640, font: t(400, 17, 28), color: color.inkSecondary }}>
               Every check we could run passed. The things only a person can judge are still worth a look before you call it done.
             </p>

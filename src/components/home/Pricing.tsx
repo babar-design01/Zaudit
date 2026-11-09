@@ -1,6 +1,7 @@
 'use client';
 
 import { type MouseEvent } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 import { planRequestHref } from '@/lib/plan-request';
 import { FREE_AFTER_LOGIN, FREE_BEFORE_LOGIN, PLANS, priceOf } from '@/lib/plans';
 
@@ -53,7 +54,7 @@ function Card({
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-          <span style={{ font: '600 44px/1 var(--font-sans)', letterSpacing: '-0.04em', color: 'var(--ink)' }}>{price}</span>
+          <span style={{ font: '500 44px/1 var(--font-sans)', letterSpacing: '-0.04em', color: 'var(--ink)' }}>{price}</span>
           {per && <span style={{ font: '500 14px/20px var(--font-sans)', color: 'var(--ink-secondary)' }}>{per}</span>}
         </div>
         <p style={{ margin: 0, font: '400 14px/22px var(--font-sans)', color: 'var(--ink-muted)', textWrap: 'pretty' }}>{summary}</p>
@@ -104,8 +105,8 @@ export function Pricing({ onRunAudit, accounts = false }: { onRunAudit: () => vo
       <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '80px clamp(16px, 5.56vw, 80px)' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px 64px' }}>
           <div style={{ flex: '1 1 520px', maxWidth: '680px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <span style={{ font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' }}>Pricing</span>
-            <h2 style={{ margin: 0, font: '800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'pretty' }}>Less than the cost of one lost customer.</h2>
+            <Eyebrow>Pricing</Eyebrow>
+            <h2 style={{ margin: 0, font: '500 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'pretty' }}>Less than the cost of one lost customer.</h2>
           </div>
           <p style={{ margin: 0, flex: '0 1 440px', minWidth: 0, font: '400 16px/28px var(--font-sans)', color: 'var(--ink-muted)', textWrap: 'pretty' }}>
             {accounts

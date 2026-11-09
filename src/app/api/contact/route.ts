@@ -42,8 +42,10 @@ export async function POST(request: Request) {
 
   const key = process.env.CONTACT_RESEND_KEY || process.env.AUTH_RESEND_KEY;
   const to = process.env.CONTACT_TO;
-  const from = process.env.CONTACT_FROM || process.env.AUTH_EMAIL_FROM || 'Audix <hello@audix.com>';
-  if (!key || !to) return Response.json({ error: 'Mail is not set up on this deployment.' }, { status: 503 });
+  // The sender must be on a domain verified in Resend (CONTACT_FROM, e.g.
+  // "ProCurveUX <noreply@procurveux.com>"); there is no safe default to fall back on.
+  const from = process.env.CONTACT_FROM || process.env.AUTH_EMAIL_FROM;
+  if (!key || !to || !from) return Response.json({ error: 'Mail is not set up on this deployment.' }, { status: 503 });
 
   // A page opened before this was one field can still send the old two.
   const name = clean(body.name, MAX.name) || clean(`${clean(body.firstName, MAX.name)} ${clean(body.lastName, MAX.name)}`, MAX.name);
@@ -93,7 +95,13 @@ export async function POST(request: Request) {
     text: `${lines.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
     html: `<table>${lines.map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table><p style="white-space:pre-wrap">${esc(message)}</p>`,
   });
-  if (error) return Response.json({ error: 'That did not send. Try again, or email sales@zeeframes.com.' }, { status: 502 });
+  // A rejected send (an unverified domain, a revoked key) answers 503 like no
+  // mail at all, so the form opens the reader's mail app and the message still
+  // reaches us. The reason goes to the logs for whoever fixes the setup.
+  if (error) {
+    console.error('contact: Resend refused the message —', error.name, error.message);
+    return Response.json({ error: 'Mail could not be sent from the server.' }, { status: 503 });
+  }
 
   return Response.json({ ok: true });
 }

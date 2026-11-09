@@ -73,7 +73,7 @@ export default function AccessibilityChecklistPage() {
               ].map(([v, l]) => (
                 <div key={l} style={{ padding: '28px 20px 28px 0', display: 'flex', flexDirection: 'column-reverse', justifyContent: 'flex-end', gap: '8px' }}>
                   <dt style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>{l}</dt>
-                  <dd style={{ margin: 0, font: '800 clamp(36px, 3.6vw, 52px)/1 var(--font-sans)', letterSpacing: '-0.035em', color: 'var(--ink)' }}>{v}</dd>
+                  <dd style={{ margin: 0, font: '500 clamp(36px, 3.6vw, 52px)/1 var(--font-sans)', letterSpacing: '-0.035em', color: 'var(--ink)' }}>{v}</dd>
                 </div>
               ))}
             </dl>

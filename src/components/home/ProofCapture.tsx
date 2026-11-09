@@ -50,7 +50,7 @@ export function ProofCapture() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <span style={{ font: '700 clamp(24px, 2.6vw, 34px)/1.15 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)', textWrap: 'balance' }}>Plan every project in one place</span>
+          <span style={{ font: '500 clamp(24px, 2.6vw, 34px)/1.15 var(--font-sans)', letterSpacing: '-0.02em', color: 'var(--ink)', textWrap: 'balance' }}>Plan every project in one place</span>
           <span style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--ink-secondary)', maxWidth: 400 }}>Tasks, files and deadlines your whole team can see.</span>
         </div>
 

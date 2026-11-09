@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import type { Post } from '@/content/blog';
-import { BlogCard, FreeAuditCard } from './BlogCard';
+import { BlogCard } from './BlogCard';
 
 /**
- * "Latest": topic filters over a grid of articles, with the free-audit card
- * always closing the grid. Filtering happens in the page, so every article is
+ * "Latest": topic filters over a grid of articles. Filtering happens in the page, so every article is
  * still in the HTML for search engines and for anyone without JavaScript.
  */
 export function BlogLatest({ posts }: { posts: Post[] }) {
@@ -44,7 +43,7 @@ export function BlogLatest({ posts }: { posts: Post[] }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px 40px' }}>
-        <h2 style={{ margin: 0, font: '800 clamp(30px, 3.1vw, 40px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>Latest</h2>
+        <h2 style={{ margin: 0, font: '500 clamp(30px, 3.1vw, 40px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>Latest</h2>
         {topics.length > 1 && (
           <div role="group" aria-label="Filter by topic" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {chip('All', null)}
@@ -59,9 +58,6 @@ export function BlogLatest({ posts }: { posts: Post[] }) {
             <BlogCard post={post} />
           </li>
         ))}
-        <li style={{ display: 'flex' }}>
-          <FreeAuditCard />
-        </li>
       </ul>
     </div>
   );

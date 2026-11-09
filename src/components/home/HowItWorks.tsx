@@ -3,6 +3,7 @@
 /* Ported from design/Main.dc.html — values transcribed by script, not by hand. */
 
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Eyebrow } from '@/components/site/PageKit';
 
 const STEPS = [
   {
@@ -103,8 +104,8 @@ export function HowItWorks(_props: { onRunAudit?: () => void }) {
         <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px clamp(16px, 5.56vw, 80px)" }}>
           <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: "24px 64px" }}>
             <div style={{ flex: "1 1 520px", maxWidth: "680px", minWidth: "0", display: "flex", flexDirection: "column", gap: "16px" }}>
-              <span style={{ font: "600 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--accent-fg)" }}>How it works</span>
-              <h2 style={{ margin: "0", font: "800 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>From one URL to more conversions in four steps</h2>
+              <Eyebrow>How it works</Eyebrow>
+              <h2 style={{ margin: "0", font: "500 clamp(32px, 3.3vw, 44px)/1.08 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>From one URL to more conversions in four steps</h2>
             </div>
             <p style={{ margin: "0", flex: "0 1 440px", minWidth: "0", font: "400 16px/28px var(--font-sans)", color: "var(--ink-muted)", textWrap: "pretty" }}>No tracking script, no code snippet, no onboarding call. Enter your website and ProCurveUX does the rest.</p>
           </div>

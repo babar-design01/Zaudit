@@ -129,7 +129,7 @@ export default function UxAuditTemplatePage() {
         {/* how to use it */}
         <section aria-labelledby="how-h" data-print-hide>
           <div style={{ ...frame, paddingBottom: '72px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <h2 id="how-h" style={{ margin: 0, font: '800 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' }}>
+            <h2 id="how-h" style={{ margin: 0, font: '500 clamp(24px, 2.4vw, 30px)/1.15 var(--font-sans)', letterSpacing: '-0.025em' }}>
               How to use it
             </h2>
             <ol style={{ margin: 0, padding: 0, listStyle: 'none', ...cols(220, 0) }}>
@@ -148,7 +148,7 @@ export default function UxAuditTemplatePage() {
         <section aria-labelledby="list-h" style={{ background: 'var(--bg-subtle)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
           <div style={{ ...frame, paddingTop: '72px', paddingBottom: '88px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px 24px' }}>
-              <h2 id="list-h" style={{ margin: 0, font: '800 clamp(28px, 3vw, 40px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>
+              <h2 id="list-h" style={{ margin: 0, font: '500 clamp(28px, 3vw, 40px)/1.1 var(--font-sans)', letterSpacing: '-0.03em' }}>
                 The checklist
               </h2>
               <span style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>
@@ -160,7 +160,7 @@ export default function UxAuditTemplatePage() {
                 <fieldset key={d.id} id={d.id} style={{ ...card, margin: 0, minWidth: 0, gap: '16px', breakInside: 'avoid' }}>
                   <legend style={{ float: 'left', width: '100%', padding: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <span style={{ font: '700 13px/18px var(--font-sans)', color: 'var(--accent-fg)' }}>{String(di + 1).padStart(2, '0')}</span>
-                    <span style={{ font: '800 21px/28px var(--font-sans)', letterSpacing: '-0.015em', color: 'var(--ink)' }}>{d.name}</span>
+                    <span style={{ font: '600 21px/28px var(--font-sans)', letterSpacing: '-0.015em', color: 'var(--ink)' }}>{d.name}</span>
                     <span style={{ font: '400 15px/22px var(--font-sans)', color: 'var(--ink-muted)' }}>{d.question}</span>
                   </legend>
                   <ul style={{ clear: 'both', margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>

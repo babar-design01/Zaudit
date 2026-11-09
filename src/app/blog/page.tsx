@@ -3,6 +3,7 @@ import { Category, DateLine, Tags } from '@/components/blog/BlogCard';
 import { BlogCover } from '@/components/blog/BlogCover';
 import { BlogLatest } from '@/components/blog/BlogLatest';
 import { ClosingCta } from '@/components/home/ClosingCta';
+import { Eyebrow } from '@/components/site/PageKit';
 import { SiteFooter } from '@/components/site/SiteFooter';
 import { SiteNav } from '@/components/site/SiteNav';
 import { POSTS, featuredPost } from '@/content/blog';
@@ -37,10 +38,10 @@ export default function BlogIndex() {
         {/* heading */}
         <section>
           <div style={{ maxWidth: '1440px', margin: '0 auto', padding: `88px ${gutter} 56px`, display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <span style={{ font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--accent-fg)' }}>Blog · UX field notes</span>
-            <h1 style={{ margin: 0, maxWidth: '900px', font: '800 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
+            <Eyebrow>UX field notes</Eyebrow>
+            <h1 style={{ margin: 0, maxWidth: '900px', font: '500 clamp(40px, 5vw, 72px)/1.04 var(--font-sans)', letterSpacing: '-0.035em', textWrap: 'balance' }}>
               <span style={{ display: 'block' }}>UX fixes that turn visitors</span>{' '}
-              <span style={{ display: 'block', background: 'linear-gradient(100deg, #2BC8E8 0%, var(--blue) 45%, #7F8CFF 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
+              <span style={{ display: 'block' }}>
                 into customers.
               </span>
             </h1>
@@ -62,7 +63,7 @@ export default function BlogIndex() {
                   <span style={{ font: '600 11px/16px var(--font-sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#7FB2FF' }}>Featured</span>
                   <Category post={featured} dark />
                 </span>
-                <span style={{ font: '700 clamp(28px, 2.8vw, 40px)/1.12 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' }}>{featured.title}</span>
+                <span style={{ font: '500 clamp(28px, 2.8vw, 40px)/1.12 var(--font-sans)', letterSpacing: '-0.03em', textWrap: 'balance' }}>{featured.title}</span>
                 <span style={{ font: '400 16px/27px var(--font-sans)', color: '#C9CDD4', textWrap: 'pretty' }}>{featured.description}</span>
                 <DateLine post={featured} dark />
                 <Tags post={featured} dark />

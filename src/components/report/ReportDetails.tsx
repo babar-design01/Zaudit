@@ -23,7 +23,7 @@ function Intro({ eyebrow, title, children }: { eyebrow: string; title: string; c
     <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px 64px' }}>
       <div style={{ flex: '1 1 520px', maxWidth: 680, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <span style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: color.accentFg }}>{eyebrow}</span>
-        <h2 style={{ margin: 0, font: t(800, 'clamp(32px, 3.3vw, 44px)', 1.08), letterSpacing: tracking.tight, color: color.ink }}>{title}</h2>
+        <h2 style={{ margin: 0, font: t(500, 'clamp(32px, 3.3vw, 44px)', 1.08), letterSpacing: tracking.tight, color: color.ink }}>{title}</h2>
       </div>
       {children && <p style={{ margin: 0, flex: '0 1 440px', minWidth: 0, font: t(400, 16, 28), color: color.inkMuted }}>{children}</p>}
     </div>

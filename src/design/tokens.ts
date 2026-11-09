@@ -204,11 +204,11 @@ export const text = {
   /** Closing statements on the glow field. Two lines at most. */
   display: t(500, 'clamp(40px, 5vw, 72px)', 1.1),
   /** Hero headline, once per page. */
-  h1: t(800, 'clamp(40px, 4.8vw, 70px)', 1.04),
+  h1: t(500, 'clamp(40px, 4.8vw, 70px)', 1.04),
   /** Section headline. */
-  h2: t(800, 'clamp(30px, 3.1vw, 44px)', 1.08),
+  h2: t(500, 'clamp(30px, 3.1vw, 44px)', 1.08),
   /** Figures in story cards and reports, in blue. */
-  stat: t(600, 'clamp(32px, 2.9vw, 42px)', 1),
+  stat: t(500, 'clamp(32px, 2.9vw, 42px)', 1),
 
   /* Text. */
   /** Card and step titles. */

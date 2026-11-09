@@ -28,7 +28,7 @@ export function Faq({ onRunAudit }: { onRunAudit: () => void }) {
         <div style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px clamp(16px, 5.56vw, 80px)", display: "grid", gridTemplateColumns: "minmax(0, 0.85fr) minmax(0, 1.15fr)", gap: "56px", alignItems: "start" }}>
           <div style={{ position: "sticky", top: "96px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "24px" }}>
             <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--ink-muted)", letterSpacing: "0.04em" }}>FAQ</span>
-            <h2 style={{ margin: "0", font: "800 clamp(32px, 3.1vw, 42px)/1.12 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Questions before your first audit? We&apos;ve got answers.</h2>
+            <h2 style={{ margin: "0", font: "500 clamp(32px, 3.1vw, 42px)/1.12 var(--font-sans)", letterSpacing: "-0.03em", textWrap: "pretty" }}>Questions before your first audit? We&apos;ve got answers.</h2>
       
             <div style={{ background: "var(--blue)", borderRadius: "8px", padding: "24px", display: "flex", flexDirection: "column", gap: "18px", color: "#FFFFFF", width: "100%" }}>
               <div style={{ display: "flex", gap: "14px", alignItems: "center" }}>

@@ -106,7 +106,7 @@ export function ReportView({ id, initial = null }: { id: string; initial?: Audit
             ) : (
               <>
                 <span style={{ font: t(600, 11, 16), letterSpacing: tracking.eyebrow, textTransform: 'uppercase', color: color.accentFg }}>Report</span>
-                <h1 style={{ margin: 0, font: t(800, 'clamp(32px, 3.4vw, 48px)', 1.08), letterSpacing: tracking.tight }}>This report is no longer here</h1>
+                <h1 style={{ margin: 0, font: t(500, 'clamp(32px, 3.4vw, 48px)', 1.08), letterSpacing: tracking.tight }}>This report is no longer here</h1>
                 <p style={{ margin: 0, maxWidth: 560, font: t(400, 17, 28), color: color.inkSecondary }}>
                   {state.message} Reports are kept for a short while on the server and for the length of a browser session, so a link
                   opened days later, or on another device, may not find one.
