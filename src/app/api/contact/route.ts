@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { verifyCaptcha } from '@/lib/captcha';
+import { PLAN_CHOICES } from '@/lib/plan-request';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -53,6 +54,9 @@ export async function POST(request: Request) {
   }
 
   const website = clean(body.website, MAX.website);
+  // Sent as the label the form shows ("Pro", "Not sure yet"); anything else is dropped.
+  const planText = clean(body.plan, 40);
+  const plan = PLAN_CHOICES.find((c) => c.label === planText)?.label ?? '';
   // The form no longer asks for these, but a page opened before it changed can still send them.
   const phone = clean(body.phone, MAX.phone);
   const phoneCode = clean(body.phoneCode, 6);
@@ -66,6 +70,7 @@ export async function POST(request: Request) {
     ['Name', name],
     ['Email', email],
     ...(website ? ([['Website', website]] as [string, string][]) : []),
+    ...(plan ? ([['Plan', plan]] as [string, string][]) : []),
     ...(phone ? ([['Phone', `${phoneCode} ${phone}`]] as [string, string][]) : []),
     ...(country ? ([['Country', country]] as [string, string][]) : []),
     // Only a message sent from a report has any of this to say.
@@ -84,11 +89,11 @@ export async function POST(request: Request) {
     from,
     to,
     replyTo: email,
-    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${name}` : `ProCurveUX enquiry — ${name}`,
+    subject: reportUrl ? `UX audit fixes — ${host || 'a report'} — ${name}` : plan ? `Plan request: ${plan}` : `ProCurveUX enquiry — ${name}`,
     text: `${lines.map(([k, v]) => `${k}: ${v}`).join('\n')}\n\n${message}`,
     html: `<table>${lines.map(([k, v]) => `<tr><td style="padding:2px 12px 2px 0;color:#6b7280">${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table><p style="white-space:pre-wrap">${esc(message)}</p>`,
   });
-  if (error) return Response.json({ error: 'That did not send. Try again, or email hello@audix.com.' }, { status: 502 });
+  if (error) return Response.json({ error: 'That did not send. Try again, or email sales@zeeframes.com.' }, { status: 502 });
 
   return Response.json({ ok: true });
 }

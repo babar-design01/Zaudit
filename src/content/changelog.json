@@ -1,0 +1,39 @@
+{
+  "_readme": "Release notes for /changelog. Add an entry here, newest or oldest anywhere: the page sorts by date. No code change needed. Dates are YYYY-MM-DD; write each item as one plain sentence a customer would understand.",
+  "entries": [
+    {
+      "date": "2026-11-09",
+      "title": "Plans by request, legal pages and a resource library",
+      "items": [
+        "Get Starter, Get Pro and Get Agency now open a contact page with your plan already chosen. We reply within one working day and set the plan up for you.",
+        "Published our Privacy policy and Terms of service, linked from the audit form and the contact form.",
+        "New Help centre, grouped by running an audit, reading a report, plans and billing, and your account and data.",
+        "New guides: UX laws explained, a WCAG 2.2 accessibility checklist and a printable UX audit template.",
+        "Six new articles on the blog: WCAG 2.2, colour contrast, tap target sizes, layout shift, heuristic evaluation, and what to do after a UX audit.",
+        "This changelog."
+      ]
+    },
+    {
+      "date": "2026-11-06",
+      "title": "The ProCurveUX blog and About page",
+      "items": [
+        "Launched the blog with four articles on automated UX audits, real-browser testing, conversion and ADA website lawsuits.",
+        "Added author pages, so you can see who wrote each article and their background.",
+        "Added an About page explaining how an audit works and what it checks.",
+        "Rewrote the homepage to explain ProCurveUX in plainer words."
+      ]
+    },
+    {
+      "date": "2026-11-04",
+      "title": "ProCurveUX launches on procurveux.com",
+      "items": [
+        "ProCurveUX is live at www.procurveux.com.",
+        "Choose one or more goals for an audit, and watch real progress while the page is scanned.",
+        "Your first audit is free with just your email address.",
+        "Reports export as a PDF without blank pages.",
+        "Links to a report show a preview image when shared.",
+        "Contact the team straight from the homepage."
+      ]
+    }
+  ]
+}

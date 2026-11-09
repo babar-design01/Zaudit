@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ClosingCta } from '@/components/home/ClosingCta';
 import { Covered } from '@/components/home/Covered';
 import { Faq } from '@/components/home/Faq';
@@ -29,14 +29,29 @@ import { useAudit } from '@/hooks/useAudit';
 export function Homepage({ account = null, accounts = false }: { account?: Account; accounts?: boolean } = {}) {
   const { state, setUrl, pressGoal, openGoal, start, closeDialog, setEmail } = useAudit();
 
-  // The report's nav sends people here with ?audit=1 to start one.
+  // The report's nav sends people here with ?audit=1 to start one, and the URL
+  // box on the content pages adds the address they typed as &url=. The dialog
+  // reads the address from state, so with one it opens on the render after.
+  const [openWhenReady, setOpenWhenReady] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('audit') === '1') {
+      const typed = params.get('url')?.trim().slice(0, 2000);
       window.history.replaceState(null, '', window.location.pathname);
+      if (typed) {
+        setUrl(typed);
+        setOpenWhenReady(true);
+      } else {
+        openGoal();
+      }
+    }
+  }, [openGoal, setUrl]);
+  useEffect(() => {
+    if (openWhenReady && state.url) {
+      setOpenWhenReady(false);
       openGoal();
     }
-  }, [openGoal]);
+  }, [openWhenReady, state.url, openGoal]);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--ink)' }}>

@@ -17,6 +17,8 @@
  */
 
 /** A list item: plain text, or a bold lead-in followed by the text. */
+import { NEW_POSTS } from './posts';
+
 export type ListItem = string | { lead: string; text: string };
 
 export type Block =
@@ -66,7 +68,10 @@ export type Post = {
 /** `note` follows the publisher: a date, or what the source covers. */
 export type Source = { title: string; publisher: string; url: string; note?: string };
 
-export type Cover = 'coverage' | 'browser' | 'conversion' | 'lawsuits';
+export type Cover = 'coverage' | 'browser' | 'conversion' | 'lawsuits' | 'wcag22' | 'contrast' | 'targets' | 'layoutshift' | 'heuristics' | 'zeeframes';
+
+/** A cover's picture for an article that has a headline figure: see BARS in components/blog/BlogCover. */
+export type CoverBars = { title: string; chip: string; rows: { label: string; value: string; share: number; strong?: boolean }[] };
 
 /** Organisations whose name links to their site wherever an author's role or bio mentions it. */
 export const ORG_LINKS: Record<string, string> = {
@@ -142,6 +147,8 @@ export const authorOf = (post: Post): Author & { id: AuthorId } => ({ id: post.a
 export const postsBy = (id: AuthorId): Post[] => POSTS.filter((p) => p.author === id);
 
 export const POSTS: Post[] = [
+  // The newer articles, one file each in content/posts.
+  ...NEW_POSTS,
   {
     slug: 'ada-website-lawsuit-statistics',
     title: "ADA website lawsuits: why the numbers don't match",

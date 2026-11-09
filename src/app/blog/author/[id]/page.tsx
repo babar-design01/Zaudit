@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description,
     alternates: { canonical: `/blog/author/${author.id}` },
     openGraph: { title, description, url: `/blog/author/${author.id}`, type: 'profile', siteName: 'ProCurveUX', ...(author.photo ? { images: [author.photo] } : {}) },
+    twitter: { card: 'summary', title, description },
   };
 }
 

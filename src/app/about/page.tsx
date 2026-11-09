@@ -29,6 +29,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: '/about' },
   openGraph: { title: 'About ProCurveUX', description: DESCRIPTION, url: '/about', type: 'website', siteName: 'ProCurveUX' },
+  twitter: { card: 'summary_large_image', title: 'About ProCurveUX', description: DESCRIPTION },
 };
 
 const gutter = 'clamp(16px, 5.56vw, 80px)';

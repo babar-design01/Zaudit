@@ -1,6 +1,7 @@
 'use client';
 
 import { type MouseEvent } from 'react';
+import { planRequestHref } from '@/lib/plan-request';
 import { FREE_AFTER_LOGIN, FREE_BEFORE_LOGIN, PLANS, priceOf } from '@/lib/plans';
 
 /* Layout from design/Main.dc.html, with the plans read from lib/plans.ts. */
@@ -89,7 +90,8 @@ function Card({
 
 /**
  * Without accounts there is nothing to log in to and no checkout to reach, so the
- * section says only what is true today and sends buyers to a person. Connecting
+ * section says only what is true today: each paid plan's button opens /contact
+ * with that plan chosen, and the plan is set up by hand after a reply. Connecting
  * the database switches it to the real flow.
  */
 export function Pricing({ onRunAudit, accounts = false }: { onRunAudit: () => void; accounts?: boolean }) {
@@ -135,8 +137,8 @@ export function Pricing({ onRunAudit, accounts = false }: { onRunAudit: () => vo
               summary={plan.summary}
               audits={[`${plan.auditsPerMonth} audits a month`]}
               cta={`Get ${plan.name}`}
-              href={accounts ? '/account' : '/#contact'}
-              note={accounts ? 'Cancel anytime' : `To start ${plan.name}, send us a message`}
+              href={accounts ? '/account' : planRequestHref(plan)}
+              note={accounts ? 'Cancel anytime' : "We'll set it up within one working day"}
             />
           ))}
         </div>

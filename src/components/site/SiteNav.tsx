@@ -8,11 +8,11 @@ import { Logo } from './Logo';
 /** Who is signed in and what they have left, when accounts are switched on. */
 export type Account = { email: string | null; credits: number } | null;
 
-const LINKS = [
+export const NAV_LINKS = [
   { label: 'About', href: '/about', id: 'about' },
   { label: 'Pricing', href: '/#plans' },
   { label: 'Blog', href: '/blog', id: 'blog' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Contact', href: '/contact', id: 'contact' },
 ] as const;
 
 /**
@@ -33,7 +33,7 @@ export function SiteNav({
   account?: Account;
   accounts?: boolean;
   /** Which link is the page the reader is on. */
-  current?: 'sample' | 'blog' | 'about';
+  current?: 'sample' | 'blog' | 'about' | 'contact';
 }) {
   // TODO(design): the handoff draws the nav at 1440 only. Below 900px the
   // links fold behind a square Menu control — a desktop nav left at phone
@@ -127,7 +127,7 @@ export function SiteNav({
           onClick={() => setOpen(false)}
           style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto', marginRight: 16 }}
         >
-          {LINKS.map((l) => {
+          {NAV_LINKS.map((l) => {
             const here = 'id' in l && l.id === current;
             return (
               <a

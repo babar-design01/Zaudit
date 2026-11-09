@@ -42,7 +42,8 @@ function Inline({ text }: { text: string }) {
     <>
       {parts.map((part, i) => {
         const a = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
-        if (a) return <a key={i} href={a[2]} style={link}>{a[1]}</a>;
+        // Another site opens in a new tab; the link stays a normal, followed link.
+        if (a) return /^https?:\/\//.test(a[2]) ? <a key={i} href={a[2]} target="_blank" rel="noopener" style={link}>{a[1]}</a> : <a key={i} href={a[2]} style={link}>{a[1]}</a>;
         if (part.length > 2 && part.startsWith('`') && part.endsWith('`')) return <code key={i} style={code}>{part.slice(1, -1)}</code>;
         return part;
       })}

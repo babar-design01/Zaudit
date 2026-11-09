@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
-import type { Cover } from '@/content/blog';
+import type { Cover, CoverBars } from '@/content/blog';
+import { NEW_MOTIFS } from '@/content/posts';
 
 /**
  * An article's cover: the brand's glow field, still, with a small picture of
@@ -16,6 +17,12 @@ const LAYOUTS: Record<Cover, [string, string, string, string]> = {
   browser: ['right:-10%;top:-34%', 'left:-16%;top:-6%', 'left:12%;bottom:-42%', 'right:16%;bottom:-34%'],
   conversion: ['left:20%;top:-40%', 'left:-18%;bottom:-30%', 'right:-12%;top:-8%', 'right:22%;bottom:-38%'],
   lawsuits: ['right:18%;top:-38%', 'right:-16%;bottom:-24%', 'left:-10%;top:-20%', 'left:14%;bottom:-40%'],
+  wcag22: ['left:-8%;top:-36%', 'right:-18%;top:4%', 'left:22%;bottom:-44%', 'right:8%;bottom:-30%'],
+  contrast: ['right:6%;top:-42%', 'left:-20%;top:10%', 'right:-14%;bottom:-28%', 'left:26%;bottom:-40%'],
+  targets: ['left:30%;top:-44%', 'right:-20%;top:-12%', 'left:-14%;bottom:-26%', 'right:20%;bottom:-42%'],
+  layoutshift: ['right:-6%;top:-40%', 'left:-14%;top:-24%', 'right:24%;bottom:-44%', 'left:4%;bottom:-30%'],
+  heuristics: ['left:-16%;top:-14%', 'right:14%;top:-44%', 'right:-12%;bottom:-32%', 'left:20%;bottom:-38%'],
+  zeeframes: ['right:-14%;top:-26%', 'left:12%;top:-42%', 'left:-18%;bottom:-24%', 'right:18%;bottom:-40%'],
 };
 
 const toStyle = (s: string): CSSProperties =>
@@ -65,7 +72,8 @@ function MiniPage({ live }: { live: boolean }) {
 }
 
 /** A few labelled bars, longest set in brand blue: the figure an article turns on. */
-const BARS: Partial<Record<Cover, { title: string; chip: string; rows: { label: string; value: string; share: number; strong?: boolean }[] }>> = {
+const BARS: Partial<Record<Cover, CoverBars>> = {
+  ...NEW_MOTIFS,
   conversion: {
     title: 'Conversion rate',
     chip: '41k pages',

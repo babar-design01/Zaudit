@@ -230,6 +230,11 @@ export function AuditDialog({
               <p id="audit-email-note" role={emailRefused ? 'alert' : undefined} style={{ margin: 0, font: t(400, 12, 18), color: emailRefused ? color.critical : color.inkMuted }}>
                 {emailRefused ? 'Enter a valid email to run the audit.' : 'Required. We keep it with your audit and may contact you about your results.'}
               </p>
+              <p style={{ margin: 0, font: t(400, 12, 18), color: color.inkMuted }}>
+                By running an audit you agree to our{' '}
+                <a href="/terms" target="_blank" style={{ color: color.ink, textDecoration: 'underline', textUnderlineOffset: 2 }}>Terms</a> and{' '}
+                <a href="/privacy" target="_blank" style={{ color: color.ink, textDecoration: 'underline', textUnderlineOffset: 2 }}>Privacy policy</a>.
+              </p>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 4 }}>

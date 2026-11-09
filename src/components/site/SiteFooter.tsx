@@ -1,8 +1,8 @@
 import { layout, t } from '@/design/tokens';
 import { Logo } from './Logo';
 
-/* TODO(design): every `#` here needs a real destination before launch. */
-const COLUMNS = [
+/* Every link goes to a real page: scripts/site-checks.ts fails the build check if a `#` comes back. */
+export const FOOTER_COLUMNS = [
   {
     heading: 'Product',
     links: [
@@ -10,26 +10,26 @@ const COLUMNS = [
       { label: 'How it works', href: '/#how' },
       { label: 'Pricing', href: '/#plans' },
       { label: 'Sample report', href: '/report/sample' },
-      { label: 'Changelog', href: '#' },
+      { label: 'Changelog', href: '/changelog' },
     ],
   },
   {
     heading: 'Resources',
     links: [
       { label: 'Blog', href: '/blog' },
-      { label: 'UX laws explained', href: '#' },
-      { label: 'Accessibility checklist', href: '#' },
-      { label: 'UX audit template', href: '#' },
-      { label: 'Help centre', href: '#' },
+      { label: 'UX laws explained', href: '/ux-laws' },
+      { label: 'Accessibility checklist', href: '/accessibility-checklist' },
+      { label: 'UX audit template', href: '/ux-audit-template' },
+      { label: 'Help centre', href: '/help' },
     ],
   },
   {
     heading: 'Company',
     links: [
       { label: 'About', href: '/about' },
-      { label: 'Contact', href: '/#contact' },
-      { label: 'Privacy policy', href: '#' },
-      { label: 'Terms of service', href: '#' },
+      { label: 'Contact', href: '/contact' },
+      { label: 'Privacy policy', href: '/privacy' },
+      { label: 'Terms of service', href: '/terms' },
     ],
   },
 ];
@@ -62,7 +62,7 @@ export function SiteFooter() {
           </p>
         </div>
 
-        {COLUMNS.map((c) => (
+        {FOOTER_COLUMNS.map((c) => (
           <div key={c.heading} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <span style={{ font: t(700, 16, 22), letterSpacing: '-0.015em', color: '#FFFFFF' }}>{c.heading}</span>
             {c.links.map((l) => (

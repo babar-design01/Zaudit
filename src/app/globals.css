@@ -859,3 +859,15 @@ main section,
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+/* Legal pages: the contents list sits beside the text on wide screens and
+   above it, unpinned, on narrow ones. */
+@media (max-width: 900px) {
+  [data-legal] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  [data-legal] > nav {
+    position: static !important;
+    max-width: none !important;
+  }
+}
