@@ -113,6 +113,13 @@ const sections = [
         <P>
           The site uses the cookies it needs to work, such as the one that keeps you signed in, and Cloudflare Turnstile may set its own when it checks the contact form for robots. We do not use analytics, tracking or advertising cookies.
         </P>
+        <H3>If you use the ProCurveUX Figma plugin</H3>
+        <P>
+          The plugin checks your designs inside Figma; your designs, layer and file names and any text in them never leave Figma. Unless you turn off
+          “Share anonymous usage” in the plugin’s Settings, it sends us counts: a random install id the plugin creates for itself, the plugin version,
+          your approximate country, when it was opened, and for each audit the score, the number of frames, layers and findings, and which checks
+          failed. We use these to see how the plugin is used and to improve it.
+        </P>
         <H3>The sites you audit</H3>
         <P>
           An audit views a public page the way a normal visitor would. It does not log in, submit forms or get past access controls. If a page shows personal information to every visitor, that can appear in the screenshots we
